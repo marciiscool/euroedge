@@ -113,7 +113,10 @@ export async function startFvService(o: FvServiceOptions): Promise<RunningFvServ
         }),
       );
       if (r.next === undefined || ts >= r.next.at) {
-        r.next = nextWindowChange({ primary: r.config.primaryMic, extended: 'TGAT' }, ts);
+        r.next = nextWindowChange(
+          { primary: r.config.primaryMic, extended: r.config.extendedMic },
+          ts,
+        );
       }
       const view: FvDisplaySnapshot = displaySnapshot(r.config.id, r.units, out, r.next);
       const json = JSON.stringify(view);

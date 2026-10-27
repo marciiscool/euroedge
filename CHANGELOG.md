@@ -10,6 +10,19 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 - Curated venue calendars 2026–2028 in `config/calendars/` for XETR, TGAT, LSX, XAMS, XPAR, XCSE, XLON, XNYS, XNAS, USON, XEUR and FX. They cover holidays, half-days, auction phases and random-end ranges, with a schema and a generated browser-safe module (M2-01…04).
 - Venue-state resolver (`venueState`, `nextVenueTransition`) and a holiday-aware window resolver (M2-05/06). Tests cover a cross-check against an `exchange_calendars` 4.13.2 fixture, holidays, half-days, the US overnight session and a 120-day coverage guard (M2-07).
+- `markets.yaml` lists all ten markets (M2-17):
+  - Five EUR stock perps are enabled.
+  - NOVO and SHEL follow the ADR-0017 window and price-source rules. They stay disabled until EUR conversion of the anchor lands in M3.
+  - RHM is a late launch.
+  - EE-Blue 20 (20 constituents, 10 % cap) and EE-Semis (5 constituents, 35 % cap) are draft baskets that need founder sign-off.
+- Underlying helpers in `@euroedge/shared`: `allUnderlyings`, `basketConstituents`, `underlyingLines`.
+- An `OTCM` calendar for OTC ADRs (SIEGY, LVMUY).
+- `markets.yaml` lists all ten markets (M2-17):
+  - Five EUR stock perps are enabled.
+  - NOVO and SHEL follow ADR-0017 but stay disabled until EUR conversion of the anchor lands in M3.
+  - RHM is a late launch.
+  - EE-Blue 20 and EE-Semis are draft baskets that need founder sign-off.
+- An `OTCM` calendar for OTC ADRs (SIEGY, LVMUY).
 
 ### M1 — Thin vertical slice (2026-10-27, on `integration/m1`)
 

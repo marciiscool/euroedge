@@ -59,7 +59,7 @@ describe('MarketFvPipeline configuration', () => {
     expect(p.evaluate(cet('2026-10-27T10:00'))).toBeUndefined();
     p.onTick({
       source: 'sim',
-      instrument: { venue: 'XAMS', symbol: 'ASML-PERP' },
+      instrument: { venue: 'XAMS', symbol: 'ASML' },
       ts: cet('2026-10-27T10:00'),
       currency: 'EUR',
       kind: 'close',

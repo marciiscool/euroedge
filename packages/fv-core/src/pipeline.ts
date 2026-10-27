@@ -31,9 +31,12 @@ export class MarketFvPipeline {
     this.calendar = calendar;
     this.tickSize = Number(market.tickSize);
     this.stepCap = stepCapBpsPerSecond;
-    const symbol = market.tradegateSymbol ?? market.id;
+    if (market.kind !== 'stock' || market.primarySymbol === undefined)
+      throw new Error(`${market.id}: basket FV arrives in M3`);
+    if (market.primaryCcy !== 'EUR')
+      throw new Error(`${market.id}: non-EUR anchors arrive in M3 (ADR-0017)`);
     this.model = new FvModel({
-      primary: { venue: market.primaryMic, symbol },
+      primary: { venue: market.primaryMic, symbol: market.primarySymbol },
       ...(market.tradegateSymbol === undefined
         ? {}
         : { tradegate: { venue: 'TGAT' as const, symbol: market.tradegateSymbol } }),
@@ -61,7 +64,7 @@ export class MarketFvPipeline {
   /** Evaluates at `ts`; undefined until the first anchor is known. */
   evaluate(ts: number): PipelineOutput | undefined {
     const window = this.calendar.windowAt(
-      { primary: this.market.primaryMic, extended: 'TGAT' },
+      { primary: this.market.primaryMic, extended: this.market.extendedMic },
       ts,
     );
     const adrLive =
