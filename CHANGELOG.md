@@ -31,6 +31,13 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - A key-gated `PythProvider` (M2-15). It refuses to start without `PYTH_API_KEY` and is tested against a recorded-shape fixture; the wire format is unverified until the key arrives.
 - Stub providers for Tradegate, Xetra delayed and Eurex, with licence/attribution metadata and the source list per tier (M2-16).
 - `FeedMonitor`: halt detection from feed silence and provider health (M2-08).
+- Ingest v1 (M2-18):
+  - `DATA_TIER=replay` streams a tick file at `REPLAY_SPEED`;
+  - `live-min` refuses to start until the Tradegate vendor and Pyth key exist;
+  - exact duplicate ticks are dropped.
+
+  Ticks keep their source currency; GBX/100 and FX conversion happen in fv-core (M3).
+
 - `markets.yaml` lists all ten markets (M2-17):
   - Five EUR stock perps are enabled.
   - NOVO and SHEL follow ADR-0017 but stay disabled until EUR conversion of the anchor lands in M3.

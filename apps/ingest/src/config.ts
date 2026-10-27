@@ -7,6 +7,9 @@ export const configShape = {
   SIM_SEED: z.coerce.number().int().default(42),
   /** Sim world epoch (UTC ms). Default: the most recent Monday 00:00 UTC. */
   SIM_EPOCH: z.coerce.number().int().positive().optional(),
+  /** DATA_TIER=replay: tick CSV(.gz) to replay (docs/data-format.md). */
+  REPLAY_FILE: z.string().default('data/sample/sim-2027-03-15_2027-03-31.csv.gz'),
+  REPLAY_SPEED: z.coerce.number().min(1).max(1000).default(60),
 } as const;
 
 export const loadConfig = (source?: Record<string, string | undefined>) =>
