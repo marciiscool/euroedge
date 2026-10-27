@@ -82,6 +82,8 @@ export default tseslint.config(
       '@typescript-eslint/switch-exhaustiveness-check': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
       eqeqeq: ['error', 'always'],
+      // False positive for branded bigints (bigint & { brand }), used for all money types.
+      '@typescript-eslint/no-unsafe-unary-minus': 'off',
     },
   },
   {
