@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import type { Venue, Window } from '@euroedge/shared';
-import { scheduleFor, type SessionRule, type Weekday } from './sessions.ts';
+import { PHASES, type Phase } from './schema.ts';
+import { calendarFor, phasesOpeningOn, spanOf } from './sessions.ts';
 
 export interface Interval {
   /** UTC ms, inclusive. */
@@ -9,51 +10,99 @@ export interface Interval {
   readonly to: number;
 }
 
-/** Concrete UTC intervals of a session rule overlapping [fromMs, toMs). DST-correct via Luxon. */
-export function sessionIntervals(
-  rule: SessionRule,
-  tz: string,
+/** Calendar state of a venue. Halts are layered on top from feed health (M2-08). */
+export type VenueState = Phase | 'closed';
+
+/**
+ * Concrete UTC intervals of one phase overlapping [fromMs, toMs), honouring holidays and
+ * special sessions. DST-correct: wall-clock times are resolved per day via Luxon.
+ */
+export function phaseIntervals(
+  venue: Venue,
+  phase: Phase,
   fromMs: number,
   toMs: number,
 ): Interval[] {
+  const cal = calendarFor(venue);
   const out: Interval[] = [];
-  // Start early enough to catch sessions that began before fromMs: a week for
-  // week-long sessions (FX), two days for overnight ones.
-  const weekLong = rule.open === rule.close;
-  let day = DateTime.fromMillis(fromMs, { zone: tz })
+  // Step through local calendar dates as plain UTC dates (cheap); wall-clock times are
+  // resolved in the venue's zone once per date and memoised.
+  let day = DateTime.fromMillis(fromMs, { zone: cal.tz })
+    .setZone('utc', { keepLocalTime: true })
     .startOf('day')
-    .minus({ days: weekLong ? 7 : 2 });
-  const end = DateTime.fromMillis(toMs, { zone: tz }).endOf('day');
-  const [oh, om] = rule.open.split(':').map(Number) as [number, number];
-  const [ch, cm] = rule.close.split(':').map(Number) as [number, number];
+    .minus({ days: cal.maxSpanDays + 1 });
+  const end = DateTime.fromMillis(toMs, { zone: cal.tz }).setZone('utc', { keepLocalTime: true });
   while (day <= end) {
-    if (rule.days.includes(day.weekday as Weekday)) {
-      const open = day.set({ hour: oh, minute: om });
-      let close = day.set({ hour: ch, minute: cm });
-      if (close <= open) close = close.plus({ days: 1 });
-      // open === close means a week-long session (FX 24/5: Sunday open → Friday close).
-      if (weekLong) close = open.plus({ days: 5 });
-      const iv = { from: open.toMillis(), to: close.toMillis() };
-      if (iv.to > fromMs && iv.from < toMs) out.push(iv);
-    }
+    const iv = dayIntervals(venue, day)[phase];
+    if (iv !== undefined && iv.to > fromMs && iv.from < toMs) out.push(iv);
     day = day.plus({ days: 1 });
   }
   return out;
 }
 
-const within = (ivs: readonly Interval[], ts: number) => ivs.some((i) => ts >= i.from && ts < i.to);
+type DayIntervals = Partial<Record<Phase, Interval>>;
+const dayCache = new Map<string, DayIntervals>();
+const DAY_CACHE_MAX = 50_000;
 
-export function isVenueOpen(venue: Venue, ts: number): boolean {
-  const s = scheduleFor(venue);
-  return within(sessionIntervals(s.continuous, s.tz, ts, ts + 1), ts);
+/** All phase intervals of sessions opening on one local date (`localDate` is that date in UTC). */
+function dayIntervals(venue: Venue, localDate: DateTime): DayIntervals {
+  const key = `${venue}|${localDate.toMillis()}`;
+  const hit = dayCache.get(key);
+  if (hit !== undefined) return hit;
+  const cal = calendarFor(venue);
+  const date = localDate.setZone(cal.tz, { keepLocalTime: true });
+  const phases = phasesOpeningOn(cal, date);
+  const out: DayIntervals = {};
+  if (phases !== undefined)
+    for (const p of PHASES) {
+      const rule = phases[p];
+      if (rule === undefined) continue;
+      const [oh, om] = rule.open.split(':').map(Number) as [number, number];
+      const [ch, cm] = rule.close.split(':').map(Number) as [number, number];
+      const open = date.set({ hour: oh, minute: om });
+      const close = date
+        .plus({ days: spanOf(rule.open, rule.close, rule.spanDays) })
+        .set({ hour: ch, minute: cm });
+      out[p] = { from: open.toMillis(), to: close.toMillis() };
+    }
+  if (dayCache.size >= DAY_CACHE_MAX) dayCache.clear();
+  dayCache.set(key, out);
+  return out;
 }
 
-export function isInClosingAuction(venue: Venue, ts: number): boolean {
-  const s = scheduleFor(venue);
-  return (
-    s.closingAuction !== undefined &&
-    within(sessionIntervals(s.closingAuction, s.tz, ts, ts + 1), ts)
-  );
+const within = (ivs: readonly Interval[], ts: number) => ivs.some((i) => ts >= i.from && ts < i.to);
+
+export const isVenueOpen = (venue: Venue, ts: number): boolean =>
+  within(phaseIntervals(venue, 'continuous', ts, ts + 1), ts);
+
+export const isInClosingAuction = (venue: Venue, ts: number): boolean =>
+  within(phaseIntervals(venue, 'closingAuction', ts, ts + 1), ts);
+
+export function venueState(venue: Venue, ts: number): VenueState {
+  for (const p of PHASES) if (within(phaseIntervals(venue, p, ts, ts + 1), ts)) return p;
+  return 'closed';
+}
+
+export interface VenueTransition {
+  readonly at: number;
+  readonly state: VenueState;
+}
+
+/** The next instant after `ts` at which the venue's state changes (searches 10 days ahead). */
+export function nextVenueTransition(venue: Venue, ts: number): VenueTransition | undefined {
+  const current = venueState(venue, ts);
+  const horizon = ts + 10 * 86_400_000;
+  const cuts = new Set<number>();
+  for (const p of PHASES)
+    for (const iv of phaseIntervals(venue, p, ts, horizon)) {
+      cuts.add(iv.from);
+      cuts.add(iv.to);
+    }
+  for (const at of [...cuts].filter((t) => t > ts && t < horizon).sort((a, b) => a - b)) {
+    const state = venueState(venue, at);
+    if (state !== current) return { at, state };
+  }
+  return undefined;
 }
 
 /** The venues that define a market's windows (brief §6.2, ADR-0017). */
@@ -66,15 +115,14 @@ export interface WindowVenues {
 
 /**
  * Window at `ts`: A = primary continuous; B = extended venue open outside A;
- * D = from the last extended close of the trading week until the next week's first open;
- * C = all other (weeknight) time. Holidays arrive with the M2 calendars.
+ * D = weekends and holidays (a gap between extended sessions longer than a weeknight);
+ * C = all other (weeknight) time.
  */
 export function windowAt(v: WindowVenues, ts: number): Window {
   if (isVenueOpen(v.primary, ts)) return 'A';
   if (isVenueOpen(v.extended, ts)) return 'B';
-  const ext = scheduleFor(v.extended);
-  const lookaround = 4 * 86_400_000;
-  const sessions = sessionIntervals(ext.continuous, ext.tz, ts - lookaround, ts + lookaround);
+  const lookaround = 6 * 86_400_000;
+  const sessions = phaseIntervals(v.extended, 'continuous', ts - lookaround, ts + lookaround);
   const prev = sessions.filter((s) => s.to <= ts).at(-1);
   const next = sessions.find((s) => s.from > ts);
   if (prev === undefined || next === undefined) return 'D';
@@ -87,23 +135,21 @@ export interface WindowChange {
   readonly window: Window;
 }
 
-/** Instants where any defining venue opens or closes, within [fromMs, toMs). */
+/** Instants where any defining venue opens or closes continuous trading, within (fromMs, toMs). */
 function boundaries(v: WindowVenues, fromMs: number, toMs: number): number[] {
   const set = new Set<number>();
-  for (const venue of [v.primary, v.extended]) {
-    const s = scheduleFor(venue);
-    for (const iv of sessionIntervals(s.continuous, s.tz, fromMs, toMs)) {
+  for (const venue of [v.primary, v.extended])
+    for (const iv of phaseIntervals(venue, 'continuous', fromMs, toMs)) {
       set.add(iv.from);
       set.add(iv.to);
     }
-  }
   return [...set].filter((t) => t > fromMs && t < toMs).sort((a, b) => a - b);
 }
 
-/** The next instant after `ts` at which the window changes (searches up to 7 days ahead). */
+/** The next instant after `ts` at which the window changes (searches up to 10 days ahead). */
 export function nextWindowChange(v: WindowVenues, ts: number): WindowChange | undefined {
   const current = windowAt(v, ts);
-  for (const b of boundaries(v, ts, ts + 7 * 86_400_000)) {
+  for (const b of boundaries(v, ts, ts + 10 * 86_400_000)) {
     const w = windowAt(v, b);
     if (w !== current) return { at: b, window: w };
   }

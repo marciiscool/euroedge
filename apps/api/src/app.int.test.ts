@@ -269,7 +269,15 @@ describe.skipIf(dbUrl === undefined || vkUrl === undefined)('api (integration)',
     );
     await new Promise((r) => setTimeout(r, 200));
     expect(msgs.find((m) => m.ch === 'market:ASML-PERP' && m.snapshot === true)).toBeDefined();
-    expect(msgs.filter((m) => m.ch === 'market:ASML-PERP')).toHaveLength(2);
+    // Pub/sub is not scoped to a Valkey database, so a locally running stack may add messages.
+    expect(
+      msgs.some(
+        (m) =>
+          m.ch === 'market:ASML-PERP' &&
+          m.snapshot !== true &&
+          JSON.stringify(m).includes('701.00'),
+      ),
+    ).toBe(true);
     expect(msgs.some((m) => m.error !== undefined)).toBe(true);
     ws.close();
 

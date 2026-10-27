@@ -11,7 +11,10 @@ export const sourceIdSchema = z.enum([
 ]);
 export type SourceId = z.infer<typeof sourceIdSchema>;
 
-/** Venue MIC, or FX for currency pairs. */
+/**
+ * Venue MIC, or an internal code where no single MIC fits: FX (currency pairs, 24/5),
+ * LSX (Lang & Schwarz hours, informational) and USON (US overnight ATS session).
+ */
 export const venueSchema = z.enum([
   'XETR',
   'XAMS',
@@ -22,6 +25,8 @@ export const venueSchema = z.enum([
   'XNYS',
   'XNAS',
   'XEUR',
+  'LSX',
+  'USON',
   'FX',
 ]);
 export type Venue = z.infer<typeof venueSchema>;

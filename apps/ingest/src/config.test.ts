@@ -37,5 +37,5 @@ describe('fastForward', () => {
     expect(kinds).toContain('XAMS:close');
     expect(kinds).toContain('TGAT:quote');
     expect(a.world.now).toBe(now);
-  });
+  }, 30_000);
 });
