@@ -1,6 +1,6 @@
 'use client';
 
-import { buttonVariants } from '@euroedge/ui/components/button';
+import { buttonVariants } from '@euroedge/ui/components/button-variants';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 
@@ -11,13 +11,18 @@ export function LocaleSwitch() {
   const other = locale === 'en' ? 'de' : 'en';
 
   return (
+    // WCAG 2.5.3: the accessible name starts with the visible text ("DE – Deutsch").
     <Link
       href={pathname}
       locale={other}
-      aria-label={t('switch')}
+      hrefLang={other}
       className={buttonVariants({ variant: 'outline', size: 'sm' })}
     >
       {other.toUpperCase()}
+      <span className="sr-only" lang={other}>
+        {' – '}
+        {t('targetName')}
+      </span>
     </Link>
   );
 }

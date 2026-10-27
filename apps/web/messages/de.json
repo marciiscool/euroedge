@@ -18,7 +18,7 @@
     "light": "hellen"
   },
   "Locale": {
-    "switch": "Language: English",
+    "targetName": "English",
     "label": "Sprache"
   },
   "Footer": {

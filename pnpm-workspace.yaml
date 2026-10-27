@@ -44,6 +44,8 @@ catalog:
   geist: 1.8.2
   lucide-react: 1.62.0
   lightweight-charts: 5.2.1
+  '@playwright/test': 1.63.0
+  '@axe-core/playwright': 4.14.0
   '@next/eslint-plugin-next': 16.4.3
   eslint-plugin-react-hooks: 7.1.1
   yaml: 2.9.1
