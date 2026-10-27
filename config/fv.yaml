@@ -3,7 +3,6 @@
 signalSigmaBp:
   tradegate: { A: 8, B: 12, C: 25, D: 40 }
   adr: { A: 15, B: 20, C: 35, D: 50 }
-  primary: { A: 5, B: 10, C: 20, D: 30 }
 stalenessBp2PerSecond: 0.5
 phi: 1.2
 sigmaFloorBp: { A: 5, B: 10, C: 20, D: 30 }
