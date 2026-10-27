@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@euroedge/fixed": "workspace:*",
+    "@euroedge/ledger": "workspace:*",
+    "@euroedge/risk-core": "workspace:*",
     "@euroedge/service-kit": "workspace:*",
     "@euroedge/shared": "workspace:*",
     "zod": "catalog:"

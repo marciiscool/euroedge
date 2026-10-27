@@ -372,6 +372,12 @@ importers:
       '@euroedge/fixed':
         specifier: workspace:*
         version: link:../../packages/fixed
+      '@euroedge/ledger':
+        specifier: workspace:*
+        version: link:../../packages/ledger
+      '@euroedge/risk-core':
+        specifier: workspace:*
+        version: link:../../packages/risk-core
       '@euroedge/service-kit':
         specifier: workspace:*
         version: link:../../packages/service-kit
