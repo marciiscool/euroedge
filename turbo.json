@@ -7,16 +7,16 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
-    "typecheck": {
-      "dependsOn": ["^typecheck"]
-    },
+    "typecheck": {},
     "lint": {},
     "test": {
-      "outputs": ["coverage/**"]
+      "outputs": [],
+      "env": ["DATABASE_URL", "VALKEY_URL", "FC_NUM_RUNS", "FC_SEED"]
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "passThroughEnv": ["*"]
     }
   }
 }

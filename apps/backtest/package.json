@@ -1,0 +1,20 @@
+{
+  "name": "@euroedge/backtest",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "euroedge-backtest": "./src/main.ts"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=../../.env src/main.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
