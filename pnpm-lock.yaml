@@ -430,19 +430,40 @@ importers:
 
   apps/fv-service:
     dependencies:
+      '@euroedge/calendar':
+        specifier: workspace:*
+        version: link:../../packages/calendar
+      '@euroedge/fixed':
+        specifier: workspace:*
+        version: link:../../packages/fixed
+      '@euroedge/fv-core':
+        specifier: workspace:*
+        version: link:../../packages/fv-core
       '@euroedge/service-kit':
         specifier: workspace:*
         version: link:../../packages/service-kit
       '@euroedge/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      pg:
+        specifier: 'catalog:'
+        version: 8.23.1
       zod:
         specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
+      '@euroedge/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.2
+      '@types/pg':
+        specifier: 'catalog:'
+        version: 8.23.1
+      ioredis:
+        specifier: 'catalog:'
+        version: 6.0.0
       typescript:
         specifier: 'catalog:'
         version: 6.0.3

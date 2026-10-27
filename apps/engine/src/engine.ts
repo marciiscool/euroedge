@@ -1,10 +1,16 @@
 import { migrate } from '@euroedge/db';
 import { createValkey, type Logger, type Redis } from '@euroedge/service-kit';
-import { STREAMS, type DataTier, type MarketConfig, type WindowsFile } from '@euroedge/shared';
+import {
+  encodeEngineCommand,
+  ENGINE_STREAM_MAXLEN,
+  STREAMS,
+  type DataTier,
+  type MarketConfig,
+  type WindowsFile,
+} from '@euroedge/shared';
 import { bootstrapInputs } from './bootstrap.ts';
 import { apply } from './core/apply.ts';
 import { createState, type EngineState } from './core/state.ts';
-import { canonicalJson } from './log/canonical.ts';
 import { chainHash, decodeEvent, GENESIS_HASH } from './log/codec.ts';
 import { EventStore } from './log/store.ts';
 import { publishAll, publishBatch } from './publisher.ts';
@@ -26,18 +32,16 @@ export interface RunningEngine {
   stop(): Promise<void>;
 }
 
-const STREAM_MAXLEN = '100000';
-
 /** Enqueues an engine input (used by producers and by the engine's own clock). */
 export async function enqueueInput(valkey: Redis, input: unknown): Promise<string | null> {
   return valkey.xadd(
     STREAMS.engineInput,
     'MAXLEN',
     '~',
-    STREAM_MAXLEN,
+    String(ENGINE_STREAM_MAXLEN),
     '*',
     'input',
-    canonicalJson(input),
+    encodeEngineCommand(input),
   );
 }
 
