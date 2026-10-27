@@ -16,13 +16,16 @@
     "@euroedge/risk-core": "workspace:*",
     "@euroedge/service-kit": "workspace:*",
     "@euroedge/shared": "workspace:*",
+    "pg": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@euroedge/data-adapters": "workspace:*",
+    "@euroedge/db": "workspace:*",
     "@euroedge/fv-core": "workspace:*",
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
+    "@types/pg": "catalog:",
     "fast-check": "catalog:",
     "luxon": "catalog:",
     "typescript": "catalog:",
