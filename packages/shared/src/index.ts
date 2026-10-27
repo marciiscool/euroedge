@@ -3,3 +3,4 @@ export { dataTierSchema, tierFeatures, type DataTier, type TierFeatures } from '
 export * from './market-data.ts';
 export * from './markets.ts';
 export * from './fv-params.ts';
+export * from './engine-api.ts';

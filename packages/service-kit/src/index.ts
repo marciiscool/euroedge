@@ -7,3 +7,4 @@ export {
   type ServiceOptions,
   type ShutdownHook,
 } from './service.ts';
+export { createValkey, type Redis } from './valkey.ts';
