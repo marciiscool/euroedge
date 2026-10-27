@@ -173,6 +173,9 @@ catalogs:
     '@tailwindcss/postcss':
       specifier: 4.3.3
       version: 4.3.3
+    '@types/luxon':
+      specifier: 3.7.6
+      version: 3.7.6
     '@types/node':
       specifier: 24.19.2
       version: 24.19.2
@@ -212,6 +215,9 @@ catalogs:
     lucide-react:
       specifier: 1.62.0
       version: 1.62.0
+    luxon:
+      specifier: 3.7.2
+      version: 3.7.2
     next:
       specifier: 16.4.3
       version: 16.4.3
@@ -522,6 +528,31 @@ importers:
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.3
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@24.19.2)(@vitest/coverage-v8@5.0.5)(vite@8.3.5(@types/node@24.19.2)(jiti@2.7.0)(yaml@2.9.1))
+
+  packages/calendar:
+    dependencies:
+      '@euroedge/shared':
+        specifier: workspace:*
+        version: link:../shared
+      luxon:
+        specifier: 'catalog:'
+        version: 3.7.2
+    devDependencies:
+      '@types/luxon':
+        specifier: 'catalog:'
+        version: 3.7.6
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      fast-check:
+        specifier: 'catalog:'
+        version: 4.10.2
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -1673,6 +1704,9 @@ packages:
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
+  '@types/luxon@3.7.6':
+    resolution: {integrity: sha512-6KSjliQAXK8ZLgFQO4B7iE4Rpf/B3rItzCFuXezBY/XIAGxOdLd7vRNK9/StRPwiS/yJsVbB7HKpW46B8tcEuQ==}
+
   '@types/node@24.19.2':
     resolution: {integrity: sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ==}
 
@@ -2484,6 +2518,10 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  luxon@3.7.2:
+    resolution: {integrity: sha512-vtEhXh/gNjI9Yg1u4jX/0YVPMvxzHuGgCm6tC5kZyb08yjGWGnqAjGJvcXbqQR2P3MyMEFnRbpcdFS6PBcLqew==}
+    engines: {node: '>=12'}
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -3932,6 +3970,8 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
+  '@types/luxon@3.7.6': {}
+
   '@types/node@24.19.2':
     dependencies:
       undici-types: 7.24.6
@@ -4694,6 +4734,8 @@ snapshots:
       react: 19.3.1
     optionalDependencies:
       '@types/react': 19.3.0
+
+  luxon@3.7.2: {}
 
   magic-string@0.30.21:
     dependencies:
