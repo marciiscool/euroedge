@@ -369,6 +369,9 @@ importers:
 
   apps/engine:
     dependencies:
+      '@euroedge/fixed':
+        specifier: workspace:*
+        version: link:../../packages/fixed
       '@euroedge/service-kit':
         specifier: workspace:*
         version: link:../../packages/service-kit
@@ -382,6 +385,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.2
+      fast-check:
+        specifier: 'catalog:'
+        version: 4.10.2
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
