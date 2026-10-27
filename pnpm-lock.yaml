@@ -796,6 +796,9 @@ importers:
       '@euroedge/shared':
         specifier: workspace:*
         version: link:../shared
+      luxon:
+        specifier: 'catalog:'
+        version: 3.7.2
     devDependencies:
       '@euroedge/data-adapters':
         specifier: workspace:*
@@ -812,9 +815,6 @@ importers:
       fast-check:
         specifier: 'catalog:'
         version: 4.10.2
-      luxon:
-        specifier: 'catalog:'
-        version: 3.7.2
       typescript:
         specifier: 'catalog:'
         version: 6.0.3

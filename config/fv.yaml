@@ -11,3 +11,6 @@ tradegateMaxSpreadBp: 30
 maxSignalAgeSeconds: 60
 bandSigmas: 2.5
 confidenceBp: { high: 25, medium: 75 }
+basisHalfLifeDays: 20
+# Danish krone peg (founder decision): fall back to the central rate without a feed; alert beyond 0.5 %.
+dkkPeg: { central: 7.46038, alertBp: 50 }

@@ -229,8 +229,7 @@ markets:
     tradegateSymbol: NOVC
     sector: pharma
     betaToBasket: '0.7'
-    enabled: false
-    launchNote: Converting the DKK/GBX anchor to EUR arrives in M3 (ADR-0017).
+    enabled: true
     sim:
       startPrice: '45'
       annualVol: '0.40'
@@ -282,8 +281,7 @@ markets:
     tradegateSymbol: R6C0
     sector: energy
     betaToBasket: '0.8'
-    enabled: false
-    launchNote: Converting the DKK/GBX anchor to EUR arrives in M3 (ADR-0017).
+    enabled: true
     sim:
       startPrice: '31'
       annualVol: '0.24'

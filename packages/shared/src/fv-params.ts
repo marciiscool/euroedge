@@ -27,5 +27,11 @@ export const fvParamsSchema = z.object({
   bandSigmas: z.number().positive(),
   /** Confidence thresholds on σ_FV, bp. */
   confidenceBp: z.object({ high: nonNeg, medium: nonNeg }),
+  /** Half-life of the ADR basis EWMA b_A, in trading days (M3-03). */
+  basisHalfLifeDays: z.number().positive().default(20),
+  /** EURDKK peg (ERM II): fallback rate without a feed, and the deviation that raises an alert. */
+  dkkPeg: z
+    .object({ central: z.number().positive(), alertBp: nonNeg })
+    .default({ central: 7.46038, alertBp: 50 }),
 });
 export type FvParams = z.infer<typeof fvParamsSchema>;

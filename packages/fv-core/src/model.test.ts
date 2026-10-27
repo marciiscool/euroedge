@@ -13,6 +13,8 @@ const params: FvParams = {
   maxSignalAgeSeconds: 60,
   bandSigmas: 2.5,
   confidenceBp: { high: 25, medium: 75 },
+  basisHalfLifeDays: 20,
+  dkkPeg: { central: 7.46038, alertBp: 50 },
 };
 const T0 = 1_793_000_000_000;
 const model = () =>

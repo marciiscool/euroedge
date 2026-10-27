@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@euroedge/calendar": "workspace:*",
-    "@euroedge/shared": "workspace:*"
+    "@euroedge/shared": "workspace:*",
+    "luxon": "catalog:"
   },
   "devDependencies": {
     "@euroedge/data-adapters": "workspace:*",
@@ -21,7 +22,6 @@
     "@types/node": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "fast-check": "catalog:",
-    "luxon": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
