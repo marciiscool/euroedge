@@ -20,10 +20,12 @@ await runService(
     },
   },
   async (service) => {
+    const catalog = await loadMarkets();
     fv = await startFvService({
       databaseUrl: config.DATABASE_URL,
       valkeyUrl: config.VALKEY_URL,
-      markets: (await loadMarkets()).filter((m) => m.enabled),
+      markets: catalog.filter((m) => m.enabled),
+      catalog,
       params: await loadFvParams(),
       stepCapBpsPerSecond: (await loadWindows()).markStepCapBpsPerSecond,
       log: service.log,

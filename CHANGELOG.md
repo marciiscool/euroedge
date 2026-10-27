@@ -14,6 +14,12 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - NOVO and SHEL are enabled.
 - Dividends per line (M3-02): the anchor moves on the local ex-date, and the ADR signal uses its own ex-date without double counting.
 - ADR basis `b_A` as an EWMA of close-to-open residuals, with a configurable half-life (M3-03).
+- Basket FV (M3-10/11):
+  - The level is the weighted sum of constituent FVs relative to base prices.
+  - Constituents without data are dropped and the weights renormalized; the snapshot lists them.
+  - No basket FV is published below 50 % weight coverage.
+  - σ comes from an EWMA covariance, with ρ = 1 until enough samples exist (never independence).
+  - EE-Blue 20 and EE-Semis are enabled (10x in Window A).
 
 ### M2 — Data layer (complete, on `integration/m2`)
 

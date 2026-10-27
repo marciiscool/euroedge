@@ -62,8 +62,8 @@ markets:
     lotSize: '0.001'
     minNotional: '10'
     sector: basket
-    enabled: false
-    launchNote: Basket FV arrives in M3; constituents and weights are a draft for founder sign-off.
+    enabled: true
+    launchNote: Constituents and weights are a draft for founder sign-off.
     basket:
       status: draft
       methodology: '20 largest eurozone stocks by free float on XETR/XAMS/XPAR, 10 % cap, quarterly rebalance'
@@ -327,8 +327,8 @@ markets:
     lotSize: '0.001'
     minNotional: '10'
     sector: basket
-    enabled: false
-    launchNote: Basket FV arrives in M3; the 35 % cap is a proposal for founder sign-off.
+    enabled: true
+    launchNote: The 35 % cap is a proposal for founder sign-off.
     basket:
       status: draft
       methodology: 'European semiconductor theme, free-float weighted, 35 % cap, quarterly rebalance'

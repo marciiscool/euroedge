@@ -1,7 +1,7 @@
 import pg from 'pg';
 import { CalendarCache, nextWindowChange } from '@euroedge/calendar';
 import { resolveUnits } from '@euroedge/fixed';
-import { MarketFvPipeline } from '@euroedge/fv-core';
+import { BasketFvPipeline, MarketFvPipeline } from '@euroedge/fv-core';
 import { createValkey, type Logger } from '@euroedge/service-kit';
 import {
   CHANNELS,
@@ -23,6 +23,8 @@ export interface FvServiceOptions {
   readonly databaseUrl: string;
   readonly valkeyUrl: string;
   readonly markets: readonly MarketConfig[];
+  /** Every configured market, to resolve basket constituents (default: `markets`). */
+  readonly catalog?: readonly MarketConfig[];
   readonly params: FvParams;
   readonly stepCapBpsPerSecond: number;
   readonly log: Logger;
@@ -37,7 +39,7 @@ export interface RunningFvService {
 }
 
 interface MarketRuntime {
-  readonly pipeline: MarketFvPipeline;
+  readonly pipeline: MarketFvPipeline | BasketFvPipeline;
   readonly config: MarketConfig;
   readonly units: ReturnType<typeof resolveUnits>;
   next: { at: number; window: Window } | undefined;
@@ -51,7 +53,10 @@ export async function startFvService(o: FvServiceOptions): Promise<RunningFvServ
   const sub = createValkey(o.valkeyUrl, 'fv-service-sub');
   const calendar = new CalendarCache();
   const runtimes = o.markets.map((m): MarketRuntime => ({
-    pipeline: new MarketFvPipeline(m, o.params, o.stepCapBpsPerSecond, calendar),
+    pipeline:
+      m.kind === 'basket'
+        ? new BasketFvPipeline(m, o.catalog ?? o.markets, o.params, o.stepCapBpsPerSecond, calendar)
+        : new MarketFvPipeline(m, o.params, o.stepCapBpsPerSecond, calendar),
     config: m,
     units: resolveUnits(m),
     next: undefined,
@@ -72,12 +77,15 @@ export async function startFvService(o: FvServiceOptions): Promise<RunningFvServ
   });
   await sub.subscribe(CHANNELS.ticks);
   for (const r of runtimes) {
-    const [primary, ...others] = r.pipeline.instruments();
-    if (primary === undefined) continue;
-    const warm = await warmStartTicks(db, primary, others);
-    for (const t of warm) r.pipeline.onTick(t);
-    lastWarmTs = Math.max(lastWarmTs, ...warm.map((t) => t.ts));
-    o.log.info({ market: r.config.id, ticks: warm.length }, 'fv warm start');
+    let n = 0;
+    for (const [primary, ...others] of r.pipeline.warmGroups()) {
+      if (primary === undefined) continue;
+      const warm = await warmStartTicks(db, primary, others);
+      for (const t of warm) r.pipeline.onTick(t);
+      lastWarmTs = Math.max(lastWarmTs, ...warm.map((t) => t.ts));
+      n += warm.length;
+    }
+    o.log.info({ market: r.config.id, ticks: n }, 'fv warm start');
   }
   warming = false;
   for (const t of buffered.filter((x) => x.ts > lastWarmTs)) feed(t);
