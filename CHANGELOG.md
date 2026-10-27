@@ -20,6 +20,14 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - No basket FV is published below 50 % weight coverage.
   - σ comes from an EWMA covariance, with ρ = 1 until enough samples exist (never independence).
   - EE-Blue 20 and EE-Semis are enabled (10x in Window A).
+- Pure circuit-breaker state machines on event time (M3-12):
+  - CB1 ADR/Tradegate divergence;
+  - CB2 primary halt;
+  - CB3 stale index, plus the ADR-0008 Tradegate escalation (> 5 min → reduce-only, released after 2 min fresh);
+  - CB4 EE-Blue −7 %, global for 15 min;
+  - CB8 mark pinned to the band (ADR-0009).
+
+  Parameters live in `fv.yaml`.
 
 ### M2 — Data layer (complete, on `integration/m2`)
 
