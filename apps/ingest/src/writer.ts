@@ -5,13 +5,25 @@ import type { Tick } from '@euroedge/shared';
 export class TickWriter {
   private readonly pool: pg.Pool;
   private buffer: Tick[] = [];
+  /** Last row per instrument and kind, to drop exact duplicates (reconnects, replays). */
+  private readonly last = new Map<string, string>();
+  duplicates = 0;
 
   constructor(databaseUrl: string) {
     this.pool = new pg.Pool({ connectionString: databaseUrl, max: 2 });
   }
 
-  push(t: Tick): void {
+  /** Buffers a tick; returns false for an exact duplicate of the previous row of its stream. */
+  push(t: Tick): boolean {
+    const stream = `${t.instrument.venue}:${t.instrument.symbol}|${t.kind}`;
+    const row = `${t.ts}|${t.bid}|${t.ask}|${t.last}|${t.size}`;
+    if (this.last.get(stream) === row) {
+      this.duplicates++;
+      return false;
+    }
+    this.last.set(stream, row);
     this.buffer.push(t);
+    return true;
   }
 
   async flush(): Promise<number> {
