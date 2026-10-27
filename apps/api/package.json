@@ -11,13 +11,23 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@euroedge/execution": "workspace:*",
     "@euroedge/service-kit": "workspace:*",
     "@euroedge/shared": "workspace:*",
+    "@fastify/cookie": "catalog:",
+    "@fastify/websocket": "catalog:",
+    "pg": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@euroedge/db": "workspace:*",
     "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "@types/ws": "catalog:",
+    "fastify": "catalog:",
+    "ioredis": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "ws": "catalog:"
   }
 }
