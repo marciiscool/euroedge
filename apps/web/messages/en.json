@@ -29,7 +29,6 @@
     "skipToContent": "Skip to main content"
   },
   "Terminal": {
-    "assetName": "ASML Holding",
     "mark": "Mark price",
     "modelPrice": "Model price",
     "fairValue": "Fair value",
@@ -115,6 +114,7 @@
     "buyVerb": "Buy",
     "sellVerb": "Sell",
     "buyNoun": "Buy",
-    "sellNoun": "Sell"
+    "sellNoun": "Sell",
+    "markets": "Markets"
   }
 }

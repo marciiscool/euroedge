@@ -3,19 +3,22 @@
 import { Button } from '@euroedge/ui/components/button';
 import type { AccountSnapshot, FvDisplaySnapshot, MarketSnapshot } from '@euroedge/shared';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { api, type Session } from '@/lib/api';
 import { live, useChannel, useLiveStatus } from '@/lib/live';
+import { marketById } from '@/lib/markets';
 import { MarketHeader } from './market-header';
+import { MarketSwitcher } from './market-switcher';
 import { OrderTicket } from './order-ticket';
 import { AccountSummary, Positions } from './positions';
 import { PriceChart } from './price-chart';
 import { Provenance } from './provenance';
 
-const MARKET = 'ASML-PERP';
-
-/** Bare trade terminal (M1): one market, sim data, market orders. The full terminal is M7. */
+/** Bare trade terminal: enabled markets, sim data, market orders. The full terminal is M7. */
 export function Terminal() {
+  const marketCfg = marketById(useSearchParams().get('market'));
+  const MARKET = marketCfg.id;
   const t = useTranslations('Terminal');
   const [session, setSession] = useState<Session | null>(null);
   const [account, setAccount] = useState<AccountSnapshot | undefined>();
@@ -45,7 +48,10 @@ export function Terminal() {
 
   return (
     <div className="flex min-h-[calc(100dvh-8rem)] flex-col">
+      <MarketSwitcher current={MARKET} />
       <MarketHeader
+        id={MARKET}
+        name={marketCfg.name}
         market={market}
         fv={fv}
         simulated={session?.tier !== 'live-min'}
@@ -53,7 +59,7 @@ export function Terminal() {
       />
       <div className="grid flex-1 grid-cols-1 lg:grid-cols-[1fr_320px]">
         <div className="flex min-w-0 flex-col">
-          <PriceChart market={MARKET} fv={fv} />
+          <PriceChart key={MARKET} market={MARKET} fv={fv} />
           <Provenance fv={fv} />
           <Positions account={shown} onClosed={refreshAccount} />
         </div>
