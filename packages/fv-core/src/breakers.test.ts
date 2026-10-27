@@ -23,6 +23,7 @@ const base = (ts: number, over: Partial<BreakerInput> = {}): BreakerInput => ({
   sigma: 0.001,
   sources: [tg(100), adr(100)],
   tradegateScheduled: true,
+  liveExpected: true,
   primaryHalted: false,
   mark: 10_000n,
   bandLo: 9_900n,

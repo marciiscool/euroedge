@@ -81,6 +81,7 @@ async function simulateDay(seed: number) {
       mark: ticks(u.mark),
       markClamped: u.markClamped,
       sigmaPpm: u.sigmaPpm,
+      breaker: 'none',
     });
     stats.marketData += 1;
     if (ts % 60_000 === 0) push(ts, { type: 'ClockTick' });

@@ -93,7 +93,8 @@
       "price-limit": "The price is too far from the index right now.",
       "min-notional": "Below the minimum order value of 10 USDC.",
       "insufficient-margin": "Not enough margin for this size at the current leverage cap.",
-      "no-position": "There is no position to close."
+      "no-position": "There is no position to close.",
+      "circuit-breaker": "A circuit breaker is active: only reducing orders are allowed right now."
     },
     "account": "Account",
     "equity": "Equity",
@@ -115,6 +116,12 @@
     "sellVerb": "Sell",
     "buyNoun": "Buy",
     "sellNoun": "Sell",
-    "markets": "Markets"
+    "markets": "Markets",
+    "breaker": "Circuit breaker",
+    "breakerEffect": {
+      "no-opens": "No new positions",
+      "degraded": "Degraded: no new positions, wider spreads",
+      "reduce-only": "Reduce-only"
+    }
   }
 }

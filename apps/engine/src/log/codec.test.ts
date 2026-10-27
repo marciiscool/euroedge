@@ -53,6 +53,7 @@ const sample: EngineInput[] = [
     mark: ticks(70_005n),
     markClamped: false,
     sigmaPpm: 600n,
+    breaker: 'none',
   },
   {
     type: 'PlaceOrder',

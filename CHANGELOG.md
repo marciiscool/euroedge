@@ -29,6 +29,13 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
   Parameters live in `fv.yaml`.
 
+- Circuit breakers take effect end to end (M3-13):
+  - fv-service evaluates them every second, with halts detected by `FeedMonitor`.
+  - The effect is carried on `MarketData` (event v2; v1 logs decode as `none`).
+  - The engine rejects new exposure under any breaker and doubles the house half-spread when degraded.
+  - The terminal shows a breaker badge.
+  - CB3 only applies while a live source is scheduled. Off-hours, FV_last widening is the design and does not count as stale.
+
 ### M2 — Data layer (complete, on `integration/m2`)
 
 #### Added

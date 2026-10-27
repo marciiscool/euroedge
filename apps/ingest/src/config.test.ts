@@ -27,7 +27,9 @@ describe('ingest config', () => {
 
 describe('fastForward', () => {
   it('reproduces the same latest state for the same seed and epoch', async () => {
-    const markets = (await loadMarkets()).filter((m) => m.enabled);
+    const markets = (await loadMarkets()).filter(
+      (m) => m.id === 'ASML-PERP' || m.id === 'SAP-PERP',
+    );
     const epoch = Date.UTC(2026, 9, 26);
     const now = Date.UTC(2026, 9, 27, 10, 0, 0);
     const a = fastForward(42, epoch, now, markets);

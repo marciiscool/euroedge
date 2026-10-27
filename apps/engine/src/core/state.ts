@@ -1,7 +1,7 @@
 import type { MarketUnits, Ticks, Usdc } from '@euroedge/fixed';
 import { Ledger } from '@euroedge/ledger';
 import type { Position } from '@euroedge/risk-core';
-import type { AccountId, MarketId, Side, WindowId, WindowRisk } from './events.ts';
+import type { AccountId, BreakerEffect, MarketId, Side, WindowId, WindowRisk } from './events.ts';
 
 export interface MarketData {
   readonly window: WindowId;
@@ -11,6 +11,7 @@ export interface MarketData {
   readonly index: Ticks;
   readonly mark: Ticks;
   readonly sigmaPpm: bigint;
+  readonly breaker: BreakerEffect;
   readonly ts: bigint;
 }
 
@@ -42,7 +43,8 @@ export type RejectReason =
   | 'price-limit'
   | 'min-notional'
   | 'insufficient-margin'
-  | 'no-position';
+  | 'no-position'
+  | 'circuit-breaker';
 
 export interface Fill {
   readonly market: MarketId;

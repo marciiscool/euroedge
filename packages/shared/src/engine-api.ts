@@ -78,7 +78,12 @@ export const rejectReasonSchema = z.enum([
   'min-notional',
   'insufficient-margin',
   'no-position',
+  'circuit-breaker',
 ]);
+
+/** Circuit-breaker effect on a market (brief §6.5); carried on each MarketData input. */
+export const breakerEffectSchema = z.enum(['none', 'no-opens', 'degraded', 'reduce-only']);
+export type BreakerEffectName = z.infer<typeof breakerEffectSchema>;
 
 /** Order result published on CHANNELS.results (one message per request). */
 export const orderResultSchema = z.discriminatedUnion('status', [
@@ -136,5 +141,12 @@ export const fvSnapshotSchema = z.object({
   nextWindowChange: z
     .object({ at: z.number().int(), window: z.enum(['A', 'B', 'C', 'D']) })
     .nullable(),
+  /** Active circuit breakers and their combined effect (shown in the UI). */
+  breakers: z.array(z.string()).default([]),
+  breakerEffect: breakerEffectSchema.default('none'),
+  /** Basket constituents dropped for missing data. */
+  dropped: z.array(z.string()).default([]),
+  /** EURDKK de-peg / missing feed alert. */
+  fxAlert: z.boolean().default(false),
 });
 export type FvDisplaySnapshot = z.infer<typeof fvSnapshotSchema>;

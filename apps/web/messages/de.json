@@ -93,7 +93,8 @@
       "price-limit": "Der Preis weicht derzeit zu stark vom Index ab.",
       "min-notional": "Unter dem Mindestorderwert von 10 USDC.",
       "insufficient-margin": "Nicht genug Margin für diese Größe beim aktuellen Hebel-Limit.",
-      "no-position": "Es gibt keine Position zum Schließen."
+      "no-position": "Es gibt keine Position zum Schließen.",
+      "circuit-breaker": "Ein Schutzschalter ist aktiv: Gerade sind nur reduzierende Orders möglich."
     },
     "account": "Konto",
     "equity": "Eigenkapital",
@@ -115,6 +116,12 @@
     "sellVerb": "verkaufen",
     "buyNoun": "Kauf",
     "sellNoun": "Verkauf",
-    "markets": "Märkte"
+    "markets": "Märkte",
+    "breaker": "Schutzschalter",
+    "breakerEffect": {
+      "no-opens": "Keine neuen Positionen",
+      "degraded": "Eingeschränkt: keine neuen Positionen, breitere Spreads",
+      "reduce-only": "Nur reduzieren"
+    }
   }
 }
