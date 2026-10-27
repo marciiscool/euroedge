@@ -105,3 +105,36 @@ export const orderResultSchema = z.discriminatedUnion('status', [
   }),
 ]);
 export type OrderResult = z.infer<typeof orderResultSchema>;
+
+/** Producers enqueue engine inputs as JSON with bigints as decimal strings. */
+export const encodeEngineCommand = (input: unknown): string =>
+  JSON.stringify(input, (_k, v: unknown) => (typeof v === 'bigint' ? v.toString() : v));
+
+export const ENGINE_STREAM_MAXLEN = 100_000;
+
+/** FV display snapshot published by fv-service each second (brief §11.2 price provenance). */
+export const fvSnapshotSchema = z.object({
+  market: z.string(),
+  ts: z.number().int(),
+  window: z.enum(['A', 'B', 'C', 'D']),
+  fv: dec,
+  bandLo: dec,
+  bandHi: dec,
+  index: dec,
+  mark: dec,
+  sigmaBp: z.number(),
+  confidence: z.enum(['high', 'medium', 'low', 'none']),
+  anchor: z.object({ price: dec, ts: z.number().int() }),
+  sources: z.array(
+    z.object({
+      kind: z.enum(['tradegate', 'adr']),
+      weight: z.number(),
+      ageMs: z.number().int(),
+      implied: dec,
+    }),
+  ),
+  nextWindowChange: z
+    .object({ at: z.number().int(), window: z.enum(['A', 'B', 'C', 'D']) })
+    .nullable(),
+});
+export type FvDisplaySnapshot = z.infer<typeof fvSnapshotSchema>;

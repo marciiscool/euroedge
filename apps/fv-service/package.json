@@ -11,12 +11,19 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@euroedge/calendar": "workspace:*",
+    "@euroedge/fixed": "workspace:*",
+    "@euroedge/fv-core": "workspace:*",
     "@euroedge/service-kit": "workspace:*",
     "@euroedge/shared": "workspace:*",
+    "pg": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@euroedge/db": "workspace:*",
     "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "ioredis": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
