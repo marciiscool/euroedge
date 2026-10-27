@@ -14,7 +14,6 @@
     "@euroedge/fixed": "workspace:*",
     "@euroedge/ledger": "workspace:*",
     "@euroedge/risk-core": "workspace:*",
-    "@euroedge/service-kit": "workspace:*",
     "@euroedge/shared": "workspace:*",
     "pg": "catalog:",
     "zod": "catalog:"
@@ -23,10 +22,12 @@
     "@euroedge/data-adapters": "workspace:*",
     "@euroedge/db": "workspace:*",
     "@euroedge/fv-core": "workspace:*",
+    "@euroedge/service-kit": "workspace:*",
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "@types/pg": "catalog:",
     "fast-check": "catalog:",
+    "ioredis": "catalog:",
     "luxon": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
