@@ -7,7 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { api, type Session } from '@/lib/api';
 import { live, useChannel, useLiveStatus } from '@/lib/live';
-import { marketById } from '@/lib/markets';
+import { useMarkets } from '@/lib/markets';
 import { MarketHeader } from './market-header';
 import { MarketSwitcher } from './market-switcher';
 import { OrderTicket } from './order-ticket';
@@ -17,8 +17,9 @@ import { Provenance } from './provenance';
 
 /** Bare trade terminal: enabled markets, sim data, market orders. The full terminal is M7. */
 export function Terminal() {
-  const marketCfg = marketById(useSearchParams().get('market'));
-  const MARKET = marketCfg.id;
+  const markets = useMarkets();
+  const MARKET = useSearchParams().get('market') ?? 'ASML-PERP';
+  const name = markets.find((m) => m.id === MARKET)?.displayName ?? MARKET;
   const t = useTranslations('Terminal');
   const [session, setSession] = useState<Session | null>(null);
   const [account, setAccount] = useState<AccountSnapshot | undefined>();
@@ -48,10 +49,10 @@ export function Terminal() {
 
   return (
     <div className="flex min-h-[calc(100dvh-8rem)] flex-col">
-      <MarketSwitcher current={MARKET} />
+      <MarketSwitcher current={MARKET} markets={markets} />
       <MarketHeader
         id={MARKET}
-        name={marketCfg.name}
+        name={name}
         market={market}
         fv={fv}
         simulated={session?.tier !== 'live-min'}

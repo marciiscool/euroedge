@@ -102,6 +102,7 @@ describe.skipIf(dbUrl === undefined || vkUrl === undefined)('api (integration)',
       valkey,
       subscriber,
       db,
+      markets: [{ id: 'ASML-PERP', displayName: 'ASML Holding', kind: 'stock' }],
       config: {
         PUBLIC_ORIGIN: ORIGIN,
         SESSION_SECRET: 'x'.repeat(32),
@@ -238,6 +239,12 @@ describe.skipIf(dbUrl === undefined || vkUrl === undefined)('api (integration)',
     expect(
       (await svc.http.inject({ url: '/api/account', headers: { cookie } })).json(),
     ).toMatchObject({ cash: '10000.000000' });
+  });
+
+  it('lists enabled markets', async () => {
+    expect((await svc.http.inject({ url: '/api/markets' })).json()).toEqual({
+      markets: [{ id: 'ASML-PERP', displayName: 'ASML Holding', kind: 'stock' }],
+    });
   });
 
   it('serves market snapshots and FV history', async () => {

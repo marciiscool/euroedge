@@ -42,8 +42,8 @@ describe('SimWorld v1', () => {
   });
 
   it('moves stocks together through market and sector factors', () => {
-    const w = world(pick('ASML-PERP', 'SAP-PERP', 'EUSEMI-PERP'), '2026-10-26T00:00');
-    const ids = ['ASML-PERP', 'SAP-PERP', 'IFX'];
+    const w = world(pick('ASML-PERP', 'SAP-PERP', 'IFX-PERP'), '2026-10-26T00:00');
+    const ids = ['ASML-PERP', 'SAP-PERP', 'IFX-PERP'];
     const series: number[][] = ids.map(() => []);
     for (let t = cet('2026-10-26T00:00'); t < cet('2026-10-29T00:00'); t += 60_000) {
       w.advanceTo(t);

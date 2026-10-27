@@ -24,6 +24,8 @@ export interface ApiDeps {
   /** Dedicated pub/sub connection for the WebSocket fan-out. */
   readonly subscriber: Redis;
   readonly db: pg.Pool;
+  /** Enabled markets from config/markets.yaml, listed by GET /api/markets. */
+  readonly markets?: readonly { id: string; displayName: string; kind: 'stock' | 'basket' }[];
   readonly config: {
     readonly PUBLIC_ORIGIN: string;
     readonly SESSION_SECRET: string;
@@ -135,6 +137,13 @@ export async function buildApi(app: FastifyInstance, deps: ApiDeps): Promise<voi
     reply.clearCookie(SESSION_COOKIE, { path: '/' });
     return { account: null };
   });
+
+  const marketList = (deps.markets ?? []).map(({ id, displayName, kind }) => ({
+    id,
+    displayName,
+    kind,
+  }));
+  app.get('/api/markets', () => ({ markets: marketList }));
 
   app.get<{ Params: { id: string } }>('/api/markets/:id', async (req, reply) => {
     if (!MARKET_ID.test(req.params.id)) return sendError(reply, 'not-found', 'unknown market');

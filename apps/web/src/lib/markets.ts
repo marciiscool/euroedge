@@ -1,13 +1,39 @@
-/** Markets enabled in config/markets.yaml. GET /api/markets replaces this list in M6. */
-export const MARKETS = [
-  { id: 'ASML-PERP', name: 'ASML Holding' },
-  { id: 'SAP-PERP', name: 'SAP' },
-  { id: 'SIE-PERP', name: 'Siemens' },
-  { id: 'TTE-PERP', name: 'TotalEnergies' },
-  { id: 'MC-PERP', name: 'LVMH' },
-] as const;
+'use client';
 
-export type MarketId = (typeof MARKETS)[number]['id'];
+import { useEffect, useState } from 'react';
 
-export const marketById = (id: string | null | undefined) =>
-  MARKETS.find((m) => m.id === id) ?? MARKETS[0];
+export interface MarketListing {
+  readonly id: string;
+  readonly displayName: string;
+}
+
+/** Shown until GET /api/markets answers, and if it fails. */
+const FALLBACK: readonly MarketListing[] = [{ id: 'ASML-PERP', displayName: 'ASML Holding' }];
+
+let cache: Promise<readonly MarketListing[]> | undefined;
+
+function fetchMarkets(): Promise<readonly MarketListing[]> {
+  cache ??= fetch('/api/markets')
+    .then((r) => (r.ok ? (r.json() as Promise<{ markets: MarketListing[] }>) : { markets: [] }))
+    .then((b) => (b.markets.length > 0 ? b.markets : FALLBACK))
+    .catch(() => {
+      cache = undefined;
+      return FALLBACK;
+    });
+  return cache;
+}
+
+/** Enabled markets from the server (config/markets.yaml): new tickers appear without a web change. */
+export function useMarkets(): readonly MarketListing[] {
+  const [markets, setMarkets] = useState<readonly MarketListing[]>(FALLBACK);
+  useEffect(() => {
+    let live = true;
+    void fetchMarkets().then((m) => {
+      if (live) setMarkets(m);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+  return markets;
+}

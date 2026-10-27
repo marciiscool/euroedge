@@ -114,3 +114,17 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md): one task per branch and PR, convention
 ## Notices
 
 Charts use TradingView Lightweight Charts™ (Apache-2.0). Fonts: Geist (SIL OFL 1.1).
+
+## Adding a market
+
+1. Add a block to `config/markets.yaml`. Copy an existing EUR stock such as `ALV-PERP` and set:
+   - the ISIN;
+   - the primary venue and symbol;
+   - the Tradegate symbol;
+   - the sector;
+   - optionally an `adr`;
+   - a `sim` block.
+2. The venue needs a calendar in `config/calendars/`. If it is new, add one and run `pnpm --filter @euroedge/calendar gen`.
+3. Restart the stack. Engine, FV service, ingest and the terminal all pick the market up from config.
+
+Leverage, fees and funding come from `config/windows.yaml` per window, so every stock gets the same rules: 5x in Window A, 4x/3x/2x in B/C/D.

@@ -1,4 +1,4 @@
-# Market definitions (brief §5). Contract: quanto perp, EUR-quoted, USDC-settled, 1 EUR-point = 1 USDC per contract.
+# Market definitions (brief §5, plus ALV/AIR/DTE/IFX/SU/OR added by the founder 2026-10-27). Contract: quanto perp, EUR-quoted, USDC-settled, 1 EUR-point = 1 USDC per contract.
 # 1 contract = 1 share (stocks) or 1 basket unit. Lots/ticks per ADR-0016; tickSize × lotSize × 1e6 must be an integer.
 # `sim` blocks drive the simulated world only (DATA_TIER=sim); prices there are synthetic.
 # ADR ratios are local shares per ADR. Unverified ratios get weight 0 (brief §5); founder to confirm (PLAN §8).
@@ -76,40 +76,8 @@ markets:
         - { id: SIE, market: SIE-PERP, weightBps: 804 }
         - { id: MC, market: MC-PERP, weightBps: 670 }
         - { id: TTE, market: TTE-PERP, weightBps: 559 }
-        - id: ALV
-          name: Allianz
-          underlyingIsin: DE0008404005
-          primaryMic: XETR
-          primarySymbol: ALV
-          primaryCcy: EUR
-          tradegateSymbol: ALV
-          sector: financials
-          weightBps: 626
-          sim:
-            {
-              startPrice: '350',
-              annualVol: '0.20',
-              beta: '0.9',
-              jumpsPerYear: '3',
-              jumpVol: '0.02',
-            }
-        - id: SU
-          name: Schneider Electric
-          underlyingIsin: FR0000121972
-          primaryMic: XPAR
-          primarySymbol: SU
-          primaryCcy: EUR
-          tradegateSymbol: SND
-          sector: industrials
-          weightBps: 603
-          sim:
-            {
-              startPrice: '240',
-              annualVol: '0.26',
-              beta: '1.1',
-              jumpsPerYear: '3',
-              jumpVol: '0.02',
-            }
+        - { id: ALV, market: ALV-PERP, weightBps: 626 }
+        - { id: SU, market: SU-PERP, weightBps: 603 }
         - id: SAF
           name: Safran
           underlyingIsin: FR0000073272
@@ -127,23 +95,7 @@ markets:
               jumpsPerYear: '3',
               jumpVol: '0.02',
             }
-        - id: AIR
-          name: Airbus
-          underlyingIsin: NL0000235190
-          primaryMic: XPAR
-          primarySymbol: AIR
-          primaryCcy: EUR
-          tradegateSymbol: AIR
-          sector: aerospace
-          weightBps: 492
-          sim:
-            {
-              startPrice: '200',
-              annualVol: '0.27',
-              beta: '1.0',
-              jumpsPerYear: '3',
-              jumpVol: '0.02',
-            }
+        - { id: AIR, market: AIR-PERP, weightBps: 492 }
         - id: SAN
           name: Sanofi
           underlyingIsin: FR0000120578
@@ -155,34 +107,8 @@ markets:
           weightBps: 492
           sim:
             { startPrice: '90', annualVol: '0.20', beta: '0.6', jumpsPerYear: '3', jumpVol: '0.03' }
-        - id: DTE
-          name: Deutsche Telekom
-          underlyingIsin: DE0005557508
-          primaryMic: XETR
-          primarySymbol: DTE
-          primaryCcy: EUR
-          tradegateSymbol: DTE
-          sector: telecom
-          weightBps: 469
-          sim:
-            { startPrice: '30', annualVol: '0.18', beta: '0.6', jumpsPerYear: '2', jumpVol: '0.02' }
-        - id: OR
-          name: L'Oréal
-          underlyingIsin: FR0000120321
-          primaryMic: XPAR
-          primarySymbol: OR
-          primaryCcy: EUR
-          tradegateSymbol: LOR
-          sector: consumer
-          weightBps: 380
-          sim:
-            {
-              startPrice: '380',
-              annualVol: '0.22',
-              beta: '0.8',
-              jumpsPerYear: '2',
-              jumpVol: '0.03',
-            }
+        - { id: DTE, market: DTE-PERP, weightBps: 469 }
+        - { id: OR, market: OR-PERP, weightBps: 380 }
         - id: EL
           name: EssilorLuxottica
           underlyingIsin: FR0000121667
@@ -267,17 +193,7 @@ markets:
           weightBps: 268
           sim:
             { startPrice: '50', annualVol: '0.32', beta: '1.1', jumpsPerYear: '3', jumpVol: '0.03' }
-        - id: IFX
-          name: Infineon
-          underlyingIsin: DE0006231004
-          primaryMic: XETR
-          primarySymbol: IFX
-          primaryCcy: EUR
-          tradegateSymbol: IFX
-          sector: semiconductors
-          weightBps: 223
-          sim:
-            { startPrice: '35', annualVol: '0.38', beta: '1.3', jumpsPerYear: '4', jumpVol: '0.03' }
+        - { id: IFX, market: IFX-PERP, weightBps: 223 }
         - id: ADYEN
           name: Adyen
           underlyingIsin: NL0012969182
@@ -423,17 +339,7 @@ markets:
       rebalance: quarterly
       constituents:
         - { id: ASML, market: ASML-PERP, weightBps: 3500 }
-        - id: IFX
-          name: Infineon
-          underlyingIsin: DE0006231004
-          primaryMic: XETR
-          primarySymbol: IFX
-          primaryCcy: EUR
-          tradegateSymbol: IFX
-          sector: semiconductors
-          weightBps: 2981
-          sim:
-            { startPrice: '35', annualVol: '0.38', beta: '1.3', jumpsPerYear: '4', jumpVol: '0.03' }
+        - { id: IFX, market: IFX-PERP, weightBps: 2981 }
         - id: ASM
           name: ASM International
           underlyingIsin: NL0000334118
@@ -527,3 +433,105 @@ markets:
       beta: '1.0'
       jumpsPerYear: '4'
       jumpVol: '0.04'
+
+  - id: ALV-PERP
+    displayName: Allianz
+    underlyingIsin: DE0008404005
+    kind: stock
+    primaryMic: XETR
+    primarySymbol: ALV
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.01'
+    minNotional: '10'
+    tradegateSymbol: ALV
+    sector: financials
+    betaToBasket: '0.9'
+    enabled: true
+    sim: { startPrice: '350', annualVol: '0.20', beta: '0.9', jumpsPerYear: '3', jumpVol: '0.02' }
+
+  - id: AIR-PERP
+    displayName: Airbus
+    underlyingIsin: NL0000235190
+    kind: stock
+    primaryMic: XPAR
+    primarySymbol: AIR
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.01'
+    minNotional: '10'
+    tradegateSymbol: AIR
+    sector: aerospace
+    betaToBasket: '1.0'
+    enabled: true
+    sim: { startPrice: '200', annualVol: '0.27', beta: '1.0', jumpsPerYear: '3', jumpVol: '0.02' }
+
+  - id: DTE-PERP
+    displayName: Deutsche Telekom
+    underlyingIsin: DE0005557508
+    kind: stock
+    primaryMic: XETR
+    primarySymbol: DTE
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.01'
+    minNotional: '10'
+    tradegateSymbol: DTE
+    sector: telecom
+    betaToBasket: '0.6'
+    enabled: true
+    sim: { startPrice: '30', annualVol: '0.18', beta: '0.6', jumpsPerYear: '2', jumpVol: '0.02' }
+
+  - id: IFX-PERP
+    displayName: Infineon
+    underlyingIsin: DE0006231004
+    kind: stock
+    primaryMic: XETR
+    primarySymbol: IFX
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.01'
+    minNotional: '10'
+    tradegateSymbol: IFX
+    sector: semiconductors
+    betaToBasket: '1.3'
+    enabled: true
+    sim: { startPrice: '35', annualVol: '0.38', beta: '1.3', jumpsPerYear: '4', jumpVol: '0.03' }
+
+  - id: SU-PERP
+    displayName: Schneider Electric
+    underlyingIsin: FR0000121972
+    kind: stock
+    primaryMic: XPAR
+    primarySymbol: SU
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.01'
+    minNotional: '10'
+    tradegateSymbol: SND
+    sector: industrials
+    betaToBasket: '1.1'
+    enabled: true
+    sim: { startPrice: '240', annualVol: '0.26', beta: '1.1', jumpsPerYear: '3', jumpVol: '0.02' }
+
+  - id: OR-PERP
+    displayName: L'Oréal
+    underlyingIsin: FR0000120321
+    kind: stock
+    primaryMic: XPAR
+    primarySymbol: OR
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.01'
+    minNotional: '10'
+    tradegateSymbol: LOR
+    sector: consumer
+    betaToBasket: '0.8'
+    enabled: true
+    sim: { startPrice: '380', annualVol: '0.22', beta: '0.8', jumpsPerYear: '2', jumpVol: '0.03' }

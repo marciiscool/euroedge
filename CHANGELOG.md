@@ -4,9 +4,11 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
-### M2 — Data layer (in progress, on `integration/m2`)
+### M2 — Data layer (complete, on `integration/m2`)
 
 #### Added
+
+- Six more stock perps (founder request): Allianz, Airbus, Deutsche Telekom, Infineon, Schneider Electric and L'Oréal. They use the same window leverage as the other stocks (5x in Window A). `GET /api/markets` feeds the terminal's market list, so new tickers need only a `markets.yaml` entry.
 
 - Curated venue calendars 2026–2028 in `config/calendars/` for XETR, TGAT, LSX, XAMS, XPAR, XCSE, XLON, XNYS, XNAS, USON, XEUR and FX. They cover holidays, half-days, auction phases and random-end ranges, with a schema and a generated browser-safe module (M2-01…04).
 - Venue-state resolver (`venueState`, `nextVenueTransition`) and a holiday-aware window resolver (M2-05/06). Tests cover a cross-check against an `exchange_calendars` 4.13.2 fixture, holidays, half-days, the US overnight session and a 120-day coverage guard (M2-07).

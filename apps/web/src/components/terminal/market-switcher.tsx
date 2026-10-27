@@ -3,14 +3,20 @@
 import { cn } from '@euroedge/ui/lib/utils';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { MARKETS } from '@/lib/markets';
+import type { MarketListing } from '@/lib/markets';
 
-export function MarketSwitcher({ current }: { current: string }) {
+export function MarketSwitcher({
+  current,
+  markets,
+}: {
+  current: string;
+  markets: readonly MarketListing[];
+}) {
   const t = useTranslations('Terminal');
   return (
     <nav aria-label={t('markets')} className="border-b border-border px-2">
       <ul className="flex gap-1 overflow-x-auto">
-        {MARKETS.map((m) => (
+        {markets.map((m) => (
           <li key={m.id}>
             <Link
               href={{ pathname: '/trade', query: { market: m.id } }}

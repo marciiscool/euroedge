@@ -2,6 +2,7 @@
 import pg from 'pg';
 import { SimAdapter } from '@euroedge/execution';
 import { createValkey, runService } from '@euroedge/service-kit';
+import { loadMarkets } from '@euroedge/shared/config';
 import { buildApi } from './app.ts';
 import { loadConfig } from './config.ts';
 
@@ -19,7 +20,8 @@ await runService(
     const subscriber = createValkey(config.VALKEY_URL, 'api-ws');
     const db = new pg.Pool({ connectionString: config.DATABASE_URL, max: 5 });
     const adapter = new SimAdapter({ valkey, subscriber: results });
-    await buildApi(service.http, { adapter, valkey, subscriber, db, config });
+    const markets = (await loadMarkets()).filter((m) => m.enabled);
+    await buildApi(service.http, { adapter, valkey, subscriber, db, config, markets });
     service.onShutdown(async () => {
       for (const c of [valkey, results, subscriber]) c.disconnect();
       await db.end();
