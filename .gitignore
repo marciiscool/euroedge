@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+.next/
+.turbo/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+playwright-report/
+test-results/
+contracts/out/
+contracts/cache/
+contracts/broadcast/*/31337/
