@@ -1,0 +1,25 @@
+{
+  "name": "@euroedge/calendar",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@euroedge/shared": "workspace:*",
+    "luxon": "catalog:"
+  },
+  "devDependencies": {
+    "@types/luxon": "catalog:",
+    "@types/node": "catalog:",
+    "fast-check": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
