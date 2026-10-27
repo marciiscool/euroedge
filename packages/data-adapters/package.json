@@ -13,13 +13,13 @@
   },
   "dependencies": {
     "@euroedge/calendar": "workspace:*",
-    "@euroedge/shared": "workspace:*"
+    "@euroedge/shared": "workspace:*",
+    "luxon": "catalog:"
   },
   "devDependencies": {
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "fast-check": "catalog:",
-    "luxon": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

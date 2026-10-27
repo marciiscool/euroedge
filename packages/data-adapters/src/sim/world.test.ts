@@ -49,6 +49,8 @@ describe('SimWorld', () => {
       'XAMS:close',
       'XNAS:close',
       'FX:close',
+      'FX:close',
+      'FX:close',
     ]);
   });
 
@@ -76,8 +78,8 @@ describe('SimWorld', () => {
     };
     expect(xams.every((t) => hour(t) >= '09:00' && hour(t) < '17:30')).toBe(true);
     expect(tg.every((t) => hour(t) >= '08:00' && hour(t) < '22:00')).toBe(true);
-    // DST mismatch week: US regular session is 14:30–21:00 CET.
-    expect(us.every((t) => hour(t) >= '14:30' && hour(t) < '21:00')).toBe(true);
+    // DST mismatch week: US pre-market to after-hours is 04:00–20:00 New York = 09:00–01:00 CET.
+    expect(us.every((t) => hour(t) >= '09:00' || hour(t) < '01:00')).toBe(true);
     const closes = byVenue(ticks, 'XAMS').filter((t) => t.kind === 'close');
     expect(closes.map(hour)).toEqual(['07:00', '17:35']);
     expect(xams.length).toBeGreaterThan(5_000);

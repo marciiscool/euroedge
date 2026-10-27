@@ -1,0 +1,15 @@
+# Simulated world (DATA_TIER=sim, brief §4.2). Per-underlying parameters live in markets.yaml `sim` blocks.
+# Volatilities are annualised. Each stock's variance is split into market, sector and idiosyncratic parts.
+factors:
+  marketVol: 0.14
+  sectorVol: 0.10
+fx:
+  EURUSD: { start: 1.08, annualVol: 0.07 }
+  EURGBP: { start: 0.86, annualVol: 0.05 }
+  # Danish krone peg (ERM II): strong pull to the central rate, tiny volatility.
+  EURDKK: { start: 7.46038, annualVol: 0.003, meanReversionPerDay: 0.5 }
+# Seeded faults to exercise the circuit breakers (rates per instrument per trading day).
+faults:
+  badPrintsPerDay: 0.2
+  staleFeedsPerDay: 0.1
+  haltsPerDay: 0.02

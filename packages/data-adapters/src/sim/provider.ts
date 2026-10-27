@@ -1,10 +1,17 @@
-import { instrumentKey, type InstrumentRef, type MarketConfig, type Tick } from '@euroedge/shared';
+import {
+  instrumentKey,
+  type InstrumentRef,
+  type MarketConfig,
+  type SimConfig,
+  type Tick,
+} from '@euroedge/shared';
 import type { MarketDataProvider, ProviderHealth, Unsubscribe } from '../provider.ts';
 import { SimWorld } from './world.ts';
 
 export interface SimulatedProviderOptions {
   readonly seed: number;
   readonly markets: readonly MarketConfig[];
+  readonly config?: SimConfig;
   /** Wall clock (injected for tests). */
   readonly now?: () => number;
   readonly pollMs?: number;
@@ -24,7 +31,12 @@ export class SimulatedProvider implements MarketDataProvider {
     this.now = opts.now ?? Date.now;
     this.pollMs = opts.pollMs ?? 250;
     const start = Math.floor(this.now() / 1000) * 1000;
-    this.world = new SimWorld({ seed: opts.seed, startTs: start, markets: opts.markets });
+    this.world = new SimWorld({
+      seed: opts.seed,
+      startTs: start,
+      markets: opts.markets,
+      ...(opts.config === undefined ? {} : { config: opts.config }),
+    });
   }
 
   subscribe(instruments: readonly InstrumentRef[], onTick: (t: Tick) => void): Unsubscribe {

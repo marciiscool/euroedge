@@ -18,6 +18,15 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - Underlying helpers in `@euroedge/shared`: `allUnderlyings`, `basketConstituents`, `underlyingLines`.
 - An `OTCM` calendar for OTC ADRs (SIEGY, LVMUY).
 - The terminal switches between the five enabled markets (`?market=`).
+- Sim world v1 (M2-09…12):
+  - market and sector factors, and every basket constituent;
+  - EURUSD, EURGBP, and EURDKK pegged at 7.46038;
+  - DKK/GBX primary lines;
+  - local and ADR dividends on separate ex-dates;
+  - opening/closing auctions with a random end;
+  - US pre-market, after-hours and overnight quotes;
+  - seeded and scheduled faults (bad print, stale feed, halt);
+  - `config/sim.yaml`.
 - `markets.yaml` lists all ten markets (M2-17):
   - Five EUR stock perps are enabled.
   - NOVO and SHEL follow ADR-0017 but stay disabled until EUR conversion of the anchor lands in M3.
