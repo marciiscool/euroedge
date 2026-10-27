@@ -1,0 +1,48 @@
+# Risk parameters per window (brief §7.2, ADR-0016). Integers only (bps, ppm, leverage).
+# priceLimit (max fill deviation from the index) is NOT fvBand (model confidence).
+windows:
+  A:
+    {
+      stockMaxLeverage: 5,
+      basketMaxLeverage: 10,
+      priceLimitBps: 1000,
+      takerFeeBps: 5,
+      makerFeeBps: 1,
+      houseHalfSpreadBps: 5,
+      fundingCapPpmPerHour: 300,
+    }
+  B:
+    {
+      stockMaxLeverage: 4,
+      basketMaxLeverage: 10,
+      priceLimitBps: 500,
+      takerFeeBps: 8,
+      makerFeeBps: 2,
+      houseHalfSpreadBps: 10,
+      fundingCapPpmPerHour: 200,
+    }
+  C:
+    {
+      stockMaxLeverage: 3,
+      basketMaxLeverage: 8,
+      priceLimitBps: 400,
+      takerFeeBps: 12,
+      makerFeeBps: 3,
+      houseHalfSpreadBps: 20,
+      fundingCapPpmPerHour: 100,
+    }
+  # D: ±min(3 %, 1/maxLev); skew add-on on fees arrives in M4.
+  D:
+    {
+      stockMaxLeverage: 2,
+      basketMaxLeverage: 5,
+      priceLimitBps: 300,
+      takerFeeBps: 20,
+      makerFeeBps: 5,
+      houseHalfSpreadBps: 35,
+      fundingCapPpmPerHour: null,
+    }
+maintenanceMarginBps: { stock: 1000, basket: 500 }
+liquidationPenaltyBps: { stock: 100, basket: 50 }
+fundingInterestBpsPerYear: 500
+markStepCapBpsPerSecond: 50

@@ -1,0 +1,14 @@
+# Fair-value model parameters (brief §6.1). Seed defaults — replaced by backtest fits in M3-16
+# (walk-forward / out-of-sample only; never optimised on the full history).
+signalSigmaBp:
+  tradegate: { A: 8, B: 12, C: 25, D: 40 }
+  adr: { A: 15, B: 20, C: 35, D: 50 }
+  primary: { A: 5, B: 10, C: 20, D: 30 }
+stalenessBp2PerSecond: 0.5
+phi: 1.2
+sigmaFloorBp: { A: 5, B: 10, C: 20, D: 30 }
+widenBp2PerHour: { A: 25, B: 100, C: 400, D: 900 }
+tradegateMaxSpreadBp: 30
+maxSignalAgeSeconds: 60
+bandSigmas: 2.5
+confidenceBp: { high: 25, medium: 75 }

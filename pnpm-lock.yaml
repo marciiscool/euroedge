@@ -590,6 +590,9 @@ importers:
 
   packages/shared:
     dependencies:
+      '@euroedge/fixed':
+        specifier: workspace:*
+        version: link:../fixed
       yaml:
         specifier: 'catalog:'
         version: 2.9.1
