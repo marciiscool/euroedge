@@ -28,6 +28,9 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - seeded and scheduled faults (bad print, stale feed, halt);
   - `config/sim.yaml`.
 - Tick CSV format (`docs/data-format.md`), a committed two-week sample in `data/sample/`, and a `ReplayProvider` with a 1–1000× virtual clock (M2-13/14).
+- A key-gated `PythProvider` (M2-15). It refuses to start without `PYTH_API_KEY` and is tested against a recorded-shape fixture; the wire format is unverified until the key arrives.
+- Stub providers for Tradegate, Xetra delayed and Eurex, with licence/attribution metadata and the source list per tier (M2-16).
+- `FeedMonitor`: halt detection from feed silence and provider health (M2-08).
 - `markets.yaml` lists all ten markets (M2-17):
   - Five EUR stock perps are enabled.
   - NOVO and SHEL follow ADR-0017 but stay disabled until EUR conversion of the anchor lands in M3.
