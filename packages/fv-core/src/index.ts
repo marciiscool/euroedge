@@ -23,3 +23,5 @@ export {
 } from './model.ts';
 export { toEngineUpdate, type QuantizeOptions, type QuantizedUpdate } from './engine-update.ts';
 export { MarketFvPipeline, type PipelineOutput } from './pipeline.ts';
+export { BasketFvPipeline, type BasketSnapshot } from './basket.ts';
+export { EwmaCovariance } from './covariance.ts';

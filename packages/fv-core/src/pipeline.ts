@@ -33,7 +33,7 @@ export class MarketFvPipeline {
     this.tickSize = Number(market.tickSize);
     this.stepCap = stepCapBpsPerSecond;
     if (market.kind !== 'stock' || market.primarySymbol === undefined)
-      throw new Error(`${market.id}: basket FV arrives in M3`);
+      throw new Error(`${market.id}: baskets use BasketFvPipeline`);
     const ccy = market.primaryCcy;
     const conversionPair =
       ccy === 'GBX' || ccy === 'GBP' ? 'EURGBP' : ccy === 'DKK' ? 'EURDKK' : undefined;
@@ -71,6 +71,11 @@ export class MarketFvPipeline {
 
   instruments() {
     return this.model.instruments();
+  }
+
+  /** Warm-start groups: one group, primary first (fv-service fetches the anchor from it). */
+  warmGroups() {
+    return [this.model.instruments()];
   }
 
   onTick(t: Tick): void {

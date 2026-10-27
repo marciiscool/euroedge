@@ -63,6 +63,8 @@ export interface FvSnapshot {
   readonly basis: number;
   /** EURDKK beyond the peg alert threshold, or no EURDKK feed (peg fallback in use). */
   readonly fxAlert: boolean;
+  /** Baskets only: constituents dropped for missing data. */
+  readonly dropped?: readonly string[];
 }
 
 interface Obs {
