@@ -14,13 +14,14 @@
     "test": "turbo run test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint:root": "eslint *.js",
+    "lint:root": "eslint *.js *.ts scripts",
     "hooks:install": "lefthook install",
     "test:all": "vitest run",
     "typecheck:root": "tsc -p tsconfig.json",
     "infra:up": "docker compose up -d --wait",
     "infra:down": "docker compose down",
-    "db:migrate": "pnpm --filter @euroedge/db migrate"
+    "db:migrate": "pnpm --filter @euroedge/db migrate",
+    "check:guards": "node scripts/check-env-guards.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",
@@ -36,6 +37,7 @@
     "turbo": "2.11.10",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.0",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@euroedge/shared": "workspace:*"
   }
 }
