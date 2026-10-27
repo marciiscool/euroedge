@@ -1,7 +1,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { usdc } from '@euroedge/fixed';
-import { Ledger, SYSTEM, userAccount, type Posting } from './ledger.ts';
+import { Ledger, SYSTEM, userAccount } from './ledger.ts';
 
 const accounts = [
   SYSTEM.house,
@@ -15,7 +15,7 @@ const posting = fc.record({
   from: fc.constantFrom(...accounts),
   to: fc.constantFrom(...accounts),
   amount: fc.bigInt({ min: 1n, max: 10n ** 12n }).map(usdc),
-  reason: fc.constantFrom('deposit', 'fee', 'realized-pnl') as fc.Arbitrary<Posting['reason']>,
+  reason: fc.constantFrom('deposit', 'fee', 'realized-pnl'),
 });
 
 describe('Ledger', () => {
@@ -64,5 +64,22 @@ describe('Ledger', () => {
         expect(l.internalTotal()).toBe(l.netExternalInflow());
       }),
     );
+  });
+});
+
+describe('Ledger edge cases', () => {
+  it('reports zero for unknown accounts and an empty ledger', () => {
+    const l = new Ledger();
+    expect(l.balance('user:nobody')).toBe(0n);
+    expect(l.netExternalInflow()).toBe(0n);
+    expect(l.internalTotal()).toBe(0n);
+    expect(l.entries()).toEqual([]);
+  });
+
+  it('sorts snapshot entries regardless of posting order', () => {
+    const l = new Ledger();
+    l.post([{ from: userAccount('z'), to: userAccount('b'), amount: usdc(1n), reason: 'fee' }]);
+    l.post([{ from: userAccount('a'), to: userAccount('c'), amount: usdc(1n), reason: 'fee' }]);
+    expect(l.entries().map(([a]) => a)).toEqual(['user:a', 'user:b', 'user:c', 'user:z']);
   });
 });
