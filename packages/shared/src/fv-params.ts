@@ -12,7 +12,6 @@ export const fvParamsSchema = z.object({
   signalSigmaBp: z.object({
     tradegate: perWindow(nonNeg),
     adr: perWindow(nonNeg),
-    primary: perWindow(nonNeg),
   }),
   /** Staleness penalty λ: variance added per second of signal age, bp². */
   stalenessBp2PerSecond: nonNeg,
