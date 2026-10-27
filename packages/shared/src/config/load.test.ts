@@ -45,7 +45,7 @@ describe('loadMarkets validation', () => {
   });
 });
 
-describe('markets.yaml (all ten markets, brief §5)', () => {
+describe('markets.yaml (the ten brief markets plus six more stocks)', () => {
   it('loads, resolves basket constituents and exposes every underlying once', async () => {
     const markets = await loadMarkets();
     expect(markets.map((m) => m.id)).toEqual([
@@ -59,6 +59,12 @@ describe('markets.yaml (all ten markets, brief §5)', () => {
       'EUSEMI-PERP',
       'RHM-PERP',
       'MC-PERP',
+      'ALV-PERP',
+      'AIR-PERP',
+      'DTE-PERP',
+      'IFX-PERP',
+      'SU-PERP',
+      'OR-PERP',
     ]);
     const blue = markets.find((m) => m.id === 'EUBLUE20-PERP');
     if (blue === undefined) throw new Error('missing basket');
