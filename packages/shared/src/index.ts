@@ -4,3 +4,4 @@ export * from './market-data.ts';
 export * from './markets.ts';
 export * from './fv-params.ts';
 export * from './engine-api.ts';
+export * from './underlyings.ts';

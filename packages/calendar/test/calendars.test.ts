@@ -27,7 +27,7 @@ describe('curated calendars (ADR-0004)', () => {
 
   it('covers every venue', async () => {
     expect(calendarVenues().sort()).toEqual((await loadCalendarFiles()).map((c) => c.venue).sort());
-    expect(calendarVenues()).toHaveLength(12);
+    expect(calendarVenues()).toHaveLength(13);
   });
 
   it('CI fails 120 days before any calendar runs out of data', () => {

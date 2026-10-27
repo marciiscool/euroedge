@@ -59,7 +59,7 @@ export class SimWorld {
       if (sim === undefined) throw new Error(`${config.id} has no sim parameters`);
       return {
         config,
-        primary: { venue: config.primaryMic, symbol: config.tradegateSymbol ?? config.id },
+        primary: { venue: config.primaryMic, symbol: config.primarySymbol ?? config.id },
         tradegate:
           config.tradegateSymbol === undefined
             ? undefined

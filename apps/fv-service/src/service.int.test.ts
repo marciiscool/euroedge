@@ -51,7 +51,7 @@ describe.skipIf(dbUrl === undefined || vkUrl === undefined)('fv-service (integra
     const fv = await startFvService({
       databaseUrl: testDb,
       valkeyUrl: testVk,
-      markets: await loadMarkets(),
+      markets: (await loadMarkets()).filter((m) => m.enabled),
       params: await loadFvParams(),
       stepCapBpsPerSecond: 50,
       log: createLogger('fv-test', 'silent'),

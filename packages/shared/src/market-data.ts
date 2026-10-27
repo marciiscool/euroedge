@@ -24,6 +24,7 @@ export const venueSchema = z.enum([
   'TGAT',
   'XNYS',
   'XNAS',
+  'OTCM',
   'XEUR',
   'LSX',
   'USON',

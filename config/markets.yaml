@@ -1,12 +1,15 @@
 # Market definitions (brief §5). Contract: quanto perp, EUR-quoted, USDC-settled, 1 EUR-point = 1 USDC per contract.
 # 1 contract = 1 share (stocks) or 1 basket unit. Lots/ticks per ADR-0016; tickSize × lotSize × 1e6 must be an integer.
-# M1 lists ASML only; the other nine markets arrive in M2-17.
+# `sim` blocks drive the simulated world only (DATA_TIER=sim); prices there are synthetic.
+# ADR ratios are local shares per ADR. Unverified ratios get weight 0 (brief §5); founder to confirm (PLAN §8).
+# Tradegate symbols are the usual German exchange codes, not yet verified; live adapters map by ISIN.
 markets:
   - id: ASML-PERP
     displayName: ASML Holding
     underlyingIsin: NL0010273215
     kind: stock
     primaryMic: XAMS
+    primarySymbol: ASML
     quoteCcy: EUR
     primaryCcy: EUR
     tickSize: '0.01'
@@ -15,9 +18,512 @@ markets:
     adr: { venue: XNAS, symbol: ASML, ratio: '1', verified: true }
     tradegateSymbol: ASML
     sector: semiconductors
+    betaToBasket: '1.3'
     enabled: true
     sim:
       startPrice: '700'
       annualVol: '0.32'
+      beta: '1.2'
       jumpsPerYear: '6'
       jumpVol: '0.03'
+      dividends:
+        - { exDate: '2027-03-23', gross: '1.85', adrExDate: '2027-03-24' }
+
+  - id: SAP-PERP
+    displayName: SAP
+    underlyingIsin: DE0007164600
+    kind: stock
+    primaryMic: XETR
+    primarySymbol: SAP
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.01'
+    minNotional: '10'
+    adr: { venue: XNYS, symbol: SAP, ratio: '1', verified: true }
+    tradegateSymbol: SAP
+    sector: software
+    betaToBasket: '1.1'
+    enabled: true
+    sim:
+      startPrice: '230'
+      annualVol: '0.28'
+      beta: '1.1'
+      jumpsPerYear: '5'
+      jumpVol: '0.03'
+
+  - id: EUBLUE20-PERP
+    displayName: EE-Blue 20
+    kind: basket
+    primaryMic: XETR
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.001'
+    minNotional: '10'
+    sector: basket
+    enabled: false
+    launchNote: Basket FV arrives in M3; constituents and weights are a draft for founder sign-off.
+    basket:
+      status: draft
+      methodology: '20 largest eurozone stocks by free float on XETR/XAMS/XPAR, 10 % cap, quarterly rebalance'
+      startLevel: '1000'
+      capBps: 1000
+      rebalance: quarterly
+      constituents:
+        - { id: ASML, market: ASML-PERP, weightBps: 1000 }
+        - { id: SAP, market: SAP-PERP, weightBps: 1000 }
+        - { id: SIE, market: SIE-PERP, weightBps: 804 }
+        - { id: MC, market: MC-PERP, weightBps: 670 }
+        - { id: TTE, market: TTE-PERP, weightBps: 559 }
+        - id: ALV
+          name: Allianz
+          underlyingIsin: DE0008404005
+          primaryMic: XETR
+          primarySymbol: ALV
+          primaryCcy: EUR
+          tradegateSymbol: ALV
+          sector: financials
+          weightBps: 626
+          sim:
+            {
+              startPrice: '350',
+              annualVol: '0.20',
+              beta: '0.9',
+              jumpsPerYear: '3',
+              jumpVol: '0.02',
+            }
+        - id: SU
+          name: Schneider Electric
+          underlyingIsin: FR0000121972
+          primaryMic: XPAR
+          primarySymbol: SU
+          primaryCcy: EUR
+          tradegateSymbol: SND
+          sector: industrials
+          weightBps: 603
+          sim:
+            {
+              startPrice: '240',
+              annualVol: '0.26',
+              beta: '1.1',
+              jumpsPerYear: '3',
+              jumpVol: '0.02',
+            }
+        - id: SAF
+          name: Safran
+          underlyingIsin: FR0000073272
+          primaryMic: XPAR
+          primarySymbol: SAF
+          primaryCcy: EUR
+          tradegateSymbol: SEJ
+          sector: aerospace
+          weightBps: 559
+          sim:
+            {
+              startPrice: '280',
+              annualVol: '0.26',
+              beta: '1.0',
+              jumpsPerYear: '3',
+              jumpVol: '0.02',
+            }
+        - id: AIR
+          name: Airbus
+          underlyingIsin: NL0000235190
+          primaryMic: XPAR
+          primarySymbol: AIR
+          primaryCcy: EUR
+          tradegateSymbol: AIR
+          sector: aerospace
+          weightBps: 492
+          sim:
+            {
+              startPrice: '200',
+              annualVol: '0.27',
+              beta: '1.0',
+              jumpsPerYear: '3',
+              jumpVol: '0.02',
+            }
+        - id: SAN
+          name: Sanofi
+          underlyingIsin: FR0000120578
+          primaryMic: XPAR
+          primarySymbol: SAN
+          primaryCcy: EUR
+          tradegateSymbol: SNW
+          sector: pharma
+          weightBps: 492
+          sim:
+            { startPrice: '90', annualVol: '0.20', beta: '0.6', jumpsPerYear: '3', jumpVol: '0.03' }
+        - id: DTE
+          name: Deutsche Telekom
+          underlyingIsin: DE0005557508
+          primaryMic: XETR
+          primarySymbol: DTE
+          primaryCcy: EUR
+          tradegateSymbol: DTE
+          sector: telecom
+          weightBps: 469
+          sim:
+            { startPrice: '30', annualVol: '0.18', beta: '0.6', jumpsPerYear: '2', jumpVol: '0.02' }
+        - id: OR
+          name: L'Oréal
+          underlyingIsin: FR0000120321
+          primaryMic: XPAR
+          primarySymbol: OR
+          primaryCcy: EUR
+          tradegateSymbol: LOR
+          sector: consumer
+          weightBps: 380
+          sim:
+            {
+              startPrice: '380',
+              annualVol: '0.22',
+              beta: '0.8',
+              jumpsPerYear: '2',
+              jumpVol: '0.03',
+            }
+        - id: EL
+          name: EssilorLuxottica
+          underlyingIsin: FR0000121667
+          primaryMic: XPAR
+          primarySymbol: EL
+          primaryCcy: EUR
+          tradegateSymbol: ESL
+          sector: consumer
+          weightBps: 358
+          sim:
+            {
+              startPrice: '260',
+              annualVol: '0.20',
+              beta: '0.8',
+              jumpsPerYear: '2',
+              jumpVol: '0.02',
+            }
+        - id: MUV2
+          name: Munich Re
+          underlyingIsin: DE0008430026
+          primaryMic: XETR
+          primarySymbol: MUV2
+          primaryCcy: EUR
+          tradegateSymbol: MUV2
+          sector: financials
+          weightBps: 335
+          sim:
+            {
+              startPrice: '550',
+              annualVol: '0.20',
+              beta: '0.8',
+              jumpsPerYear: '2',
+              jumpVol: '0.02',
+            }
+        - id: BNP
+          name: BNP Paribas
+          underlyingIsin: FR0000131104
+          primaryMic: XPAR
+          primarySymbol: BNP
+          primaryCcy: EUR
+          tradegateSymbol: BNP
+          sector: financials
+          weightBps: 335
+          sim:
+            { startPrice: '70', annualVol: '0.28', beta: '1.2', jumpsPerYear: '3', jumpVol: '0.03' }
+        - id: RMS
+          name: Hermès
+          underlyingIsin: FR0000052292
+          primaryMic: XPAR
+          primarySymbol: RMS
+          primaryCcy: EUR
+          tradegateSymbol: RMS
+          sector: luxury
+          weightBps: 335
+          sim:
+            {
+              startPrice: '2200',
+              annualVol: '0.25',
+              beta: '0.9',
+              jumpsPerYear: '2',
+              jumpVol: '0.03',
+            }
+        - id: INGA
+          name: ING Groep
+          underlyingIsin: NL0011821202
+          primaryMic: XAMS
+          primarySymbol: INGA
+          primaryCcy: EUR
+          tradegateSymbol: INN1
+          sector: financials
+          weightBps: 291
+          sim:
+            { startPrice: '20', annualVol: '0.27', beta: '1.2', jumpsPerYear: '3', jumpVol: '0.03' }
+        - id: PRX
+          name: Prosus
+          underlyingIsin: NL0013654783
+          primaryMic: XAMS
+          primarySymbol: PRX
+          primaryCcy: EUR
+          tradegateSymbol: 1YD
+          sector: technology
+          weightBps: 268
+          sim:
+            { startPrice: '50', annualVol: '0.32', beta: '1.1', jumpsPerYear: '3', jumpVol: '0.03' }
+        - id: IFX
+          name: Infineon
+          underlyingIsin: DE0006231004
+          primaryMic: XETR
+          primarySymbol: IFX
+          primaryCcy: EUR
+          tradegateSymbol: IFX
+          sector: semiconductors
+          weightBps: 223
+          sim:
+            { startPrice: '35', annualVol: '0.38', beta: '1.3', jumpsPerYear: '4', jumpVol: '0.03' }
+        - id: ADYEN
+          name: Adyen
+          underlyingIsin: NL0012969182
+          primaryMic: XAMS
+          primarySymbol: ADYEN
+          primaryCcy: EUR
+          tradegateSymbol: 1N8
+          sector: technology
+          weightBps: 201
+          sim:
+            {
+              startPrice: '1500',
+              annualVol: '0.42',
+              beta: '1.3',
+              jumpsPerYear: '4',
+              jumpVol: '0.05',
+            }
+
+  - id: NOVO-PERP
+    displayName: Novo Nordisk B
+    underlyingIsin: DK0062498333
+    kind: stock
+    # Windows and the anchor follow XCSE; the Tradegate EUR line is the price source (ADR-0017).
+    primaryMic: XCSE
+    primarySymbol: NOVO B
+    quoteCcy: EUR
+    primaryCcy: DKK
+    priceSourceOverride: { venue: TGAT, ccy: EUR }
+    tickSize: '0.01'
+    lotSize: '0.01'
+    minNotional: '10'
+    adr: { venue: XNYS, symbol: NVO, ratio: '1', verified: true }
+    tradegateSymbol: NOVC
+    sector: pharma
+    betaToBasket: '0.7'
+    enabled: false
+    launchNote: Converting the DKK/GBX anchor to EUR arrives in M3 (ADR-0017).
+    sim:
+      startPrice: '45'
+      annualVol: '0.40'
+      beta: '0.6'
+      jumpsPerYear: '6'
+      jumpVol: '0.06'
+      dividends:
+        - { exDate: '2027-03-30', gross: '1.60' }
+
+  - id: SIE-PERP
+    displayName: Siemens
+    underlyingIsin: DE0007236101
+    kind: stock
+    primaryMic: XETR
+    primarySymbol: SIE
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.01'
+    minNotional: '10'
+    # OTC ADR, 2 ADRs = 1 share; low weight via fv.yaml (OTC signal sigma).
+    adr: { venue: OTCM, symbol: SIEGY, ratio: '0.5', verified: true }
+    tradegateSymbol: SIE
+    sector: industrials
+    betaToBasket: '1.0'
+    enabled: true
+    sim:
+      startPrice: '220'
+      annualVol: '0.25'
+      beta: '1.0'
+      jumpsPerYear: '3'
+      jumpVol: '0.03'
+
+  - id: SHEL-PERP
+    displayName: Shell
+    underlyingIsin: GB00BP6MXD84
+    kind: stock
+    # Windows and the anchor follow XLON (GBX/100 → EUR via EURGBP); Tradegate EUR line is the price source.
+    primaryMic: XLON
+    primarySymbol: SHEL
+    quoteCcy: EUR
+    primaryCcy: GBX
+    priceSourceOverride: { venue: TGAT, ccy: EUR }
+    alternativeEurLine: { venue: XAMS, symbol: SHELL, enabled: false }
+    tickSize: '0.01'
+    lotSize: '0.01'
+    minNotional: '10'
+    adr: { venue: XNYS, symbol: SHEL, ratio: '2', verified: true }
+    tradegateSymbol: R6C0
+    sector: energy
+    betaToBasket: '0.8'
+    enabled: false
+    launchNote: Converting the DKK/GBX anchor to EUR arrives in M3 (ADR-0017).
+    sim:
+      startPrice: '31'
+      annualVol: '0.24'
+      beta: '0.7'
+      jumpsPerYear: '3'
+      jumpVol: '0.03'
+      dividends:
+        - { exDate: '2026-11-12', gross: '0.32', adrExDate: '2026-11-12' }
+
+  - id: TTE-PERP
+    displayName: TotalEnergies
+    underlyingIsin: FR0000120271
+    kind: stock
+    primaryMic: XPAR
+    primarySymbol: TTE
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.01'
+    minNotional: '10'
+    adr: { venue: XNYS, symbol: TTE, ratio: '1', verified: false }
+    tradegateSymbol: TOTB
+    sector: energy
+    betaToBasket: '0.8'
+    enabled: true
+    sim:
+      startPrice: '55'
+      annualVol: '0.24'
+      beta: '0.7'
+      jumpsPerYear: '3'
+      jumpVol: '0.03'
+      dividends:
+        - { exDate: '2027-01-04', gross: '0.85', adrExDate: '2027-01-04' }
+        - { exDate: '2027-03-24', gross: '0.85', adrExDate: '2027-03-25' }
+
+  - id: EUSEMI-PERP
+    displayName: EE-Semis
+    kind: basket
+    primaryMic: XETR
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.001'
+    minNotional: '10'
+    sector: basket
+    enabled: false
+    launchNote: Basket FV arrives in M3; the 35 % cap is a proposal for founder sign-off.
+    basket:
+      status: draft
+      methodology: 'European semiconductor theme, free-float weighted, 35 % cap, quarterly rebalance'
+      startLevel: '1000'
+      capBps: 3500
+      rebalance: quarterly
+      constituents:
+        - { id: ASML, market: ASML-PERP, weightBps: 3500 }
+        - id: IFX
+          name: Infineon
+          underlyingIsin: DE0006231004
+          primaryMic: XETR
+          primarySymbol: IFX
+          primaryCcy: EUR
+          tradegateSymbol: IFX
+          sector: semiconductors
+          weightBps: 2981
+          sim:
+            { startPrice: '35', annualVol: '0.38', beta: '1.3', jumpsPerYear: '4', jumpVol: '0.03' }
+        - id: ASM
+          name: ASM International
+          underlyingIsin: NL0000334118
+          primaryMic: XAMS
+          primarySymbol: ASM
+          primaryCcy: EUR
+          tradegateSymbol: AXI
+          sector: semiconductors
+          weightBps: 1491
+          sim:
+            {
+              startPrice: '450',
+              annualVol: '0.40',
+              beta: '1.3',
+              jumpsPerYear: '4',
+              jumpVol: '0.04',
+            }
+        - id: STMPA
+          name: STMicroelectronics
+          underlyingIsin: NL0000226223
+          primaryMic: XPAR
+          primarySymbol: STMPA
+          primaryCcy: EUR
+          adr: { venue: XNYS, symbol: STM, ratio: '1', verified: false }
+          tradegateSymbol: SGM
+          sector: semiconductors
+          weightBps: 1312
+          sim:
+            { startPrice: '22', annualVol: '0.42', beta: '1.3', jumpsPerYear: '4', jumpVol: '0.04' }
+        - id: BESI
+          name: BE Semiconductor
+          underlyingIsin: NL0012866412
+          primaryMic: XAMS
+          primarySymbol: BESI
+          primaryCcy: EUR
+          tradegateSymbol: BSI
+          sector: semiconductors
+          weightBps: 716
+          sim:
+            {
+              startPrice: '120',
+              annualVol: '0.48',
+              beta: '1.4',
+              jumpsPerYear: '4',
+              jumpVol: '0.05',
+            }
+
+  - id: RHM-PERP
+    displayName: Rheinmetall
+    underlyingIsin: DE0007030033
+    kind: stock
+    primaryMic: XETR
+    primarySymbol: RHM
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.01'
+    minNotional: '10'
+    tradegateSymbol: RHM
+    sector: defence
+    betaToBasket: '0.9'
+    enabled: false
+    launchNote: No liquid ADR, so Windows C/D rely on widening only; late launch (brief §5).
+    sim:
+      startPrice: '1700'
+      annualVol: '0.45'
+      beta: '0.8'
+      jumpsPerYear: '6'
+      jumpVol: '0.05'
+
+  - id: MC-PERP
+    displayName: LVMH
+    underlyingIsin: FR0000121014
+    kind: stock
+    primaryMic: XPAR
+    primarySymbol: MC
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.01'
+    minNotional: '10'
+    # 5 ADRs = 1 share per founder note; unverified → weight 0 until confirmed.
+    adr: { venue: OTCM, symbol: LVMUY, ratio: '0.2', verified: false }
+    tradegateSymbol: MOH
+    sector: luxury
+    betaToBasket: '1.0'
+    enabled: true
+    sim:
+      startPrice: '550'
+      annualVol: '0.28'
+      beta: '1.0'
+      jumpsPerYear: '4'
+      jumpVol: '0.04'

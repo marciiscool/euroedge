@@ -72,7 +72,7 @@ describe('Sequencer', () => {
 
 describe('bootstrapInputs', () => {
   it('adds genesis once (sim) and lists markets only when config differs from the log', async () => {
-    const markets = await loadMarkets();
+    const markets = (await loadMarkets()).filter((m) => m.id === 'ASML-PERP');
     const windows = await loadWindows();
     const log = new MemoryLog();
     const state = createState();

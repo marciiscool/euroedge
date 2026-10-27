@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { loadFvParams, loadMarkets, loadWindows } from './load.ts';
+import { allUnderlyings, basketConstituents } from '../underlyings.ts';
 
 describe('repo config files', () => {
   it('markets.yaml is valid and lists ASML-PERP with integer tick value', async () => {
@@ -35,11 +36,75 @@ describe('loadMarkets validation', () => {
     await writeFile(
       join(dir, 'markets.yaml'),
       `markets:
-  - { id: X-PERP, displayName: X, underlyingIsin: NL0010273215, kind: stock, primaryMic: XAMS,
+  - { id: X-PERP, displayName: X, underlyingIsin: NL0010273215, kind: stock, primaryMic: XAMS, primarySymbol: X,
       quoteCcy: EUR, primaryCcy: EUR, tickSize: '0.0001', lotSize: '0.001', minNotional: '10',
       sector: x, enabled: true }
 `,
     );
     await expect(loadMarkets(dir)).rejects.toThrow(/X-PERP: .*whole number/);
+  });
+});
+
+describe('markets.yaml (all ten markets, brief §5)', () => {
+  it('loads, resolves basket constituents and exposes every underlying once', async () => {
+    const markets = await loadMarkets();
+    expect(markets.map((m) => m.id)).toEqual([
+      'ASML-PERP',
+      'SAP-PERP',
+      'EUBLUE20-PERP',
+      'NOVO-PERP',
+      'SIE-PERP',
+      'SHEL-PERP',
+      'TTE-PERP',
+      'EUSEMI-PERP',
+      'RHM-PERP',
+      'MC-PERP',
+    ]);
+    const blue = markets.find((m) => m.id === 'EUBLUE20-PERP');
+    if (blue === undefined) throw new Error('missing basket');
+    const cs = basketConstituents(blue, markets);
+    expect(cs).toHaveLength(20);
+    expect(cs.find((c) => c.id === 'ASML')?.underlying.primaryMic).toBe('XAMS');
+    const all = allUnderlyings(markets);
+    expect(new Set(all.map((u) => u.underlyingIsin)).size).toBe(all.length);
+    expect(all.every((u) => u.sim !== undefined)).toBe(true);
+    // Non-EUR primaries carry a EUR price source (ADR-0017).
+    for (const id of ['NOVO-PERP', 'SHEL-PERP'])
+      expect(markets.find((m) => m.id === id)?.priceSourceOverride).toEqual({
+        venue: 'TGAT',
+        ccy: 'EUR',
+      });
+  });
+
+  it('rejects basket weights that do not sum to 100 %', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'mk-'));
+    await writeFile(
+      join(dir, 'markets.yaml'),
+      `markets:
+  - { id: A-PERP, displayName: A, underlyingIsin: NL0010273215, kind: stock, primaryMic: XAMS, primarySymbol: A,
+      quoteCcy: EUR, primaryCcy: EUR, tickSize: '0.01', lotSize: '0.01', minNotional: '10', sector: x, enabled: true }
+  - id: B-PERP
+    displayName: B
+    kind: basket
+    primaryMic: XETR
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.001'
+    minNotional: '10'
+    sector: basket
+    enabled: false
+    basket:
+      status: draft
+      methodology: x
+      startLevel: '1000'
+      capBps: 6000
+      rebalance: quarterly
+      constituents:
+        - { id: A, market: A-PERP, weightBps: 5000 }
+        - { id: C, market: A-PERP, weightBps: 4000 }
+`,
+    );
+    await expect(loadMarkets(dir)).rejects.toThrow(/sum to 9000/);
   });
 });

@@ -11,6 +11,8 @@ const ASML: MarketConfig = {
   underlyingIsin: 'NL0010273215',
   kind: 'stock',
   primaryMic: 'XAMS',
+  primarySymbol: 'ASML',
+  extendedMic: 'TGAT',
   quoteCcy: 'EUR',
   primaryCcy: 'EUR',
   tickSize: '0.01',
@@ -20,7 +22,7 @@ const ASML: MarketConfig = {
   tradegateSymbol: 'ASML',
   sector: 'semiconductors',
   enabled: true,
-  sim: { startPrice: '700', annualVol: '0.32', jumpsPerYear: '6', jumpVol: '0.03' },
+  sim: { startPrice: '700', annualVol: '0.32', jumpsPerYear: '6', jumpVol: '0.03', dividends: [] },
 };
 const cet = (iso: string) => DateTime.fromISO(iso, { zone: 'Europe/Berlin' }).toMillis();
 const make = (seed = 42, start = cet('2026-10-27T07:00')) =>
