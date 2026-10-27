@@ -25,3 +25,12 @@ export { toEngineUpdate, type QuantizeOptions, type QuantizedUpdate } from './en
 export { MarketFvPipeline, type PipelineOutput } from './pipeline.ts';
 export { BasketFvPipeline, type BasketSnapshot } from './basket.ts';
 export { EwmaCovariance } from './covariance.ts';
+export {
+  BasketDrawdownBreaker,
+  MarketBreakers,
+  type BreakerChange,
+  type BreakerEffect,
+  type BreakerId,
+  type BreakerInput,
+  type BreakerOutput,
+} from './breakers.ts';

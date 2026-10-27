@@ -14,6 +14,16 @@ const params: FvParams = {
   confidenceBp: { high: 25, medium: 75 },
   basisHalfLifeDays: 1,
   dkkPeg: { central: 7.46038, alertBp: 50 },
+  breakers: {
+    divergenceSigmas: 3,
+    divergenceSeconds: 60,
+    indexStaleSeconds: { A: 15, B: 120, C: 120, D: 120 },
+    tradegateStaleEscalationSeconds: 300,
+    tradegateReleaseSeconds: 120,
+    basketDrawdownBp: 700,
+    basketCooldownSeconds: 900,
+    markPinnedSeconds: 60,
+  },
 };
 const T0 = 1_793_000_000_000;
 const H = 3_600_000;

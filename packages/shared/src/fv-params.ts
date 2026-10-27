@@ -30,6 +30,28 @@ export const fvParamsSchema = z.object({
   /** Half-life of the ADR basis EWMA b_A, in trading days (M3-03). */
   basisHalfLifeDays: z.number().positive().default(20),
   /** EURDKK peg (ERM II): fallback rate without a feed, and the deviation that raises an alert. */
+  /** Circuit breakers (brief §6.5, ADR-0008/0009). Seconds of event time. */
+  breakers: z
+    .object({
+      divergenceSigmas: z.number().positive(),
+      divergenceSeconds: nonNeg,
+      indexStaleSeconds: perWindow(nonNeg),
+      tradegateStaleEscalationSeconds: nonNeg,
+      tradegateReleaseSeconds: nonNeg,
+      basketDrawdownBp: nonNeg,
+      basketCooldownSeconds: nonNeg,
+      markPinnedSeconds: nonNeg,
+    })
+    .default({
+      divergenceSigmas: 3,
+      divergenceSeconds: 60,
+      indexStaleSeconds: { A: 15, B: 120, C: 120, D: 120 },
+      tradegateStaleEscalationSeconds: 300,
+      tradegateReleaseSeconds: 120,
+      basketDrawdownBp: 700,
+      basketCooldownSeconds: 900,
+      markPinnedSeconds: 60,
+    }),
   dkkPeg: z
     .object({ central: z.number().positive(), alertBp: nonNeg })
     .default({ central: 7.46038, alertBp: 50 }),
