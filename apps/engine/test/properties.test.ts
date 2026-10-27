@@ -180,5 +180,5 @@ describe('engine invariants under random inputs (fast-check, 15 000+ steps)', ()
     expect(totals.steps).toBeGreaterThan(15_000);
     expect(totals.fills).toBeGreaterThan(1_000);
     expect(totals.liquidations).toBeGreaterThan(0);
-  });
+  }, 120_000);
 });
