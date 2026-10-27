@@ -79,7 +79,10 @@ export default tseslint.config(
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
-      '@typescript-eslint/switch-exhaustiveness-check': 'error',
+      '@typescript-eslint/switch-exhaustiveness-check': [
+        'error',
+        { considerDefaultExhaustiveForUnions: true },
+      ],
       '@typescript-eslint/no-floating-promises': 'error',
       eqeqeq: ['error', 'always'],
       // False positive for branded bigints (bigint & { brand }), used for all money types.

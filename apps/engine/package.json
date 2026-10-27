@@ -11,12 +11,14 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@euroedge/fixed": "workspace:*",
     "@euroedge/service-kit": "workspace:*",
     "@euroedge/shared": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "fast-check": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
