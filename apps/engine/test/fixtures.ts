@@ -45,6 +45,7 @@ export function data(
     mark: ticks(mark),
     markClamped: false,
     sigmaPpm: 500n,
+    breaker: 'none',
   };
 }
 

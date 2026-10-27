@@ -32,5 +32,9 @@ export function displaySnapshot(
       implied: price(units, x.implied),
     })),
     nextWindowChange: next ?? null,
+    breakers: [],
+    breakerEffect: 'none',
+    dropped: [...(s.dropped ?? [])],
+    fxAlert: s.fxAlert,
   };
 }

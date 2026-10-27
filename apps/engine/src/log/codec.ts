@@ -8,7 +8,7 @@ export const EVENT_VERSIONS: Readonly<Record<EngineInput['type'], number>> = {
   ClockTick: 1,
   GenesisCapital: 1,
   MarketListed: 1,
-  MarketData: 1,
+  MarketData: 2,
   DevDeposit: 1,
   PlaceOrder: 1,
   ClosePosition: 1,
@@ -61,6 +61,7 @@ export const inputSchema = z.discriminatedUnion('type', [
     mark: pos,
     markClamped: z.boolean(),
     sigmaPpm: nonNeg,
+    breaker: z.enum(['none', 'no-opens', 'degraded', 'reduce-only']).default('none'),
   }),
   z.object({ type: z.literal('DevDeposit'), account: id, amount: pos }),
   z.object({

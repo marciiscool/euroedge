@@ -29,6 +29,9 @@ export interface BreakerInput {
   readonly sources: readonly SourceContribution[];
   /** Tradegate is scheduled open now (calendar). */
   readonly tradegateScheduled: boolean;
+  /** Some signal source is scheduled to be live (Tradegate or a verified ADR venue). CB3 only
+   *  applies then: off-hours without any live source, FV_last with widening is the design. */
+  readonly liveExpected: boolean;
   /** Primary halt / volatility interruption (feed monitor or venue flag). */
   readonly primaryHalted: boolean;
   /** Quantized mark and band (ticks). */
@@ -107,6 +110,7 @@ export class MarketBreakers {
     const freshest = i.sources.reduce((m, s) => Math.min(m, s.ageMs), Infinity);
     if (freshest !== Infinity) this.lastFresh = i.ts - freshest;
     if (
+      i.liveExpected &&
       this.lastFresh !== undefined &&
       i.ts - this.lastFresh > this.p.indexStaleSeconds[i.window] * 1000
     )

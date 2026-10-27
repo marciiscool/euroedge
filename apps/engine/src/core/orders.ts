@@ -71,8 +71,13 @@ function decide(state: EngineState, o: OrderRequest): OrderOutcome {
   const reduces = pos.lots !== 0n && pos.lots > 0n !== qty > 0n && abs(qty) <= abs(pos.lots);
   if ((o.reduceOnly || closing) && !reduces) return reject('reduce-only');
 
+  // Circuit breakers (brief §6.5): every non-none effect blocks new exposure.
+  if (!reduces && data.breaker !== 'none') return reject('circuit-breaker');
   const risk = m.windows[data.window];
-  const quote = houseQuote(data.fv, risk.houseHalfSpreadBps);
+  // Degraded markets quote twice the usual half-spread.
+  const halfSpread =
+    data.breaker === 'degraded' ? risk.houseHalfSpreadBps * 2n : risk.houseHalfSpreadBps;
+  const quote = houseQuote(data.fv, halfSpread);
   const side: Side = qty > 0n ? 'buy' : 'sell';
   const price = side === 'buy' ? quote.ask : quote.bid;
   if (!withinPriceLimit(price, data.index, risk.priceLimitBps)) return reject('price-limit');

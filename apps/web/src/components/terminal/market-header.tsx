@@ -53,6 +53,15 @@ export function MarketHeader({
             {t('modelPrice')} · {t(`confidence.${fv?.confidence ?? 'none'}`)}
           </span>
         )}
+        {fv !== undefined && fv.breakerEffect !== 'none' && (
+          <span
+            role="status"
+            className="rounded-sm border border-down/50 px-1.5 py-0.5 text-[11px] text-down"
+            title={fv.breakers.join(', ')}
+          >
+            {t('breaker')}: {t(`breakerEffect.${fv.breakerEffect}`)}
+          </span>
+        )}
       </div>
       <dl className="flex flex-wrap gap-x-5 gap-y-1 text-xs">
         <Stat label={t('fairValue')} value={fv === undefined ? '—' : formatNumber(fv.fv, locale)} />

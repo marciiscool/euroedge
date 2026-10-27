@@ -1,7 +1,15 @@
 import pg from 'pg';
 import { CalendarCache, nextWindowChange } from '@euroedge/calendar';
 import { resolveUnits } from '@euroedge/fixed';
-import { BasketFvPipeline, MarketFvPipeline } from '@euroedge/fv-core';
+import { FeedMonitor } from '@euroedge/data-adapters';
+import {
+  BasketDrawdownBreaker,
+  BasketFvPipeline,
+  MarketBreakers,
+  MarketFvPipeline,
+  type BreakerId,
+  type PipelineOutput,
+} from '@euroedge/fv-core';
 import { createValkey, type Logger } from '@euroedge/service-kit';
 import {
   CHANNELS,
@@ -42,6 +50,7 @@ interface MarketRuntime {
   readonly pipeline: MarketFvPipeline | BasketFvPipeline;
   readonly config: MarketConfig;
   readonly units: ReturnType<typeof resolveUnits>;
+  readonly breakers: MarketBreakers;
   next: { at: number; window: Window } | undefined;
 }
 
@@ -59,6 +68,7 @@ export async function startFvService(o: FvServiceOptions): Promise<RunningFvServ
         : new MarketFvPipeline(m, o.params, o.stepCapBpsPerSecond, calendar),
     config: m,
     units: resolveUnits(m),
+    breakers: new MarketBreakers(o.params),
     next: undefined,
   }));
 
@@ -66,7 +76,10 @@ export async function startFvService(o: FvServiceOptions): Promise<RunningFvServ
   let warming = true;
   const buffered: Tick[] = [];
   let lastWarmTs = 0;
+  const monitor = new FeedMonitor({ calendar });
+  const cb4 = new BasketDrawdownBreaker(o.params);
   const feed = (t: Tick) => {
+    monitor.onTick(t);
     for (const r of runtimes) r.pipeline.onTick(t);
   };
   sub.on('message', (_ch: string, msg: string) => {
@@ -81,7 +94,10 @@ export async function startFvService(o: FvServiceOptions): Promise<RunningFvServ
     for (const [primary, ...others] of r.pipeline.warmGroups()) {
       if (primary === undefined) continue;
       const warm = await warmStartTicks(db, primary, others);
-      for (const t of warm) r.pipeline.onTick(t);
+      for (const t of warm) {
+        monitor.onTick(t);
+        r.pipeline.onTick(t);
+      }
       lastWarmTs = Math.max(lastWarmTs, ...warm.map((t) => t.ts));
       n += warm.length;
     }
@@ -96,10 +112,39 @@ export async function startFvService(o: FvServiceOptions): Promise<RunningFvServ
   const evaluateAt = async (ts: number): Promise<number> => {
     const pipe = valkey.pipeline();
     let published = 0;
-    for (const r of runtimes) {
-      const out = r.pipeline.evaluate(ts);
+    const outs = runtimes.map((r) => r.pipeline.evaluate(ts));
+    // CB4 (global): EE-Blue FV −7 % vs its anchor puts every market reduce-only for 15 min.
+    const blue = outs[runtimes.findIndex((r) => r.config.id === 'EUBLUE20-PERP')];
+    const global: readonly BreakerId[] =
+      blue === undefined ? [] : cb4.evaluate(ts, blue.snapshot.fv, blue.snapshot.anchor);
+    for (const [k, r] of runtimes.entries()) {
+      const out: PipelineOutput | undefined = outs[k];
       if (out === undefined) continue;
       const u = out.update;
+      const s = out.snapshot;
+      const stock = r.config.kind === 'stock';
+      const tgOpen =
+        stock && r.config.tradegateSymbol !== undefined && calendar.isVenueOpen('TGAT', ts);
+      const adrOpen =
+        stock && r.config.adr?.verified === true && calendar.isVenueOpen(r.config.adr.venue, ts);
+      const primary = r.pipeline.instruments()[0];
+      const br = r.breakers.evaluate(
+        {
+          ts,
+          window: u.window,
+          sigma: s.sigma,
+          sources: s.sources,
+          tradegateScheduled: tgOpen,
+          liveExpected: tgOpen || adrOpen,
+          primaryHalted: stock && primary !== undefined && monitor.status(primary, ts) === 'halted',
+          mark: u.mark,
+          bandLo: u.bandLo,
+          bandHi: u.bandHi,
+        },
+        global,
+      );
+      for (const c of br.changes)
+        o.log.info({ market: r.config.id, breaker: c.id, active: c.active }, 'circuit breaker');
       pipe.xadd(
         STREAMS.engineInput,
         'MAXLEN',
@@ -118,6 +163,7 @@ export async function startFvService(o: FvServiceOptions): Promise<RunningFvServ
           mark: u.mark,
           markClamped: u.markClamped,
           sigmaPpm: u.sigmaPpm,
+          breaker: br.effect,
         }),
       );
       if (r.next === undefined || ts >= r.next.at) {
@@ -126,7 +172,11 @@ export async function startFvService(o: FvServiceOptions): Promise<RunningFvServ
           ts,
         );
       }
-      const view: FvDisplaySnapshot = displaySnapshot(r.config.id, r.units, out, r.next);
+      const view: FvDisplaySnapshot = {
+        ...displaySnapshot(r.config.id, r.units, out, r.next),
+        breakers: [...br.active],
+        breakerEffect: br.effect,
+      };
       const json = JSON.stringify(view);
       pipe.set(KEYS.fv(r.config.id), json).publish(CHANNELS.fv(r.config.id), json);
       pendingRows.push([

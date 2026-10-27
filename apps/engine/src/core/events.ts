@@ -10,6 +10,7 @@ export type AccountId = string;
 export type MarketId = string;
 export type WindowId = 'A' | 'B' | 'C' | 'D';
 export type Side = 'buy' | 'sell';
+export type BreakerEffect = 'none' | 'no-opens' | 'degraded' | 'reduce-only';
 
 export interface WindowRisk {
   /** Max leverage on new exposure; 0 = reduce-only. */
@@ -53,6 +54,8 @@ export type EngineInput =
       /** ADR-0009: the band, not the step cap, decided the mark (the MarkClamped record). */
       readonly markClamped: boolean;
       readonly sigmaPpm: bigint;
+      /** Combined circuit-breaker effect from fv-service (brief §6.5). v1 logs decode as 'none'. */
+      readonly breaker: BreakerEffect;
     }
   | {
       /** Play-money credit without a chain (sim tier, dev login only). */

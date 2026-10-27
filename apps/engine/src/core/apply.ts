@@ -88,6 +88,7 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
         index: input.index,
         mark: input.mark,
         sigmaPpm: input.sigmaPpm,
+        breaker: input.breaker,
         ts,
       };
       const out: EngineOutput[] = [{ type: 'MarketChanged', market: m.id }];

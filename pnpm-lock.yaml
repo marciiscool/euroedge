@@ -484,6 +484,9 @@ importers:
       '@euroedge/calendar':
         specifier: workspace:*
         version: link:../../packages/calendar
+      '@euroedge/data-adapters':
+        specifier: workspace:*
+        version: link:../../packages/data-adapters
       '@euroedge/fixed':
         specifier: workspace:*
         version: link:../../packages/fixed

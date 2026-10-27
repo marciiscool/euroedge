@@ -90,6 +90,7 @@ function toInputs(steps: Step[]): EngineInput[] {
       mark: ticks(px),
       markClamped: false,
       sigmaPpm: sigmaBp * 100n,
+      breaker: 'none',
     };
   };
   inputs.push(md('A', 10n));
