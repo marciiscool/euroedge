@@ -4,15 +4,19 @@
 - **Review gate:** math
 
 ## Context
+
 Brief §7.1 rules: no floats in the engine; USDC in 1e6 units; integer price ticks; lots; fees round up; PnL rounds toward zero with the residue going to fees.
 
 ## Options
+
 1. **Own thin wrapper over native `bigint`** (`packages/fixed`) — zero dependencies, explicit rounding, ~300 LOC we control.
 2. **decimal.js / big.js** — decimal floating semantics; precision is implicit global state; slower.
 3. **dnum** — reasonable, but adds little over option 1.
 
 ## Decision
+
 Option 1.
+
 - **Branded types:**
   - `Usdc` (µUSDC, 1e-6)
   - `Ticks` (per-market integer price)
@@ -28,5 +32,6 @@ Option 1.
 - **Serialisation:** decimal strings only, never JSON numbers.
 
 ## Consequences
+
 - Configs must choose compatible tick and lot sizes. Validation enforces this at load time.
 - The UI converts to display numbers only at the edge, with `formatDecimal`.

@@ -1,0 +1,11 @@
+# Install with `pnpm hooks:install` (lefthook's postinstall is disabled).
+pre-commit:
+  parallel: true
+  commands:
+    prettier:
+      glob: '*.{ts,tsx,js,mjs,json,md,yml,yaml,css}'
+      run: pnpm exec prettier --check {staged_files}
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm exec commitlint --edit {1}

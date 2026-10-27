@@ -4,9 +4,11 @@
 - **Review gate:** math
 
 ## Context
+
 The brief caps mark moves at 50 bp/s (except during SNAP), and Invariant 5 says the mark always lies within `fvBand` (except during SNAP). When FV moves legitimately faster than 50 bp/s, the two rules conflict.
 
 ## Decision
+
 - `stepped = mark_{t−1} + clamp(target_t − mark_{t−1}, ±50 bp · Δt_s)`
 - `mark_t = clamp(stepped, bandLo_t, bandHi_t)`. **The band dominates.** The step cap is suspended during SNAP.
 - **Every clamp** — any step where `mark_t ≠ stepped` because of the band — emits an engine event: `MarkClamped { market, target, stepped, mark, bandLo, bandHi }`.
@@ -17,5 +19,6 @@ The brief caps mark moves at 50 bp/s (except during SNAP), and Invariant 5 says 
 - Invariant 5 then holds by construction. A property test asserts it.
 
 ## Consequences
+
 - A visible audit trail of every forced mark move.
 - Prolonged pinning signals a model or feed problem and stops new risk.

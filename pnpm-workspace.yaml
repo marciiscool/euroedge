@@ -2,5 +2,7 @@ packages:
   - apps/*
   - packages/*
 
-# Only these dependencies may run install scripts.
-onlyBuiltDependencies: []
+# Install scripts are denied by default. lefthook's postinstall would
+# auto-install git hooks; we run `lefthook install` explicitly instead.
+allowBuilds:
+  lefthook: false
