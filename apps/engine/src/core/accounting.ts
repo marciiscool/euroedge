@@ -10,9 +10,13 @@ import {
 import type { AccountId, MarketId } from './events.ts';
 import type { EngineState, MarketState } from './state.ts';
 
-/** Unrealized PnL of a position at the market's mark, µUSDC (0 without data). */
+/**
+ * Unrealized PnL of a position at the market's mark, µUSDC (0 without data).
+ * Not short-circuited on zero lots: the house mirror can be flat in lots yet carry a cost
+ * basis (users long and short at different prices) — that value is real house equity.
+ */
 export function positionUpnl(m: MarketState, pos: Position): bigint {
-  if (m.data === undefined || pos.lots === 0n) return 0n;
+  if (m.data === undefined) return 0n;
   return unrealized(pos, m.data.mark) * m.units.tickValue;
 }
 

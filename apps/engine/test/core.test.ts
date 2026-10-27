@@ -120,6 +120,20 @@ describe('engine core — liquidation and protection', () => {
     expect(liq?.type === 'Liquidated' && liq.insuranceCover).toBe(0n);
   });
 
+  it('counts the house cost basis when the house is flat in lots (regression)', () => {
+    // Found by the property harness: one user long, another short at a different price →
+    // house lots 0, cost ≠ 0. That embedded value must be part of house equity (Invariant 7).
+    const h = Harness.booted();
+    h.run({ type: 'DevDeposit', account: 'bob', amount: usdc(10_000n * USDC) });
+    h.run(order('alice', 'buy', 100n), data(72_000n), order('bob', 'sell', 100n));
+    const m = h.state.markets.get('ASML-PERP');
+    expect(m?.house.lots).toBe(0n);
+    expect(m?.house.cost).not.toBe(0n);
+    const cash = h.state.ledger.balance(SYSTEM.house);
+    expect(houseEquity(h.state)).toBe(cash - (m?.house.cost ?? 0n) * 100n);
+    expect(() => assertInvariants(h.state)).not.toThrow();
+  });
+
   it('keeps the house solvent and the mirror exact', () => {
     const h = Harness.booted();
     h.run(order('alice', 'buy', 2_000n), data(70_500n), order('alice', 'sell', 500n));
