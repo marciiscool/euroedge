@@ -1,5 +1,5 @@
 import { SimWorld } from '@euroedge/data-adapters';
-import { instrumentKey, type MarketConfig, type Tick } from '@euroedge/shared';
+import { instrumentKey, type MarketConfig, type SimConfig, type Tick } from '@euroedge/shared';
 
 /**
  * Fast-forwards a seeded world from its epoch to `now` without keeping history, and returns
@@ -11,8 +11,14 @@ export function fastForward(
   epoch: number,
   now: number,
   markets: readonly MarketConfig[],
+  config?: SimConfig,
 ) {
-  const world = new SimWorld({ seed, startTs: epoch, markets });
+  const world = new SimWorld({
+    seed,
+    startTs: epoch,
+    markets,
+    ...(config === undefined ? {} : { config }),
+  });
   const latest = new Map<string, Tick>();
   const step = 3_600_000;
   const target = Math.floor(now / 1000) * 1000;

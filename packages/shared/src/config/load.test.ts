@@ -2,7 +2,7 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { loadFvParams, loadMarkets, loadWindows } from './load.ts';
+import { loadFvParams, loadMarkets, loadSimConfig, loadWindows } from './load.ts';
 import { allUnderlyings, basketConstituents } from '../underlyings.ts';
 
 describe('repo config files', () => {
@@ -106,5 +106,13 @@ describe('markets.yaml (all ten markets, brief §5)', () => {
 `,
     );
     await expect(loadMarkets(dir)).rejects.toThrow(/sum to 9000/);
+  });
+});
+
+describe('sim.yaml', () => {
+  it('is valid and keeps EURDKK pegged near the ERM II central rate', async () => {
+    const sim = await loadSimConfig();
+    expect(sim.fx.EURDKK.start).toBeCloseTo(7.46038, 5);
+    expect(sim.fx.EURDKK.meanReversionPerDay).toBeGreaterThan(0.1);
   });
 });

@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { resolveUnits } from '@euroedge/fixed';
 import { fvParamsSchema, type FvParams } from '../fv-params.ts';
+import { simConfigSchema, type SimConfig } from '../sim-config.ts';
 import {
   marketsFileSchema,
   windowsFileSchema,
@@ -36,3 +37,6 @@ export const loadWindows = (dir = configDir()): Promise<WindowsFile> =>
 
 export const loadFvParams = (dir = configDir()): Promise<FvParams> =>
   loadYamlConfig(join(dir, 'fv.yaml'), fvParamsSchema);
+
+export const loadSimConfig = (dir = configDir()): Promise<SimConfig> =>
+  loadYamlConfig(join(dir, 'sim.yaml'), simConfigSchema);

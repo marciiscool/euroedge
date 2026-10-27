@@ -2,7 +2,7 @@
 import { migrate } from '@euroedge/db';
 import { createValkey, runService } from '@euroedge/service-kit';
 import { CHANNELS, type Tick } from '@euroedge/shared';
-import { loadMarkets } from '@euroedge/shared/config';
+import { loadMarkets, loadSimConfig } from '@euroedge/shared/config';
 import { defaultSimEpoch, loadConfig } from './config.ts';
 import { fastForward } from './sim-start.ts';
 import { TickWriter } from './writer.ts';
@@ -33,7 +33,8 @@ await runService(
     const valkey = createValkey(config.VALKEY_URL, 'ingest');
     const writer = new TickWriter(config.DATABASE_URL);
     const epoch = config.SIM_EPOCH ?? defaultSimEpoch(Date.now());
-    const { world, snapshot } = fastForward(config.SIM_SEED, epoch, Date.now(), markets);
+    const simConfig = await loadSimConfig();
+    const { world, snapshot } = fastForward(config.SIM_SEED, epoch, Date.now(), markets, simConfig);
     service.log.info(
       { epoch: new Date(epoch).toISOString(), seed: config.SIM_SEED, snapshot: snapshot.length },
       'sim world fast-forwarded',
