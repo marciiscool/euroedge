@@ -66,8 +66,12 @@ describe('SimWorld', () => {
     const xams = byVenue(ticks, 'XAMS').filter((t) => t.kind === 'trade');
     const tg = byVenue(ticks, 'TGAT');
     const us = byVenue(ticks, 'XNAS').filter((t) => t.kind === 'quote');
-    const hour = (t: Tick) =>
-      DateTime.fromMillis(t.ts, { zone: 'Europe/Berlin' }).toFormat('HH:mm');
+    // 27–28 Oct 2026 are entirely CET (UTC+1): a fixed offset is exact here and avoids
+    // building a Luxon DateTime for each of ~100k ticks.
+    const hour = (t: Tick) => {
+      const m = (Math.floor(t.ts / 60_000) + 60) % 1440;
+      return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+    };
     expect(xams.every((t) => hour(t) >= '09:00' && hour(t) < '17:30')).toBe(true);
     expect(tg.every((t) => hour(t) >= '08:00' && hour(t) < '22:00')).toBe(true);
     // DST mismatch week: US regular session is 14:30–21:00 CET.
