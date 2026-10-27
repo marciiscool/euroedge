@@ -12,12 +12,16 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
+    "@euroedge/calendar": "workspace:*",
     "@euroedge/shared": "workspace:*"
   },
   "devDependencies": {
+    "@euroedge/data-adapters": "workspace:*",
+    "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "fast-check": "catalog:",
+    "luxon": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

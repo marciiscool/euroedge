@@ -17,3 +17,4 @@ export {
   type WindowSegment,
   type WindowVenues,
 } from './resolver.ts';
+export { CalendarCache } from './cache.ts';

@@ -19,8 +19,12 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@euroedge/data-adapters": "workspace:*",
+    "@euroedge/fv-core": "workspace:*",
+    "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "fast-check": "catalog:",
+    "luxon": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

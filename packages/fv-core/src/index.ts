@@ -22,3 +22,4 @@ export {
   type SourceContribution,
 } from './model.ts';
 export { toEngineUpdate, type QuantizeOptions, type QuantizedUpdate } from './engine-update.ts';
+export { MarketFvPipeline, type PipelineOutput } from './pipeline.ts';
