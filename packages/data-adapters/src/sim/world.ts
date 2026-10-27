@@ -1,10 +1,5 @@
-import {
-  isInClosingAuction,
-  sessionIntervals,
-  scheduleFor,
-  type Interval,
-} from '@euroedge/calendar';
-import type { Currency, InstrumentRef, MarketConfig, Tick, Venue } from '@euroedge/shared';
+import { CalendarCache } from '@euroedge/calendar';
+import type { Currency, InstrumentRef, MarketConfig, Tick } from '@euroedge/shared';
 import { Rng } from './rng.ts';
 
 const SECOND = 1000;
@@ -34,23 +29,6 @@ interface SimMarket {
   basis: number;
 }
 
-/** Cached session intervals per venue, refreshed as time advances (Luxon is too slow per second). */
-class SessionCache {
-  private readonly cache = new Map<Venue, { from: number; to: number; ivs: Interval[] }>();
-
-  isOpen(venue: Venue, ts: number): boolean {
-    let c = this.cache.get(venue);
-    if (c === undefined || ts < c.from || ts >= c.to) {
-      const from = ts - 86_400_000;
-      const to = ts + 8 * 86_400_000;
-      const s = scheduleFor(venue);
-      c = { from, to, ivs: sessionIntervals(s.continuous, s.tz, from, to) };
-      this.cache.set(venue, c);
-    }
-    return c.ivs.some((i) => ts >= i.from && ts < i.to);
-  }
-}
-
 const round = (v: number, step: number) => Math.round(v / step) * step;
 const r2 = (v: number) => Number(round(v, 0.01).toFixed(2));
 const r5 = (v: number) => Number(round(v, 0.00001).toFixed(5));
@@ -64,7 +42,7 @@ const r5 = (v: number) => Number(round(v, 0.00001).toFixed(5));
 export class SimWorld {
   private readonly rng: Rng;
   private readonly markets: SimMarket[];
-  private readonly sessions = new SessionCache();
+  private readonly sessions = new CalendarCache();
   private ts: number;
   private logFx: number;
   private readonly logFxMean: number;
@@ -143,7 +121,7 @@ export class SimWorld {
   private step(out: Tick[]): void {
     const ts = this.ts;
     const rng = this.rng;
-    const fxOpen = this.sessions.isOpen('FX', ts);
+    const fxOpen = this.sessions.isVenueOpen('FX', ts);
     if (fxOpen) {
       // Mean-reverting EUR/USD, ~7 % annual vol.
       this.logFx +=
@@ -153,7 +131,7 @@ export class SimWorld {
     const fx = Math.exp(this.logFx);
 
     for (const m of this.markets) {
-      const primaryOpen = this.sessions.isOpen(m.primary.venue, ts);
+      const primaryOpen = this.sessions.isVenueOpen(m.primary.venue, ts);
       // News arrives around the clock; off-hours variance is lower than in the session.
       const volScale = primaryOpen ? 1.3 : 0.6;
       m.logS += m.sigmaPerSqrtSecond * volScale * rng.normal();
@@ -170,17 +148,24 @@ export class SimWorld {
         );
       }
       // Official closing-auction print at the end of the closing auction (anchor C).
-      if (isClosingAuctionEnd(m.primary.venue, ts)) {
+      if (
+        this.sessions.isInClosingAuction(m.primary.venue, ts - SECOND) &&
+        !this.sessions.isInClosingAuction(m.primary.venue, ts)
+      ) {
         out.push(this.tick(m.primary, m.config.primaryCcy, 'close', { last: r2(s), size: 50_000 }));
       }
-      if (m.tradegate !== undefined && this.sessions.isOpen('TGAT', ts) && rng.chance(0.5)) {
+      if (m.tradegate !== undefined && this.sessions.isVenueOpen('TGAT', ts) && rng.chance(0.5)) {
         const mid = s * Math.exp(3 * BP * rng.normal());
         const half = mid * (3 + Math.abs(rng.normal()) * 2) * BP;
         out.push(
           this.tick(m.tradegate, 'EUR', 'quote', { bid: r2(mid - half), ask: r2(mid + half) }),
         );
       }
-      if (m.adr !== undefined && this.sessions.isOpen(m.adr.ref.venue, ts) && rng.chance(0.5)) {
+      if (
+        m.adr !== undefined &&
+        this.sessions.isVenueOpen(m.adr.ref.venue, ts) &&
+        rng.chance(0.5)
+      ) {
         const mid = s * m.adr.ratio * fx * Math.exp(m.basis + 4 * BP * rng.normal());
         const half = mid * 2 * BP;
         out.push(
@@ -206,13 +191,4 @@ export class SimWorld {
   ): Tick {
     return { source: 'sim', instrument, ts: this.ts, currency, kind, ...px };
   }
-}
-
-/** True on the first second after a closing auction ends. */
-function isClosingAuctionEnd(venue: Venue, ts: number): boolean {
-  const s = scheduleFor(venue);
-  if (s.closingAuction === undefined) return false;
-  // Only evaluate on whole minutes: auctions end on minute boundaries.
-  if (ts % 60_000 !== 0) return false;
-  return isInClosingAuction(venue, ts - SECOND) && !isInClosingAuction(venue, ts);
 }

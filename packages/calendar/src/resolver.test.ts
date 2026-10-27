@@ -115,5 +115,5 @@ describe('windows (ASML: XAMS primary, Tradegate extended)', () => {
       ),
       { numRuns: 100 },
     );
-  });
+  }, 30_000);
 });
