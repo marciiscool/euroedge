@@ -15,6 +15,7 @@
     "@euroedge/shared": "workspace:*",
     "@euroedge/ui": "workspace:*",
     "geist": "catalog:",
+    "lightweight-charts": "catalog:",
     "lucide-react": "catalog:",
     "next": "catalog:",
     "next-intl": "catalog:",

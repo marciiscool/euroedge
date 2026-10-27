@@ -9,7 +9,8 @@
   },
   "Home": {
     "headline": "Europäische Aktien. Perpetual. Rund um die Uhr fair bewertet.",
-    "status": "Das Testnet befindet sich im Aufbau."
+    "status": "Das Testnet befindet sich im Aufbau.",
+    "openTerminal": "Testnet-Terminal öffnen"
   },
   "Theme": {
     "toggle": "Zum {theme} Design wechseln",
@@ -23,5 +24,93 @@
   "Footer": {
     "riskWarning": "Perpetual Futures sind komplexe gehebelte Produkte. In diesem Testnet ist alles Guthaben Spielgeld und hat keinen Wert.",
     "chartsNotice": "Charts von TradingView Lightweight Charts™ (Apache-2.0)."
+  },
+  "Layout": {
+    "skipToContent": "Zum Hauptinhalt springen"
+  },
+  "Terminal": {
+    "assetName": "ASML Holding",
+    "mark": "Mark-Preis",
+    "modelPrice": "Modellpreis",
+    "fairValue": "Fairer Wert",
+    "band": "Band",
+    "confidence": {
+      "high": "hohe Konfidenz",
+      "medium": "mittlere Konfidenz",
+      "low": "niedrige Konfidenz",
+      "none": "keine Live-Quelle"
+    },
+    "window": {
+      "A": "Heimatbörse offen",
+      "B": "Erweitert – Tradegate",
+      "C": "Nacht – Modellpreis",
+      "D": "Wochenende – Modellpreis"
+    },
+    "windowHint": {
+      "A": "Fortlaufender Handel an Euronext Amsterdam",
+      "B": "Tradegate-Handel außerhalb der Amsterdamer Handelszeit",
+      "C": "Alle Handelsplätze geschlossen; Preis aus dem Modell",
+      "D": "Wochenende oder Feiertag; Modellpreis mit sich weitendem Band"
+    },
+    "maxLeverage": "max. {lev}x",
+    "nextWindow": "{window} um {time} (in {in})",
+    "simulated": "SIMULIERTE PREISE",
+    "live": {
+      "open": "Live",
+      "connecting": "Verbinde…",
+      "closed": "Verbinde erneut…"
+    },
+    "provenance": "Preisherkunft",
+    "sources": "Quellen",
+    "noLiveSource": "Keine Live-Quelle – fairer Wert gehalten, Band weitet sich",
+    "source": {
+      "tradegate": "Tradegate",
+      "adr": "Nasdaq-ADR"
+    },
+    "anchor": "Anker {price} ({time})",
+    "chartLabel": "Mark-Preis, fairer Wert und Band",
+    "chartDescription": "Liniendiagramm des Mark-Preises mit fairem Wert und Konfidenzband der letzten zwei Stunden.",
+    "orderTicket": "Order",
+    "side": "Richtung",
+    "buy": "Kaufen",
+    "sell": "Verkaufen",
+    "size": "Größe (Kontrakte)",
+    "estPrice": "Erwarteter Preis",
+    "notional": "Nominalwert",
+    "fee": "Gebühr ({bps} bp)",
+    "margin": "Margin bei {lev}x",
+    "submit": "{size} Kontrakte {side}",
+    "submitting": "Wird gesendet…",
+    "loginToTrade": "Melden Sie sich an, um mit Spielgeld zu handeln.",
+    "filled": "{side} {size} ausgeführt zu {price} (Gebühr {fee} USDC)",
+    "networkError": "Die Order konnte nicht gesendet werden. Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+    "reject": {
+      "not-genesis": "Das Testnet startet gerade. Bitte versuchen Sie es gleich noch einmal.",
+      "unknown-market": "Diesen Markt gibt es nicht.",
+      "no-market-data": "Noch kein Preis. Bitte versuchen Sie es gleich noch einmal.",
+      "unknown-account": "Ihr Konto hat noch kein Guthaben.",
+      "reduce-only": "Für diese Position sind nur reduzierende Orders erlaubt.",
+      "reduce-only-window": "In diesem Zeitfenster sind nur reduzierende Orders erlaubt.",
+      "price-limit": "Der Preis weicht derzeit zu stark vom Index ab.",
+      "min-notional": "Unter dem Mindestorderwert von 10 USDC.",
+      "insufficient-margin": "Nicht genug Margin für diese Größe beim aktuellen Hebel-Limit.",
+      "no-position": "Es gibt keine Position zum Schließen."
+    },
+    "account": "Konto",
+    "equity": "Eigenkapital",
+    "cash": "Guthaben",
+    "maintenance": "Erhaltungsmargin",
+    "positions": "Positionen",
+    "noPositions": "Keine offenen Positionen.",
+    "market": "Markt",
+    "markCol": "Mark",
+    "entry": "Einstieg",
+    "upnl": "Unrealisierter G/V",
+    "liqPrice": "Liq.-Preis",
+    "actions": "Aktionen",
+    "close": "Schließen",
+    "closed": "Position geschlossen, realisiert {pnl} USDC",
+    "devLogin": "Mit Spielgeld starten",
+    "devLoginHint": "Entwickler-Login: keine Wallet nötig. Sie erhalten 10.000 Test-USDC ohne Wert."
   }
 }

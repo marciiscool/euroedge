@@ -9,7 +9,8 @@
   },
   "Home": {
     "headline": "European stocks. Perpetual. Fairly priced 24/7.",
-    "status": "The testnet is under construction."
+    "status": "The testnet is under construction.",
+    "openTerminal": "Open the testnet terminal"
   },
   "Theme": {
     "toggle": "Switch to {theme} theme",
@@ -23,5 +24,93 @@
   "Footer": {
     "riskWarning": "Perpetual futures are complex leveraged products. On this testnet all funds are play money and have no value.",
     "chartsNotice": "Charts by TradingView Lightweight Charts™ (Apache-2.0)."
+  },
+  "Layout": {
+    "skipToContent": "Skip to main content"
+  },
+  "Terminal": {
+    "assetName": "ASML Holding",
+    "mark": "Mark price",
+    "modelPrice": "Model price",
+    "fairValue": "Fair value",
+    "band": "Band",
+    "confidence": {
+      "high": "high confidence",
+      "medium": "medium confidence",
+      "low": "low confidence",
+      "none": "no live source"
+    },
+    "window": {
+      "A": "Primary open",
+      "B": "Extended – Tradegate",
+      "C": "Overnight – model price",
+      "D": "Weekend – model price"
+    },
+    "windowHint": {
+      "A": "Euronext Amsterdam continuous trading",
+      "B": "Tradegate trading outside Amsterdam hours",
+      "C": "All venues closed; price from the model",
+      "D": "Weekend or holiday; price from the model with a widening band"
+    },
+    "maxLeverage": "max {lev}x",
+    "nextWindow": "{window} at {time} (in {in})",
+    "simulated": "SIMULATED PRICES",
+    "live": {
+      "open": "Live",
+      "connecting": "Connecting…",
+      "closed": "Reconnecting…"
+    },
+    "provenance": "Price provenance",
+    "sources": "Sources",
+    "noLiveSource": "No live source — fair value held, band widening",
+    "source": {
+      "tradegate": "Tradegate",
+      "adr": "Nasdaq ADR"
+    },
+    "anchor": "Anchor {price} ({time})",
+    "chartLabel": "Mark price, fair value and fair-value band",
+    "chartDescription": "Line chart of the mark price with the fair value and its confidence band over the last two hours.",
+    "orderTicket": "Order ticket",
+    "side": "Side",
+    "buy": "Buy",
+    "sell": "Sell",
+    "size": "Size (contracts)",
+    "estPrice": "Estimated price",
+    "notional": "Notional",
+    "fee": "Fee ({bps} bp)",
+    "margin": "Margin at {lev}x",
+    "submit": "{side} {size} contracts",
+    "submitting": "Sending…",
+    "loginToTrade": "Log in to trade with play money.",
+    "filled": "{side} {size} filled at {price} (fee {fee} USDC)",
+    "networkError": "The order could not be sent. Check your connection and try again.",
+    "reject": {
+      "not-genesis": "The testnet is starting up. Try again in a moment.",
+      "unknown-market": "This market does not exist.",
+      "no-market-data": "No price yet. Try again in a moment.",
+      "unknown-account": "Your account has no funds yet.",
+      "reduce-only": "Only reducing orders are allowed for this position.",
+      "reduce-only-window": "Only reducing orders are allowed in this window.",
+      "price-limit": "The price is too far from the index right now.",
+      "min-notional": "Below the minimum order value of 10 USDC.",
+      "insufficient-margin": "Not enough margin for this size at the current leverage cap.",
+      "no-position": "There is no position to close."
+    },
+    "account": "Account",
+    "equity": "Equity",
+    "cash": "Cash",
+    "maintenance": "Maintenance margin",
+    "positions": "Positions",
+    "noPositions": "No open positions.",
+    "market": "Market",
+    "markCol": "Mark",
+    "entry": "Entry",
+    "upnl": "Unrealized PnL",
+    "liqPrice": "Liq. price",
+    "actions": "Actions",
+    "close": "Close",
+    "closed": "Position closed, realized {pnl} USDC",
+    "devLogin": "Start with play money",
+    "devLoginHint": "Development login: no wallet needed. You get 10,000 Test USDC with no value."
   }
 }

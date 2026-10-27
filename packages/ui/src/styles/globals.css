@@ -10,6 +10,11 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    /* WCAG 2.4.11: the sticky testnet banner must not cover focused elements. */
+    scroll-padding-top: 3rem;
+  }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
     /* Tabular figures for every number (brief §11.1). */
