@@ -2,9 +2,10 @@
 
 import type { FvDisplaySnapshot } from '@euroedge/shared';
 import type { IChartApi, ISeriesApi, UTCTimestamp } from 'lightweight-charts';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { api } from '@/lib/api';
+import { formatNumber } from '@/lib/format';
 
 const css = (name: string) =>
   getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -12,6 +13,7 @@ const css = (name: string) =>
 /** Mark + FV with its band (the fan chart proper arrives in M7). */
 export function PriceChart({ market, fv }: { market: string; fv: FvDisplaySnapshot | undefined }) {
   const t = useTranslations('Terminal');
+  const locale = useLocale();
   const box = useRef<HTMLDivElement>(null);
   const chart = useRef<IChartApi | null>(null);
   const series = useRef<{
@@ -29,6 +31,7 @@ export function PriceChart({ market, fv }: { market: string; fv: FvDisplaySnapsh
       if (disposed || box.current === null) return;
       const c = lw.createChart(box.current, {
         autoSize: true,
+        localization: { locale, priceFormatter: (p: number) => formatNumber(p, locale) },
         layout: {
           background: { color: 'transparent' },
           textColor: css('--muted-foreground'),
@@ -75,7 +78,7 @@ export function PriceChart({ market, fv }: { market: string; fv: FvDisplaySnapsh
       chart.current = null;
       series.current = null;
     };
-  }, [market]);
+  }, [market, locale]);
 
   useEffect(() => {
     const s = series.current;

@@ -79,10 +79,10 @@
     "notional": "Notional",
     "fee": "Fee ({bps} bp)",
     "margin": "Margin at {lev}x",
-    "submit": "{side} {size} contracts",
+    "submit": "{sideVerb} {size} contracts",
     "submitting": "Sending…",
     "loginToTrade": "Log in to trade with play money.",
-    "filled": "{side} {size} filled at {price} (fee {fee} USDC)",
+    "filled": "{sideNoun} {size} filled at {price} (fee {fee} USDC)",
     "networkError": "The order could not be sent. Check your connection and try again.",
     "reject": {
       "not-genesis": "The testnet is starting up. Try again in a moment.",
@@ -111,6 +111,10 @@
     "close": "Close",
     "closed": "Position closed, realized {pnl} USDC",
     "devLogin": "Start with play money",
-    "devLoginHint": "Development login: no wallet needed. You get 10,000 Test USDC with no value."
+    "devLoginHint": "Development login: no wallet needed. You get 10,000 Test USDC with no value.",
+    "buyVerb": "Buy",
+    "sellVerb": "Sell",
+    "buyNoun": "Buy",
+    "sellNoun": "Sell"
   }
 }
