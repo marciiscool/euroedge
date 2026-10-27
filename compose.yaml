@@ -1,0 +1,53 @@
+# Local infrastructure. App services run on the host via `pnpm dev`;
+# Caddy (http://localhost:8080) is the single origin for web, api and ws (ADR-0012).
+name: euroedge
+
+services:
+  postgres:
+    image: timescale/timescaledb:2.31.0-pg17
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-euroedge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-euroedge}
+      POSTGRES_DB: ${POSTGRES_DB:-euroedge}
+      TIMESCALEDB_TELEMETRY: 'off'
+    command: ['postgres', '-c', 'timescaledb.telemetry_level=off']
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  valkey:
+    image: valkey/valkey:8.1.11-alpine
+    command: ['valkey-server', '--appendonly', 'yes']
+    ports:
+      - '${VALKEY_PORT:-6379}:6379'
+    volumes:
+      - valkeydata:/data
+    healthcheck:
+      test: ['CMD', 'valkey-cli', 'ping']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  caddy:
+    image: caddy:2.11.7-alpine
+    ports:
+      - '${CADDY_PORT:-8080}:8080'
+    environment:
+      WEB_UPSTREAM: ${WEB_UPSTREAM:-host.docker.internal:3000}
+      API_UPSTREAM: ${API_UPSTREAM:-host.docker.internal:4000}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - ./infra/caddy/Caddyfile.dev:/etc/caddy/Caddyfile:ro
+
+  # anvil (local chain) is added in M5-13 under the `chain` profile.
+
+volumes:
+  pgdata:
+  valkeydata:

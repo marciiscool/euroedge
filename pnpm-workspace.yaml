@@ -14,3 +14,6 @@ catalog:
   vitest: 5.0.5
   '@vitest/coverage-v8': 5.0.5
   fast-check: 4.10.2
+  kysely: 0.29.7
+  pg: 8.23.1
+  '@types/pg': 8.23.1
