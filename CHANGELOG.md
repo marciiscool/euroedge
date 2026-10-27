@@ -4,6 +4,19 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### M0 review decisions (2026-10-27)
+
+#### Changed
+
+- `PLAN.md` v2.1 and ADRs 0005/0008/0011/0013/0016 record the founder's M0 review:
+  - Invariant 7 in full form, plus Invariants 8 (house equity ≥ 0) and 9 (insurance ≥ 0);
+  - funding cap on the total rate;
+  - Tradegate-stale escalation (> 5 min → reduce-only, released after 2 min fresh);
+  - CB7 hysteresis (20 % trigger / 30 % release);
+  - axe-core in CI from M1, and a per-milestone re-check of jsx-a11y ESLint 10 support;
+  - shadcn reconciliation once the registry is reachable;
+  - new M1 tasks M1-20…22.
+
 ### Research (2026-10-27)
 
 #### Added

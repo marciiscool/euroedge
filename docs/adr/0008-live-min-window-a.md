@@ -1,6 +1,6 @@
 # ADR-0008 — live-min: Window A index, anchor and CB2
 
-- **Status:** Accepted (founder, 2026-10-27). The rows marked _proposed_ in the source table still need founder review.
+- **Status:** Accepted (founder, 2026-10-27; fallback rows and stale escalation confirmed at M0 review).
 - **Review gate:** math
 
 ## Context
@@ -21,10 +21,11 @@ Definitions:
 | -------- | ------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | yes      | yes     | `median{TG mid, ADR-implied, FV}` (three values)                                                    | normal                                      |
 | yes      | no      | **TG mid** — FV acts as a sanity check via CB1 (ADR-vs-TG divergence) and the band clamp (ADR-0009) | normal                                      |
-| no       | yes     | _proposed:_ **FV** (ADR-driven)                                                                     | degraded (CB3: no new opens, wider spreads) |
-| no       | no      | _proposed:_ **FV_last** with σ widening (brief §6.1)                                                | degraded (CB3)                              |
+| no       | yes     | **FV** (ADR-driven)                                                                                 | degraded (CB3: no new opens, wider spreads) |
+| no       | no      | **FV_last** with σ widening (brief §6.1)                                                            | degraded (CB3)                              |
 
 - **A median is never taken over two values.**
+- **Stale escalation:** if Tradegate stays stale > 5 min while Window A is scheduled, the market becomes **reduce-only**. It is released after 2 min of continuously fresh Tradegate quotes, falling back to "degraded" or normal per the table. Logged as engine events.
 - `sim` and `replay` keep the brief's rule, `median{primary, TG, FV}`, because the sim provides a real-time primary.
 
 ### Anchor C

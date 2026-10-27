@@ -35,3 +35,10 @@
 
 - `no-unsafe-unary-minus` is off: it is a false positive for branded bigints.
 - `next-env.d.ts` is generated and gitignored.
+
+## Founder review (M0, 2026-10-27)
+
+- TypeScript 6.0.3 accepted; revisit when typescript-eslint supports TS 7.
+- **Stay on ESLint 10.** Accessibility moves forward: `@axe-core/playwright` from M1, running on every existing page in CI and failing on serious/critical violations.
+- **Each milestone report** re-checks ESLint 10 support in `eslint-plugin-jsx-a11y` (and react/import). `jsx-a11y` is re-enabled as soon as it supports ESLint 10.
+- The pnpm 24 h `minimumReleaseAge` rule is kept.

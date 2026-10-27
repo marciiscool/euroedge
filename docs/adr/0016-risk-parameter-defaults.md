@@ -1,6 +1,6 @@
 # ADR-0016 — Risk parameter defaults (funding, liquidation penalty, contract granularity)
 
-- **Status:** Accepted (founder, 2026-10-27). One interpretation is pending (marked).
+- **Status:** Accepted (founder, 2026-10-27; funding-cap interpretation confirmed at M0 review).
 - **Review gate:** math
 
 All values live in `config/windows.yaml` / `config/markets.yaml` and change only via `ParamChange` engine events.
@@ -37,9 +37,7 @@ All values live in `config/windows.yaml` / `config/markets.yaml` and change only
   - A positive skew (net user long) means longs pay.
   - `netOIskew` = user long notional − user short notional at mark.
 - **Window D:** interest only (no skew term).
-- **Total hourly rate**, _pending confirmation_: `clamp(interest_h + skew_h, ±cap_w)`, i.e. the **total** is capped.
-  - The alternative caps only the skew term, so the total can exceed the cap by up to the interest component (≈ 0.00057 %/h).
-  - Window D is uncapped, interest only.
+- **Total hourly rate** (confirmed): `clamp(interest_h + skew_h, ±cap_w)` — the cap applies to the sum, after summing. Window D: interest only, no skew term and no skew cap.
 - **Settlement:** zero-sum across longs, shorts and the house.
   - `payment_i = position_i × ΔfundingIndex`, rounded toward zero.
   - The rounding residue goes to `fees`.
