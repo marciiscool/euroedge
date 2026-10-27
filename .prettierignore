@@ -7,6 +7,7 @@ coverage
 contracts/lib
 contracts/out
 data/sample/*.csv
+data/sample/manifest.json
 **/next-env.d.ts
 
 # Vendored third-party skills stay byte-identical to their pinned upstream.

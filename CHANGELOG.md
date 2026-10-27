@@ -27,6 +27,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - US pre-market, after-hours and overnight quotes;
   - seeded and scheduled faults (bad print, stale feed, halt);
   - `config/sim.yaml`.
+- Tick CSV format (`docs/data-format.md`), a committed two-week sample in `data/sample/`, and a `ReplayProvider` with a 1–1000× virtual clock (M2-13/14).
 - `markets.yaml` lists all ten markets (M2-17):
   - Five EUR stock perps are enabled.
   - NOVO and SHEL follow ADR-0017 but stay disabled until EUR conversion of the anchor lands in M3.

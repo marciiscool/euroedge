@@ -1,0 +1,149 @@
+{
+  "file": "sim-2027-03-15_2027-03-31.csv.gz",
+  "rows": 213830,
+  "seed": 42,
+  "from": "2027-03-15T00:00:00+01:00",
+  "to": "2027-03-31T00:00:00+02:00",
+  "markets": [
+    "ASML-PERP",
+    "SAP-PERP",
+    "NOVO-PERP",
+    "SHEL-PERP",
+    "TTE-PERP"
+  ],
+  "thinSeconds": 60,
+  "faults": [
+    {
+      "at": 1805081823000,
+      "kind": "bad-print",
+      "underlying": "SHEL-PERP"
+    },
+    {
+      "at": 1805109188000,
+      "kind": "bad-print",
+      "underlying": "NOVO-PERP"
+    },
+    {
+      "at": 1805137206000,
+      "kind": "stale",
+      "underlying": "ASML-PERP",
+      "until": 1805137708000
+    },
+    {
+      "at": 1805139838000,
+      "kind": "stale",
+      "underlying": "NOVO-PERP",
+      "until": 1805140225000
+    },
+    {
+      "at": 1805305452000,
+      "kind": "stale",
+      "underlying": "TTE-PERP",
+      "until": 1805306306000
+    },
+    {
+      "at": 1805408709000,
+      "kind": "bad-print",
+      "underlying": "TTE-PERP"
+    },
+    {
+      "at": 1805484159000,
+      "kind": "stale",
+      "underlying": "SAP-PERP",
+      "until": 1805484887000
+    },
+    {
+      "at": 1805493415000,
+      "kind": "bad-print",
+      "underlying": "TTE-PERP"
+    },
+    {
+      "at": 1805508182000,
+      "kind": "bad-print",
+      "underlying": "SHEL-PERP"
+    },
+    {
+      "at": 1805641743000,
+      "kind": "bad-print",
+      "underlying": "SAP-PERP"
+    },
+    {
+      "at": 1805828073000,
+      "kind": "stale",
+      "underlying": "ASML-PERP",
+      "until": 1805828845000
+    },
+    {
+      "at": 1805906302000,
+      "kind": "stale",
+      "underlying": "ASML-PERP",
+      "until": 1805906938000
+    },
+    {
+      "at": 1806040420000,
+      "kind": "stale",
+      "underlying": "SHEL-PERP",
+      "until": 1806041273000
+    },
+    {
+      "at": 1806044712000,
+      "kind": "bad-print",
+      "underlying": "SHEL-PERP"
+    },
+    {
+      "at": 1806086948000,
+      "kind": "stale",
+      "underlying": "NOVO-PERP",
+      "until": 1806087591000
+    },
+    {
+      "at": 1806115008000,
+      "kind": "bad-print",
+      "underlying": "NOVO-PERP"
+    },
+    {
+      "at": 1806149989000,
+      "kind": "bad-print",
+      "underlying": "ASML-PERP"
+    },
+    {
+      "at": 1806224119000,
+      "kind": "stale",
+      "underlying": "ASML-PERP",
+      "until": 1806224768000
+    },
+    {
+      "at": 1806230835000,
+      "kind": "stale",
+      "underlying": "TTE-PERP",
+      "until": 1806231439000
+    },
+    {
+      "at": 1806271891000,
+      "kind": "bad-print",
+      "underlying": "TTE-PERP"
+    },
+    {
+      "at": 1806275948000,
+      "kind": "bad-print",
+      "underlying": "SAP-PERP"
+    },
+    {
+      "at": 1806295707000,
+      "kind": "stale",
+      "underlying": "SHEL-PERP",
+      "until": 1806296585000
+    },
+    {
+      "at": 1806396682000,
+      "kind": "stale",
+      "underlying": "NOVO-PERP",
+      "until": 1806397080000
+    },
+    {
+      "at": 1806425261000,
+      "kind": "bad-print",
+      "underlying": "ASML-PERP"
+    }
+  ]
+}
