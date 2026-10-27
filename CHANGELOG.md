@@ -4,6 +4,23 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### M1 — Thin vertical slice (2026-10-27, on `integration/m1`)
+
+#### Added
+
+- Shared schemas and config (M1-01), interim calendar with A/B/C/D windows (M1-02), deterministic simulated world (M1-03), ingest to Timescale/Valkey (M1-04).
+- fv-core v0 (M1-05) and fv-service (M1-06): Tradegate + ADR signals, band, Window A median-of-three index, step-capped and band-clamped mark.
+- Engine: event model and hash chain (M1-07), Postgres event store (M1-08), sequencer + bootstrap + publisher (M1-09), ledger (M1-10), risk-core (M1-11), deterministic core with orders, liquidation and invariants (M1-12).
+- Invariant property harness (M1-13) and a full simulated trading day replay test (M1-21).
+- ExecutionAdapter + SimAdapter (M1-14), API v0 with dev login, orders and WebSocket (M1-15), bare trade terminal (M1-16/17).
+- Playwright e2e + axe accessibility in CI (M1-18, M1-20), screenshots and demo script (M1-22), report `docs/milestones/m1.md` (M1-19).
+
+#### Fixed
+
+- House equity now includes the house cost basis when flat in lots (Invariant 7).
+- Language switcher accessible name (WCAG 2.5.3); WebSocket account channel bound strictly to the session.
+- German order copy; chart number locale; web lint runs `next typegen` first on fresh checkouts.
+
 ### M0 review decisions (2026-10-27)
 
 #### Changed

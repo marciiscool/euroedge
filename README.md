@@ -63,6 +63,18 @@ pnpm dev                    # all services + web
 
 Open **http://localhost:8080**. Caddy is the single origin: `/api/*` and `/ws` go to the api service, everything else to the web app (ADR-0012). Service health is at `http://localhost:<port>/health`, with ports 4000–4060 (see `.env.example`).
 
+## Try the M1 terminal
+
+```bash
+cp .env.example .env && sed -i 's/^DEV_LOGIN=false/DEV_LOGIN=true/' .env
+pnpm install && pnpm infra:up && pnpm db:migrate
+pnpm --filter @euroedge/web build && scripts/stack.sh start
+# open http://localhost:8080/en/trade → "Start with play money"
+scripts/stack.sh stop
+```
+
+![M1 terminal](docs/screenshots/m1/terminal-dark-en.png)
+
 ## Everyday commands
 
 | Command                        | What it does                                                             |
