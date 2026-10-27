@@ -9,11 +9,13 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "gen": "node scripts/generate.ts"
   },
   "dependencies": {
     "@euroedge/shared": "workspace:*",
-    "luxon": "catalog:"
+    "luxon": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/luxon": "catalog:",

@@ -11,3 +11,4 @@ data/sample/*.csv
 
 # Vendored third-party skills stay byte-identical to their pinned upstream.
 .claude/skills/*/
+packages/calendar/src/generated/

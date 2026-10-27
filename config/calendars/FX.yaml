@@ -1,0 +1,17 @@
+# Spot FX, 24/5 by market convention: Sunday 17:00 to Friday 17:00 New York. No holidays are
+# modelled: thin liquidity on 25 Dec and 1 Jan is not a closure.
+venue: FX
+name: Spot FX
+tz: America/New_York
+coverage: { from: '2026-01-01', to: '2028-12-31' }
+sources:
+  - years: [2026, 2027, 2028]
+    url: https://en.wikipedia.org/wiki/Foreign_exchange_market
+    retrieved: null
+    verified: false
+    note: Market convention, not a venue calendar.
+regular:
+  days: [7]
+  phases:
+    continuous: { open: '17:00', close: '17:00', spanDays: 5 }
+holidays: []

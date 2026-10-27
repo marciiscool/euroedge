@@ -34,3 +34,17 @@ MICs: XETR, XAMS, XPAR, XCSE, XLON, TGAT (+ L&S hours), XNYS, XNAS (+ US overnig
 
 - A yearly maintenance runbook is needed (M9-10).
 - Mandatory tests: the EU/US DST-mismatch weeks 26–30 Oct 2026 and 14–28 Mar 2027, holidays, half-days, and halts.
+
+## Implementation notes (M2, 2026-10-27)
+
+- **Format.** The schema lives in `packages/calendar/src/schema.ts`. Each YAML file names its phases (`preOpen`, `openingAuction`, `continuous`, `closingAuction`, `postTrading`) and lists holidays and `specialSessions`. Holidays and special sessions are keyed by **trade date**. `tradeDateOffsetDays: 1` attaches the US overnight session (`USON`) to the next day.
+- **Generated module.** `pnpm --filter @euroedge/calendar gen` compiles the YAML into `src/generated/calendars.ts`, so lookups stay synchronous and work in the browser. A test fails if the generated file drifts from the YAML.
+- **Internal codes.** `FX`, `LSX` (Lang & Schwarz hours, informational only) and `USON` are internal venue codes, not MICs.
+- **Sources are not yet verified.** None of the official exchange sites was reachable from the build environment, so every source carries `verified: false, retrieved: null`.
+  - The holiday and early-close lists for XETR, XAMS, XPAR, XCSE, XLON and XNYS/XNAS equal the committed `exchange_calendars` 4.13.2 export, which CI checks.
+  - TGAT, LSX, XEUR and USON have no independent check.
+  - **The founder must verify them against the venue publications**, or allow those hosts, before a live tier relies on them.
+- **Beyond coverage.** Dates after `coverage.to` fall back to the regular week without holidays. The coverage test fails CI 120 days before that happens.
+- **Not modelled.**
+  - The Xetra 13:00 intraday auction counts as continuous trading.
+  - The US opening and closing crosses are instantaneous.

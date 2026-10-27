@@ -1,0 +1,56 @@
+# London Stock Exchange (order book). Times are Europe/London.
+venue: XLON
+name: London Stock Exchange
+tz: Europe/London
+coverage: { from: '2026-01-01', to: '2028-12-31' }
+sources:
+  - years: [2026, 2027, 2028]
+    url: https://www.londonstockexchange.com/equities-trading/business-days
+    retrieved: null
+    verified: false
+    note: 'Cross-checked against exchange_calendars 4.13.2 (committed fixture); not yet checked against the official venue publication (host unreachable from the build environment).'
+regular:
+  days: [1, 2, 3, 4, 5]
+  phases:
+    openingAuction: { open: '07:50', close: '08:00', randomEndSec: 30 }
+    continuous: { open: '08:00', close: '16:30' }
+    closingAuction: { open: '16:30', close: '16:35', randomEndSec: 30 }
+    postTrading: { open: '16:35', close: '16:40' }
+holidays:
+  - { date: '2026-01-01', name: New Year's Day }
+  - { date: '2026-04-03', name: Good Friday }
+  - { date: '2026-04-06', name: Easter Monday }
+  - { date: '2026-05-04', name: Early May bank holiday }
+  - { date: '2026-05-25', name: Spring bank holiday }
+  - { date: '2026-08-31', name: Summer bank holiday }
+  - { date: '2026-12-25', name: Christmas Day }
+  - { date: '2026-12-28', name: Boxing Day (substitute) }
+  - { date: '2027-01-01', name: New Year's Day }
+  - { date: '2027-03-26', name: Good Friday }
+  - { date: '2027-03-29', name: Easter Monday }
+  - { date: '2027-05-03', name: Early May bank holiday }
+  - { date: '2027-05-31', name: Spring bank holiday }
+  - { date: '2027-08-30', name: Summer bank holiday }
+  - { date: '2027-12-27', name: Christmas Day (substitute) }
+  - { date: '2027-12-28', name: Boxing Day (substitute) }
+  - { date: '2028-01-03', name: New Year's Day (substitute) }
+  - { date: '2028-04-14', name: Good Friday }
+  - { date: '2028-04-17', name: Easter Monday }
+  - { date: '2028-05-01', name: Early May bank holiday }
+  - { date: '2028-05-29', name: Spring bank holiday }
+  - { date: '2028-08-28', name: Summer bank holiday }
+  - { date: '2028-12-25', name: Christmas Day }
+  - { date: '2028-12-26', name: Boxing Day }
+specialSessions:
+  - date: '2026-12-24'
+    name: Christmas Eve
+    phases: &halfDay
+      openingAuction: { open: '07:50', close: '08:00', randomEndSec: 30 }
+      continuous: { open: '08:00', close: '12:30' }
+      closingAuction: { open: '12:30', close: '12:35', randomEndSec: 30 }
+      postTrading: { open: '12:35', close: '12:40' }
+  - { date: '2026-12-31', name: New Year's Eve, phases: *halfDay }
+  - { date: '2027-12-24', name: Christmas Eve, phases: *halfDay }
+  - { date: '2027-12-31', name: New Year's Eve, phases: *halfDay }
+  - { date: '2028-12-22', name: Last business day before Christmas, phases: *halfDay }
+  - { date: '2028-12-29', name: Last business day of the year, phases: *halfDay }

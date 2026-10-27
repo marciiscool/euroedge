@@ -4,6 +4,13 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### M2 — Data layer (in progress, on `integration/m2`)
+
+#### Added
+
+- Curated venue calendars 2026–2028 in `config/calendars/` for XETR, TGAT, LSX, XAMS, XPAR, XCSE, XLON, XNYS, XNAS, USON, XEUR and FX. They cover holidays, half-days, auction phases and random-end ranges, with a schema and a generated browser-safe module (M2-01…04).
+- Venue-state resolver (`venueState`, `nextVenueTransition`) and a holiday-aware window resolver (M2-05/06). Tests cover a cross-check against an `exchange_calendars` 4.13.2 fixture, holidays, half-days, the US overnight session and a 120-day coverage guard (M2-07).
+
 ### M1 — Thin vertical slice (2026-10-27, on `integration/m1`)
 
 #### Added
