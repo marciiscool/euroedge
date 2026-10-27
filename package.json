@@ -17,7 +17,10 @@
     "lint:root": "eslint *.js",
     "hooks:install": "lefthook install",
     "test:all": "vitest run",
-    "typecheck:root": "tsc -p tsconfig.json"
+    "typecheck:root": "tsc -p tsconfig.json",
+    "infra:up": "docker compose up -d --wait",
+    "infra:down": "docker compose down",
+    "db:migrate": "pnpm --filter @euroedge/db migrate"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",

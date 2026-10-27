@@ -1,0 +1,21 @@
+# Dev single origin (ADR-0012): everything is served from http://localhost:8080.
+{
+	admin off
+	auto_https off
+}
+
+:8080 {
+	encode zstd gzip
+
+	handle /api/* {
+		reverse_proxy {$API_UPSTREAM}
+	}
+
+	handle /ws {
+		reverse_proxy {$API_UPSTREAM}
+	}
+
+	handle {
+		reverse_proxy {$WEB_UPSTREAM}
+	}
+}
