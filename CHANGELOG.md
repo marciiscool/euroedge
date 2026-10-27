@@ -21,6 +21,10 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - **M0-10** GitHub Actions CI (guards, checks with service containers, audit, contracts placeholder); `pnpm check:guards`.
 - **M0-11** README, CONTRIBUTING (founder review gate), PR template, this changelog.
 
+#### Fixed
+
+- `apps/web` typecheck now runs `next typegen` first. Before this, it failed on a fresh clone; found by verifying M0 from a clean clone.
+
 #### Notes
 
 - **shadcn:** the CLI's default preset is `base-nova` (Base UI), which confirms ADR-0005. The registry host `ui.shadcn.com` is blocked by this environment's network policy, so the first components were written by hand following shadcn conventions. `components.json` is in place for `shadcn add` later.
