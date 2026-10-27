@@ -18,3 +18,4 @@ export {
   type GuardFinding,
   type ScannedFile,
 } from './guard-scan.ts';
+export { configDir, loadFvParams, loadMarkets, loadWindows } from './load.ts';

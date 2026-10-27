@@ -1,0 +1,23 @@
+# Market definitions (brief §5). Contract: quanto perp, EUR-quoted, USDC-settled, 1 EUR-point = 1 USDC per contract.
+# 1 contract = 1 share (stocks) or 1 basket unit. Lots/ticks per ADR-0016; tickSize × lotSize × 1e6 must be an integer.
+# M1 lists ASML only; the other nine markets arrive in M2-17.
+markets:
+  - id: ASML-PERP
+    displayName: ASML Holding
+    underlyingIsin: NL0010273215
+    kind: stock
+    primaryMic: XAMS
+    quoteCcy: EUR
+    primaryCcy: EUR
+    tickSize: '0.01'
+    lotSize: '0.01'
+    minNotional: '10'
+    adr: { venue: XNAS, symbol: ASML, ratio: '1', verified: true }
+    tradegateSymbol: ASML
+    sector: semiconductors
+    enabled: true
+    sim:
+      startPrice: '700'
+      annualVol: '0.32'
+      jumpsPerYear: '6'
+      jumpVol: '0.03'
