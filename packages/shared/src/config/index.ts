@@ -10,3 +10,11 @@ export {
 } from './env.ts';
 export { ConfigError } from './errors.ts';
 export { loadYamlConfig, parseConfig } from './yaml.ts';
+export {
+  isDeployPath,
+  scanFile,
+  scanFiles,
+  SCANNED_PATH,
+  type GuardFinding,
+  type ScannedFile,
+} from './guard-scan.ts';

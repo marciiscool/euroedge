@@ -268,6 +268,9 @@ importers:
       '@eslint/js':
         specifier: 10.0.1
         version: 10.0.1(eslint@10.13.0(jiti@2.7.0))
+      '@euroedge/shared':
+        specifier: workspace:*
+        version: link:packages/shared
       '@types/node':
         specifier: 24.19.2
         version: 24.19.2
