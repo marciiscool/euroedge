@@ -4,6 +4,17 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### M3 — Full fv-core (in progress, on `integration/m3`)
+
+#### Added
+
+- Anchor manager (M3-01):
+  - GBX and DKK closes are converted to EUR at `t_C`.
+  - EURDKK falls back to the 7.46038 peg without a feed and raises an alert beyond 0.5 %.
+  - NOVO and SHEL are enabled.
+- Dividends per line (M3-02): the anchor moves on the local ex-date, and the ADR signal uses its own ex-date without double counting.
+- ADR basis `b_A` as an EWMA of close-to-open residuals, with a configurable half-life (M3-03).
+
 ### M2 — Data layer (complete, on `integration/m2`)
 
 #### Added

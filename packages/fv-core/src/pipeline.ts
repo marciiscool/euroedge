@@ -1,4 +1,5 @@
-import { CalendarCache } from '@euroedge/calendar';
+import { CalendarCache, calendarFor } from '@euroedge/calendar';
+import { DateTime } from 'luxon';
 import type { FvParams, MarketConfig, Tick } from '@euroedge/shared';
 import { toEngineUpdate, type QuantizedUpdate } from './engine-update.ts';
 import { FvModel, type FvSnapshot } from './model.ts';
@@ -33,10 +34,25 @@ export class MarketFvPipeline {
     this.stepCap = stepCapBpsPerSecond;
     if (market.kind !== 'stock' || market.primarySymbol === undefined)
       throw new Error(`${market.id}: basket FV arrives in M3`);
-    if (market.primaryCcy !== 'EUR')
-      throw new Error(`${market.id}: non-EUR anchors arrive in M3 (ADR-0017)`);
+    const ccy = market.primaryCcy;
+    const conversionPair =
+      ccy === 'GBX' || ccy === 'GBP' ? 'EURGBP' : ccy === 'DKK' ? 'EURDKK' : undefined;
+    const primaryTz = calendarFor(market.primaryMic).tz;
+    const adrTz = market.adr === undefined ? primaryTz : calendarFor(market.adr.venue).tz;
+    const midnight = (iso: string, zone: string) => DateTime.fromISO(iso, { zone }).toMillis();
+    // Sim tier: the simulated dividend calendar; live tiers read dividendCalendarRef (M4 corporate actions).
+    const dividends = (market.sim?.dividends ?? []).map((d) => ({
+      gross: Number(d.gross),
+      localExTs: midnight(d.exDate, primaryTz),
+      adrExTs: midnight(d.adrExDate ?? d.exDate, adrTz),
+    }));
     this.model = new FvModel({
       primary: { venue: market.primaryMic, symbol: market.primarySymbol },
+      primaryCcy: ccy,
+      ...(conversionPair === undefined
+        ? {}
+        : { conversionFx: { venue: 'FX' as const, symbol: conversionPair } }),
+      dividends,
       ...(market.tradegateSymbol === undefined
         ? {}
         : { tradegate: { venue: 'TGAT' as const, symbol: market.tradegateSymbol } }),
