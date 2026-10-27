@@ -6,11 +6,15 @@ import { useEffect, useState } from 'react';
 import { formatCountdown, formatNumber, formatTime } from '@/lib/format';
 
 export function MarketHeader({
+  id,
+  name,
   market,
   fv,
   simulated,
   live,
 }: {
+  id: string;
+  name: string;
   market: MarketSnapshot | undefined;
   fv: FvDisplaySnapshot | undefined;
   simulated: boolean;
@@ -33,9 +37,9 @@ export function MarketHeader({
   return (
     <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-border px-4 py-3">
       <div className="flex items-baseline gap-2">
-        <h1 className="text-base font-semibold">{t('assetName')}</h1>
+        <h1 className="text-base font-semibold">{name}</h1>
         <span translate="no" className="font-mono text-xs text-muted-foreground">
-          ASML-PERP
+          {id}
         </span>
       </div>
       <div className="flex items-baseline gap-2">

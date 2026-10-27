@@ -79,9 +79,10 @@ export function live(): LiveClient {
 
 /** Latest value on a channel (re-renders on every message; fine at 1 Hz). */
 export function useChannel<T>(ch: string, initial?: T): T | undefined {
-  const [value, setValue] = useState<T | undefined>(initial);
-  useEffect(() => live().subscribe(ch, (d) => setValue(d as T)), [ch]);
-  return value;
+  // Values are tagged with their channel so a switch never shows the previous channel's data.
+  const [state, setState] = useState<{ ch: string; value: T | undefined }>({ ch, value: initial });
+  useEffect(() => live().subscribe(ch, (d) => setState({ ch, value: d as T })), [ch]);
+  return state.ch === ch ? state.value : undefined;
 }
 
 export function useLiveStatus(): LiveClient['status'] {

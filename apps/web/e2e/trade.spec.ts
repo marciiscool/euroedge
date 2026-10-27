@@ -30,3 +30,17 @@ test('rejects an order beyond the window leverage cap with a clear message', asy
   await page.getByRole('button', { name: /^Buy 500\.00 contracts$/ }).click();
   await expect(page.locator('form [role=status]')).toContainText('Not enough margin');
 });
+
+test('switches between markets', async ({ page }) => {
+  await page.goto('/en/trade');
+  await page
+    .getByRole('navigation', { name: 'Markets' })
+    .getByRole('link', { name: 'SAP-PERP' })
+    .click();
+  await expect(page).toHaveURL(/market=SAP-PERP/);
+  await expect(page.getByRole('heading', { level: 1, name: 'SAP' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'SAP-PERP' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+});

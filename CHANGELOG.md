@@ -17,6 +17,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - EE-Blue 20 (20 constituents, 10 % cap) and EE-Semis (5 constituents, 35 % cap) are draft baskets that need founder sign-off.
 - Underlying helpers in `@euroedge/shared`: `allUnderlyings`, `basketConstituents`, `underlyingLines`.
 - An `OTCM` calendar for OTC ADRs (SIEGY, LVMUY).
+- The terminal switches between the five enabled markets (`?market=`).
 - `markets.yaml` lists all ten markets (M2-17):
   - Five EUR stock perps are enabled.
   - NOVO and SHEL follow ADR-0017 but stay disabled until EUR conversion of the anchor lands in M3.
