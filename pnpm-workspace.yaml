@@ -3,6 +3,14 @@ packages:
   - packages/*
 
 # Install scripts are denied by default. lefthook's postinstall would
-# auto-install git hooks; we run `lefthook install` explicitly instead.
+# auto-install git hooks; we run `pnpm hooks:install` explicitly instead.
 allowBuilds:
   lefthook: false
+
+# Single source of truth for versions shared across workspace packages.
+catalog:
+  '@types/node': 24.19.2
+  typescript: 6.0.3
+  vitest: 5.0.5
+  '@vitest/coverage-v8': 5.0.5
+  fast-check: 4.10.2
