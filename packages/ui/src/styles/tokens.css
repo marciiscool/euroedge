@@ -1,0 +1,142 @@
+/*
+ * EuroEdge design tokens (ADR-0007). Calm, precise, institutional.
+ * Dark is the default theme; `.light` switches. Up/down colours are switchable for
+ * colour-blind users via data-updown="blue-orange". Never rely on colour alone (▲▼, +/−).
+ * Colour values are hex so test/contrast.test.ts can verify WCAG 2.2 AA contrast.
+ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Dark (default) ─────────────────────────────────────────────── */
+:root,
+.dark {
+  color-scheme: dark;
+  --background: #0b0d10;
+  --foreground: #e6e8eb;
+  --card: #11141a;
+  --card-foreground: #e6e8eb;
+  --popover: #141820;
+  --popover-foreground: #e6e8eb;
+  --muted: #161a20;
+  --muted-foreground: #9aa3ad;
+  --primary: #dfe3e8;
+  --primary-foreground: #0b0d10;
+  --secondary: #1c2129;
+  --secondary-foreground: #e6e8eb;
+  --brand: #7aa2ff;
+  --border: #262c35;
+  --input: #2c333d;
+  --ring: #7aa2ff;
+  --destructive: #f2555a;
+  --destructive-foreground: #0b0d10;
+  --warning: #f5b84a;
+  --warning-foreground: #0b0d10;
+  --up: #2fbf71;
+  --up-foreground: #04120a;
+  --down: #f2555a;
+  --down-foreground: #1a0405;
+}
+
+:root[data-updown='blue-orange'],
+.dark[data-updown='blue-orange'] {
+  --up: #4c93ff;
+  --up-foreground: #020c1c;
+  --down: #f39237;
+  --down-foreground: #1c0e02;
+}
+
+/* ── Light ──────────────────────────────────────────────────────── */
+.light {
+  color-scheme: light;
+  --background: #fbfbfc;
+  --foreground: #0f1419;
+  --card: #ffffff;
+  --card-foreground: #0f1419;
+  --popover: #ffffff;
+  --popover-foreground: #0f1419;
+  --muted: #f0f2f5;
+  --muted-foreground: #565f6a;
+  --primary: #0f1419;
+  --primary-foreground: #fbfbfc;
+  --secondary: #eceff3;
+  --secondary-foreground: #0f1419;
+  --brand: #2456d6;
+  --border: #dde1e6;
+  --input: #c9cfd6;
+  --ring: #2456d6;
+  --destructive: #c42b31;
+  --destructive-foreground: #ffffff;
+  --warning: #8a5a00;
+  --warning-foreground: #ffffff;
+  --up: #137a46;
+  --up-foreground: #ffffff;
+  --down: #c42b31;
+  --down-foreground: #ffffff;
+}
+
+.light[data-updown='blue-orange'] {
+  --up: #1f5fcc;
+  --up-foreground: #ffffff;
+  --down: #a34b00;
+  --down-foreground: #ffffff;
+}
+
+/* ── Non-colour tokens ──────────────────────────────────────────── */
+:root {
+  --radius: 0.375rem;
+  --duration-fast: 120ms;
+  --duration-base: 160ms;
+  --duration-slow: 240ms;
+  /* Price flash: background tint only, ≤150 ms (brief §11.1). */
+  --duration-flash: 150ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+    --duration-flash: 0ms;
+  }
+}
+
+/* Expose tokens as Tailwind utilities (bg-up, text-muted-foreground, …). The 4-px spacing
+   grid is Tailwind's default (--spacing: 0.25rem). */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-brand: var(--brand);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-up: var(--up);
+  --color-up-foreground: var(--up-foreground);
+  --color-down: var(--down);
+  --color-down-foreground: var(--down-foreground);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', monospace;
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.24);
+  --shadow-2: 0 4px 12px rgb(0 0 0 / 0.28);
+  --shadow-3: 0 12px 32px rgb(0 0 0 / 0.36);
+}

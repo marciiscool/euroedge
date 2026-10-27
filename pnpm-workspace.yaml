@@ -5,6 +5,8 @@ packages:
 # Install scripts are denied by default. lefthook's postinstall would
 # auto-install git hooks; we run `pnpm hooks:install` explicitly instead.
 allowBuilds:
+  '@parcel/watcher': false
+  '@swc/core': false
   lefthook: false
 
 # Single source of truth for versions shared across workspace packages.
@@ -18,6 +20,30 @@ catalog:
   zod: 4.6.7
   fastify: 5.12.7
   pino: 10.4.0
+  react: 19.3.1
+  react-dom: 19.3.1
+  '@types/react': 19.3.0
+  '@types/react-dom': 19.3.0
+  '@base-ui/react': 1.9.0
+  class-variance-authority: 0.7.1
+  clsx: 2.1.1
+  tailwind-merge: 3.7.0
+  tailwindcss: 4.3.3
+  '@tailwindcss/postcss': 4.3.3
+  tw-animate-css: 1.4.0
+  next: 16.4.3
+  next-intl: 4.14.9
+  next-themes: 0.4.6
+  geist: 1.8.2
+  lucide-react: 1.62.0
+  '@next/eslint-plugin-next': 16.4.3
+  eslint-plugin-react-hooks: 7.1.1
   yaml: 2.9.1
   pg: 8.23.1
   '@types/pg': 8.23.1
+
+minimumReleaseAgeExclude:
+  - lucide-react@1.62.0
+
+# Supply-chain policy: refuse package versions younger than 24 h (pnpm default, made explicit).
+minimumReleaseAge: 1440
