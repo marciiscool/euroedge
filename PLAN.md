@@ -32,6 +32,22 @@
 | live-min recording      | Starts as soon as a Tradegate feed exists, independent of the roadmap (track **LR**, §5).                                                                                                                                                                                                                                                                                                                                                                                                                       | §5           |
 | Pyth coverage           | Stays on the to-verify list; the founder checks manually.                                                                                                                                                                                                                                                                                                                                                                                                                                                       | §6           |
 
+**M0 review (founder, 2026-10-27)**
+
+| Topic                                       | Decision                                                                                                                                                                                                                                            | Where             |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| TypeScript 6.0.3                            | Accepted; revisit when typescript-eslint supports 7.                                                                                                                                                                                                | ADR-0011          |
+| ESLint 10 without React/import/a11y plugins | Stay on 10. **Move a11y forward:** `@axe-core/playwright` in M1. axe runs on every existing page in CI and fails on serious/critical violations. Re-check plugin support at every milestone; re-enable `jsx-a11y` as soon as it supports ESLint 10. | ADR-0011, M1-20   |
+| pnpm 24 h release-age rule                  | Keep.                                                                                                                                                                                                                                               | ADR-0011          |
+| Hand-written shadcn components              | Accepted. Once the registry is reachable, diff against `shadcn add` output and reconcile.                                                                                                                                                           | ADR-0005          |
+| `packages/db`, `packages/service-kit`       | Accepted.                                                                                                                                                                                                                                           | ADR-0011          |
+| Invariant 7                                 | House equity = cash + uPnL at the latest mark event. **Full form:** Σ user equity (each floored at 0) + max(0, house equity) + insurance ≤ vault balance. **Separate invariants:** house equity ≥ 0, insurance ≥ 0.                                 | ADR-0013          |
+| Funding cap                                 | Applies to the **total** rate (interest + skew), clamped after summing. Window D interest only, no skew cap.                                                                                                                                        | ADR-0016          |
+| live-min, Tradegate stale in Window A       | Index = FV, market degraded (no new opens). **Escalation:** stale > 5 min while Window A is scheduled → that market reduce-only; released after 2 min of fresh quotes.                                                                              | ADR-0008          |
+| CB7                                         | House equity includes uPnL. **Hysteresis:** triggers below 20 % of genesis, releases only above 30 % (house and insurance alike).                                                                                                                   | ADR-0013          |
+| M1 deliverables                             | Screenshots of the bare terminal (dark/light × en/de) and a 5-line demo script. A replay test running a full simulated ASML trading day (windows A→D) that asserts all invariants and bit-for-bit replay.                                           | M1-21, M1-22      |
+| Agent skills                                | Three reviewed skills vendored (`docs/research/skills-review.md`); `CLAUDE.md` sets precedence and overrides.                                                                                                                                       | `.claude/skills/` |
+
 **Tooling found at M0 start** (ADR-011)
 
 - TypeScript **6.0.3**, not 7.0: typescript-eslint 8.72 peers `typescript <6.1`.
@@ -248,27 +264,30 @@ Each task is ≤ 1 day / ≤ ~400 LOC diff and becomes one PR on its own branch.
 
 ### M1 — Thin vertical slice: ASML, sim, dev login (≈ 16.5 d)
 
-| ID    | Task                                                                                                                      | d   | Dep    |
-| ----- | ------------------------------------------------------------------------------------------------------------------------- | --- | ------ |
-| M1-01 | Shared schemas: `Tick`, `InstrumentRef`, `MarketConfig`; `markets.yaml` ASML entry                                        | 0.5 | M0     |
-| M1-02 | Interim hard-coded XAMS/TGAT/XNAS sessions → A/B/C/D for ASML (replaced in M2)                                            | 0.5 | 01     |
-| M1-03 | SimulatedProvider v0: seeded GBM for ASML (XAMS trades/quotes, Tradegate quotes, Nasdaq ASML, EURUSD), deterministic PRNG | 1   | 01     |
-| M1-04 | Ingest v0: provider → Valkey pub/sub + `ticks` hypertable (batched)                                                       | 1   | 03     |
-| M1-05 | fv-core v0: `s_T`, `s_A` (no basis), inverse-variance combo, σ floor, band, tick quantization; unit + property tests      | 1   | M0-07  |
-| M1-06 | fv-service v0: 1 s loop + on-tick, sim anchor, emits FvUpdate/Index/Mark events, FV hypertable                            | 1   | 04, 05 |
-| M1-07 | Event envelope + canonical encoding (JCS, bigint as string) + sha256 hash chain; tests                                    | 1   | M0-06  |
-| M1-08 | Event store: append-only PG table (raw canonical bytes), group commit, read-from-seq, advisory-lock single writer         | 1   | 07     |
-| M1-09 | Sequencer: Valkey Streams consumer, ts stamping, ClockTick timer, apply loop, result publishing                           | 1   | 08     |
-| M1-10 | `packages/ledger` v0: accounts, balanced postings, projections, runtime asserts, property tests                           | 1   | M0-07  |
-| M1-11 | `risk-core` v0: position, avg entry, quanto uPnL, equity, IM/MM (5x/10 %), cross margin                                   | 1   | 10     |
-| M1-12 | Engine core v0: DevDeposit, market order vs house at FV ± fixed half-spread, close, MarkUpdate                            | 1   | 09, 11 |
-| M1-13 | Invariant harness: fast-check model test (10k steps) for invariants 1, 2, 4 + replay == live                              | 1   | 12     |
-| M1-14 | `packages/execution`: `ExecutionAdapter` + `SimAdapter`                                                                   | 0.5 | 12     |
-| M1-15 | API v0: dev login (sim only, flag-gated), `POST /orders`, `GET /account`, WS `fv.ASML-PERP` + `account`                   | 1   | 14     |
-| M1-16 | Web v0: terminal page with mark/FV/band, watermark, LW Charts mark + band, market ticket, positions + close               | 1   | 15     |
-| M1-17 | Web v0: WS hook, dev login, disclaimers                                                                                   | 0.5 | 16     |
-| M1-18 | Playwright smoke in CI: login → open → close against the compose stack                                                    | 1   | 17     |
-| M1-19 | M1 report + README run instructions                                                                                       | 0.5 | 18     |
+| ID    | Task                                                                                                                                      | d   | Dep    |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------- | --- | ------ |
+| M1-01 | Shared schemas: `Tick`, `InstrumentRef`, `MarketConfig`; `markets.yaml` ASML entry                                                        | 0.5 | M0     |
+| M1-02 | Interim hard-coded XAMS/TGAT/XNAS sessions → A/B/C/D for ASML (replaced in M2)                                                            | 0.5 | 01     |
+| M1-03 | SimulatedProvider v0: seeded GBM for ASML (XAMS trades/quotes, Tradegate quotes, Nasdaq ASML, EURUSD), deterministic PRNG                 | 1   | 01     |
+| M1-04 | Ingest v0: provider → Valkey pub/sub + `ticks` hypertable (batched)                                                                       | 1   | 03     |
+| M1-05 | fv-core v0: `s_T`, `s_A` (no basis), inverse-variance combo, σ floor, band, tick quantization; unit + property tests                      | 1   | M0-07  |
+| M1-06 | fv-service v0: 1 s loop + on-tick, sim anchor, emits FvUpdate/Index/Mark events, FV hypertable                                            | 1   | 04, 05 |
+| M1-07 | Event envelope + canonical encoding (JCS, bigint as string) + sha256 hash chain; tests                                                    | 1   | M0-06  |
+| M1-08 | Event store: append-only PG table (raw canonical bytes), group commit, read-from-seq, advisory-lock single writer                         | 1   | 07     |
+| M1-09 | Sequencer: Valkey Streams consumer, ts stamping, ClockTick timer, apply loop, result publishing                                           | 1   | 08     |
+| M1-10 | `packages/ledger` v0: accounts, balanced postings, projections, runtime asserts, property tests                                           | 1   | M0-07  |
+| M1-11 | `risk-core` v0: position, avg entry, quanto uPnL, equity, IM/MM (5x/10 %), cross margin                                                   | 1   | 10     |
+| M1-12 | Engine core v0: DevDeposit, market order vs house at FV ± fixed half-spread, close, MarkUpdate                                            | 1   | 09, 11 |
+| M1-13 | Invariant harness: fast-check model test (10k steps) for invariants 1, 2, 4 + replay == live                                              | 1   | 12     |
+| M1-14 | `packages/execution`: `ExecutionAdapter` + `SimAdapter`                                                                                   | 0.5 | 12     |
+| M1-15 | API v0: dev login (sim only, flag-gated), `POST /orders`, `GET /account`, WS `fv.ASML-PERP` + `account`                                   | 1   | 14     |
+| M1-16 | Web v0: terminal page with mark/FV/band, watermark, LW Charts mark + band, market ticket, positions + close                               | 1   | 15     |
+| M1-17 | Web v0: WS hook, dev login, disclaimers                                                                                                   | 0.5 | 16     |
+| M1-18 | Playwright smoke in CI: login → open → close against the compose stack                                                                    | 1   | 17     |
+| M1-19 | M1 report + README run instructions                                                                                                       | 0.5 | 18     |
+| M1-20 | `@axe-core/playwright` on every existing page in CI (fail on serious/critical); skip link, `theme-color`, `translate="no"` (design notes) | 0.5 | 18     |
+| M1-21 | Full simulated ASML trading day (A→B→C→D) replay test: all invariants + bit-for-bit replay + hash chain                                   | 1   | 13     |
+| M1-22 | Screenshots (dark/light × en/de) + 5-line demo script                                                                                     | 0.5 | 20     |
 
 ### M2 — Calendars, providers, all markets (≈ 17.5 d)
 
@@ -295,26 +314,26 @@ Each task is ≤ 1 day / ≤ ~400 LOC diff and becomes one PR on its own branch.
 
 ### M3 — Full fv-core, backtest, golden vectors (≈ 17.5 d)
 
-| ID    | Task                                                                                                                                                                    | d   | Dep    |
-| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ------ |
-| M3-01 | Anchor manager: per-tier close source, override lines, FX at `t_C`, "previous anchor until published"                                                                   | 1   | M2     |
-| M3-02 | Dividend adjustment per venue line                                                                                                                                      | 0.5 | 01     |
-| M3-03 | ADR signal with EWMA basis `b_A`, FX normalization, unverified → weight 0                                                                                               | 1   | 01     |
-| M3-04 | Tradegate filters; generic `v_k = σ_k² + λ·age`                                                                                                                         | 0.5 | 01     |
-| M3-05 | Combination with φ, `σ_floor[window]`, no-signal widening; property tests                                                                                               | 1   | 03, 04 |
-| M3-06 | Confidence classes, sources/weights/ages output, boundary quantization                                                                                                  | 0.5 | 05     |
-| M3-07 | Index & mark per window/tier incl. live-min source table (ADR-008); step cap + band clamp, `MarkClamped` events, pinned > 60 s → CB8 (ADR-009)                          | 1   | 06     |
-| M3-08 | Snap state machine, per-tier snap source, no indicative prints, band re-centre, cap suspension, outside-band flag                                                       | 1   | 07     |
-| M3-09 | Snap tests incl. live-min VWAP → delayed reconciliation                                                                                                                 | 1   | 08     |
-| M3-10 | Basket FV: weights, divisor, drop + renormalize with events                                                                                                             | 1   | 06     |
-| M3-11 | EWMA covariance estimator → basket σ_FV (no independence assumption)                                                                                                    | 1   | 10     |
-| M3-12 | Pure CB evaluators: CB1 divergence, CB2 (live-min: TG halt flag / TG silent > 60 s while primary open), CB3 staleness, CB4 basket drawdown, CB8 pinned mark; CB6 inputs | 1   | 07     |
-| M3-13 | fv-service v1: all markets/windows, CB + window-change events, persistence                                                                                              | 1   | 08–12  |
-| M3-14 | Backtest CLI: replay → FV at each open; MAE/RMSE bp vs next open; naive-close baseline                                                                                  | 1   | 13     |
-| M3-15 | Backtest metrics: band coverage, PIT histogram, p99.9, per-window split; JSON schema                                                                                    | 1   | 14     |
-| M3-16 | Parameter fitting (σ_k, λ, φ, q, basis half-life)                                                                                                                       | 1   | 15     |
-| M3-17 | Golden-vector format + runner (FV, funding, liq price, fees); placeholders until the spreadsheet arrives                                                                | 1   | 06     |
-| M3-18 | Public methodology v1 (FV + baskets)                                                                                                                                    | 1   | 16     |
+| ID    | Task                                                                                                                                                                                                                                    | d   | Dep    |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ------ |
+| M3-01 | Anchor manager: per-tier close source, override lines, FX at `t_C`, "previous anchor until published"                                                                                                                                   | 1   | M2     |
+| M3-02 | Dividend adjustment per venue line                                                                                                                                                                                                      | 0.5 | 01     |
+| M3-03 | ADR signal with EWMA basis `b_A`, FX normalization, unverified → weight 0                                                                                                                                                               | 1   | 01     |
+| M3-04 | Tradegate filters; generic `v_k = σ_k² + λ·age`                                                                                                                                                                                         | 0.5 | 01     |
+| M3-05 | Combination with φ, `σ_floor[window]`, no-signal widening; property tests                                                                                                                                                               | 1   | 03, 04 |
+| M3-06 | Confidence classes, sources/weights/ages output, boundary quantization                                                                                                                                                                  | 0.5 | 05     |
+| M3-07 | Index & mark per window/tier incl. live-min source table (ADR-008); step cap + band clamp, `MarkClamped` events, pinned > 60 s → CB8 (ADR-009)                                                                                          | 1   | 06     |
+| M3-08 | Snap state machine, per-tier snap source, no indicative prints, band re-centre, cap suspension, outside-band flag                                                                                                                       | 1   | 07     |
+| M3-09 | Snap tests incl. live-min VWAP → delayed reconciliation                                                                                                                                                                                 | 1   | 08     |
+| M3-10 | Basket FV: weights, divisor, drop + renormalize with events                                                                                                                                                                             | 1   | 06     |
+| M3-11 | EWMA covariance estimator → basket σ_FV (no independence assumption)                                                                                                                                                                    | 1   | 10     |
+| M3-12 | Pure CB evaluators: CB1 divergence, CB2 (live-min: TG halt flag / TG silent > 60 s while primary open), CB3 staleness + TG-stale escalation (> 5 min → RO, release after 2 min fresh), CB4 basket drawdown, CB8 pinned mark; CB6 inputs | 1   | 07     |
+| M3-13 | fv-service v1: all markets/windows, CB + window-change events, persistence                                                                                                                                                              | 1   | 08–12  |
+| M3-14 | Backtest CLI: replay → FV at each open; MAE/RMSE bp vs next open; naive-close baseline                                                                                                                                                  | 1   | 13     |
+| M3-15 | Backtest metrics: band coverage, PIT histogram, p99.9, per-window split; JSON schema                                                                                                                                                    | 1   | 14     |
+| M3-16 | Parameter fitting (σ_k, λ, φ, q, basis half-life)                                                                                                                                                                                       | 1   | 15     |
+| M3-17 | Golden-vector format + runner (FV, funding, liq price, fees); placeholders until the spreadsheet arrives                                                                                                                                | 1   | 06     |
+| M3-18 | Public methodology v1 (FV + baskets)                                                                                                                                                                                                    | 1   | 16     |
 
 ### M4 — Full engine, bots, stress (≈ 28.5 d)
 
@@ -334,13 +353,13 @@ Each task is ≤ 1 day / ≤ ~400 LOC diff and becomes one PR on its own branch.
 | M4-12 | Liquidations: partial → full, penalty 1 % / 0.5 % → 100 % insurance, house fill, negative-balance protection                                                                          | 1   | 08    |
 | M4-13 | Snap-period liquidation (3-min VWAP), outside-band reduce-only 5 min                                                                                                                  | 1   | 12    |
 | M4-14 | House risk: inventory cap → one-sided → RO, daily loss limit, σ widening                                                                                                              | 1   | 02    |
-| M4-15 | CB application in the engine (no-opens / RO / freeze / global); CB5 and **CB7** (house or insurance < 20 % of genesis) evaluators                                                     | 1   | 14    |
+| M4-15 | CB application in the engine (no-opens / RO / freeze / global); CB5 and **CB7** (trigger < 20 %, release > 30 % of genesis) evaluators                                                | 1   | 14    |
 | M4-16 | Dividend cash flows (net long / gross short, withholding config)                                                                                                                      | 0.5 | 10    |
 | M4-17 | Corporate actions: freeze → ratio adjust → unfreeze (admin events)                                                                                                                    | 1   | 15    |
 | M4-18 | Withdrawal reservation state machine (`vault-pending`) — logic only                                                                                                                   | 1   | 12    |
 | M4-19 | Snapshots every N events, restore, snapshot-vs-genesis equality, hash-chain verifier CLI                                                                                              | 1   | –     |
 | M4-20 | Event schema versioning + upcasters                                                                                                                                                   | 0.5 | 19    |
-| M4-21 | Full invariant suite (1–7, incl. **Invariant 7** solvency check on every event) over 10k+ random steps, all event types                                                               | 1   | 01–20 |
+| M4-21 | Full invariant suite (1–9: incl. Invariant 7 solvency, house equity ≥ 0, insurance ≥ 0, each on every event) over 10k+ random steps, all event types                                  | 1   | 01–20 |
 | M4-22 | Read-model projections (positions/orders/fills/funding) + hot-state publishing                                                                                                        | 1   | 21    |
 | M4-23 | Bot framework: HMAC client, scheduler, 200-account bootstrap                                                                                                                          | 1   | 22    |
 | M4-24 | Bots: noise, momentum, mean-reversion                                                                                                                                                 | 1   | 23    |
@@ -393,38 +412,38 @@ Each task is ≤ 1 day / ≤ ~400 LOC diff and becomes one PR on its own branch.
 
 ### M7 — Trade terminal (≈ 28 d)
 
-| ID    | Task                                                                                                            | d   | Dep   |
-| ----- | --------------------------------------------------------------------------------------------------------------- | --- | ----- |
-| M7-01 | Finalize UI-benchmark ADR from screenshots; tokens (CB-safe colour schemes, type, spacing, motion)              | 1   | M6    |
-| M7-02 | Primitives: ref-updated numeric cells, ▲▼ price, data-age badge, session pill, tooltips                         | 1   | 01    |
-| M7-03 | SharedWorker WS + dedicated-worker fallback; rAF-batched external store                                         | 1   | M6-12 |
-| M7-04 | Resizable layout, presets (Trader/Compact/Analyst), saved layouts, breakpoints                                  | 1   | 02    |
-| M7-05 | Top bar (mark, 24 h, pill, funding countdown, OI)                                                               | 0.5 | 03    |
-| M7-06 | ⌘K market selector (name/ticker/ISIN, filters, favourites, mini pills)                                          | 1   | 05    |
-| M7-07 | Session ribbon (24 h segments, now marker, countdown, leverage step-down, DST-aware hover)                      | 1   | 05    |
-| M7-08 | Price-provenance popover + transparency strip                                                                   | 1   | 05    |
-| M7-09 | Chart: mark candles, timeframes, volume, VWAP                                                                   | 1   | 03    |
-| M7-10 | Chart: FV fan (custom series, gradient band)                                                                    | 1   | 09    |
-| M7-11 | Chart: window shading, snap markers, ex-div/earnings markers                                                    | 1   | 10    |
-| M7-12 | Chart trading: draggable limit/TP/SL, position + liquidation lines                                              | 1   | 11    |
-| M7-13 | Click-to-trade popover; chart accessibility (R15)                                                               | 1   | 12    |
-| M7-14 | Quote ladder (€1k/5k/25k/100k, depth curve, own orders, liq markers)                                            | 1   | 03    |
-| M7-15 | Order ticket: side, types, size modes, shared-zod validation                                                    | 1   | 03    |
-| M7-16 | Ticket: window-capped leverage slider + explanation, TP/SL, RO/PO, fee/fill/funding estimates                   | 1   | 15    |
-| M7-17 | Pre-trade risk card (liq price, σ distance, ESMA close-out, gap slider, next-window warning)                    | 1   | 16    |
-| M7-18 | Hotkeys + remapping + `?` cheat sheet                                                                           | 0.5 | 16    |
-| M7-19 | Positions table (virtualised, margin bar, close/partial, TP/SL edit, next-window highlight)                     | 1   | 03    |
-| M7-20 | Orders, history, fills, funding, account tabs                                                                   | 1   | 19    |
-| M7-21 | Basket constituent heatmap                                                                                      | 1   | 03    |
-| M7-22 | Morning report card                                                                                             | 0.5 | 03    |
-| M7-23 | Toasts + inbox (fills, liq, 30-min window warning, CBs)                                                         | 1   | 03    |
-| M7-24 | RainbowKit connect + SIWE + network switch                                                                      | 1   | M6-01 |
-| M7-25 | Compliance UI: banner, ESMA block (`losingAccountsPct`), model-price labels, watermark, attributions, LW NOTICE | 0.5 | 02    |
-| M7-26 | de strings for the terminal; locale numbers/dates; tz labels                                                    | 0.5 | 20    |
-| M7-27 | A11y: throttled `aria-live`, keyboard flow, reduced motion, axe in Playwright                                   | 1   | 20    |
-| M7-28 | Perf: < 200 KB shell budget in CI, Cache Components shell, 60 fps profiling                                     | 1   | 20    |
-| M7-29 | Playwright e2e (wagmi `mock` connector): SIWE → trade → close; visual snapshots                                 | 1   | 24    |
-| M7-30 | Lighthouse CI ≥ 90                                                                                              | 0.5 | 28    |
+| ID    | Task                                                                                                              | d   | Dep   |
+| ----- | ----------------------------------------------------------------------------------------------------------------- | --- | ----- |
+| M7-01 | Finalize UI-benchmark ADR from screenshots; tokens (CB-safe colour schemes, type, spacing, motion)                | 1   | M6    |
+| M7-02 | Primitives: ref-updated numeric cells, ▲▼ price, data-age badge, session pill, tooltips                           | 1   | 01    |
+| M7-03 | SharedWorker WS + dedicated-worker fallback; rAF-batched external store                                           | 1   | M6-12 |
+| M7-04 | Resizable layout, presets (Trader/Compact/Analyst), saved layouts, breakpoints                                    | 1   | 02    |
+| M7-05 | Top bar (mark, 24 h, pill, funding countdown, OI)                                                                 | 0.5 | 03    |
+| M7-06 | ⌘K market selector (name/ticker/ISIN, filters, favourites, mini pills)                                            | 1   | 05    |
+| M7-07 | Session ribbon (24 h segments, now marker, countdown, leverage step-down, DST-aware hover)                        | 1   | 05    |
+| M7-08 | Price-provenance popover + transparency strip                                                                     | 1   | 05    |
+| M7-09 | Chart: mark candles, timeframes, volume, VWAP                                                                     | 1   | 03    |
+| M7-10 | Chart: FV fan (custom series, gradient band)                                                                      | 1   | 09    |
+| M7-11 | Chart: window shading, snap markers, ex-div/earnings markers                                                      | 1   | 10    |
+| M7-12 | Chart trading: draggable limit/TP/SL with a keyboard/click alternative (WCAG 2.5.7), position + liquidation lines | 1   | 11    |
+| M7-13 | Click-to-trade popover; chart accessibility (R15)                                                                 | 1   | 12    |
+| M7-14 | Quote ladder (€1k/5k/25k/100k, depth curve, own orders, liq markers)                                              | 1   | 03    |
+| M7-15 | Order ticket: side, types, size modes, shared-zod validation                                                      | 1   | 03    |
+| M7-16 | Ticket: window-capped leverage slider + explanation, TP/SL, RO/PO, fee/fill/funding estimates                     | 1   | 15    |
+| M7-17 | Pre-trade risk card (liq price, σ distance, ESMA close-out, gap slider, next-window warning)                      | 1   | 16    |
+| M7-18 | Hotkeys + remapping + **switch-off** (WCAG 2.1.4) + `?` cheat sheet                                               | 0.5 | 16    |
+| M7-19 | Positions table (virtualised, margin bar, close/partial, TP/SL edit, next-window highlight)                       | 1   | 03    |
+| M7-20 | Orders, history, fills, funding, account tabs                                                                     | 1   | 19    |
+| M7-21 | Basket constituent heatmap                                                                                        | 1   | 03    |
+| M7-22 | Morning report card                                                                                               | 0.5 | 03    |
+| M7-23 | Toasts + inbox (fills, liq, 30-min window warning, CBs)                                                           | 1   | 03    |
+| M7-24 | RainbowKit connect + SIWE + network switch                                                                        | 1   | M6-01 |
+| M7-25 | Compliance UI: banner, ESMA block (`losingAccountsPct`), model-price labels, watermark, attributions, LW NOTICE   | 0.5 | 02    |
+| M7-26 | de strings for the terminal; locale numbers/dates; tz labels                                                      | 0.5 | 20    |
+| M7-27 | A11y: throttled `aria-live`, keyboard flow, reduced motion, axe in Playwright                                     | 1   | 20    |
+| M7-28 | Perf: < 200 KB shell budget in CI, Cache Components shell, 60 fps profiling                                       | 1   | 20    |
+| M7-29 | Playwright e2e (wagmi `mock` connector): SIWE → trade → close; visual snapshots                                   | 1   | 24    |
+| M7-30 | Lighthouse CI ≥ 90                                                                                                | 0.5 | 28    |
 
 ### M8 — Remaining pages, mobile, i18n (≈ 19.5 d)
 
@@ -508,42 +527,31 @@ Each task is ≤ 1 day / ≤ ~400 LOC diff and becomes one PR on its own branch.
 
 The full text lives in `docs/adr/`. The founder accepted ADRs 001–015 on 2026-10-27. Rows marked **math** fall under the review gate (§0): changes to them need explicit founder review before merge.
 
-| ADR  | Title                                                                           | Status                                            | Gate |
-| ---- | ------------------------------------------------------------------------------- | ------------------------------------------------- | ---- |
-| 0001 | Event sourcing & determinism                                                    | Accepted                                          | math |
-| 0002 | Fixed-point library (native bigint, integer tickValue)                          | Accepted                                          | math |
-| 0003 | Quote / impact model                                                            | Accepted                                          | math |
-| 0004 | Calendar data (curated YAML 2026–2028)                                          | Accepted                                          |      |
-| 0005 | shadcn on Base UI                                                               | Accepted                                          |      |
-| 0006 | wagmi 2 + RainbowKit 2.2 pin                                                    | Accepted                                          |      |
-| 0007 | UI benchmark (draft until screenshots arrive)                                   | Accepted (draft)                                  |      |
-| 0008 | live-min Window A index, anchor, CB2                                            | Accepted, plus proposed fallback rows             | math |
-| 0009 | Mark: band clamp dominates step cap; CB8                                        | Accepted                                          | math |
-| 0010 | Valkey 8 (ioredis client)                                                       | Accepted                                          |      |
-| 0011 | Tooling (ESLint 10, TS 6.0, Node 24 type stripping, Kysely/SQL, extra packages) | Accepted, plus M0 amendments                      |      |
-| 0012 | Caddy single origin (dev + prod)                                                | Accepted                                          |      |
-| 0013 | House/insurance genesis capital, CB7, Invariant 7                               | Accepted (founder)                                | math |
-| 0014 | Smart-wallet deposits (SignatureChecker permit, EIP-5792 + Paymaster)           | Accepted (founder)                                | math |
-| 0015 | FX set (EURUSD, EURGBP, EURDKK + DKK peg fallback)                              | Accepted (founder)                                | math |
-| 0016 | Risk parameter defaults (funding, liquidation penalty, lots)                    | Accepted (founder), plus 1 interpretation pending | math |
-| 0017 | Override-line markets (NOVO, SHEL): windows & anchor                            | Accepted (founder)                                | math |
+| ADR  | Title                                                                           | Status                       | Gate |
+| ---- | ------------------------------------------------------------------------------- | ---------------------------- | ---- |
+| 0001 | Event sourcing & determinism                                                    | Accepted                     | math |
+| 0002 | Fixed-point library (native bigint, integer tickValue)                          | Accepted                     | math |
+| 0003 | Quote / impact model                                                            | Accepted                     | math |
+| 0004 | Calendar data (curated YAML 2026–2028)                                          | Accepted                     |      |
+| 0005 | shadcn on Base UI                                                               | Accepted                     |      |
+| 0006 | wagmi 2 + RainbowKit 2.2 pin                                                    | Accepted                     |      |
+| 0007 | UI benchmark (draft until screenshots arrive)                                   | Accepted (draft)             |      |
+| 0008 | live-min Window A index, anchor, CB2, stale escalation                          | Accepted                     | math |
+| 0009 | Mark: band clamp dominates step cap; CB8                                        | Accepted                     | math |
+| 0010 | Valkey 8 (ioredis client)                                                       | Accepted                     |      |
+| 0011 | Tooling (ESLint 10, TS 6.0, Node 24 type stripping, Kysely/SQL, extra packages) | Accepted, plus M0 amendments |      |
+| 0012 | Caddy single origin (dev + prod)                                                | Accepted                     |      |
+| 0013 | House/insurance genesis capital, CB7 (hysteresis), Invariants 7–9               | Accepted (founder)           | math |
+| 0014 | Smart-wallet deposits (SignatureChecker permit, EIP-5792 + Paymaster)           | Accepted (founder)           | math |
+| 0015 | FX set (EURUSD, EURGBP, EURDKK + DKK peg fallback)                              | Accepted (founder)           | math |
+| 0016 | Risk parameter defaults (funding, liquidation penalty, lots)                    | Accepted (founder)           | math |
+| 0017 | Override-line markets (NOVO, SHEL): windows & anchor                            | Accepted (founder)           | math |
 
 ---
 
 ## 8. Open questions
 
-**Interpretations I made while writing up your decisions. Each is a math item; please confirm.**
-
-1. **Invariant 7: what "house" means** (ADR-0013). I read it as house **equity** (cash + unrealized PnL), not house cash.
-   - With house cash, the check fails whenever users are in profit, because their withdrawable balance includes unrealized gains while the house's loss is not yet realized.
-2. **Funding cap scope** (ADR-0016). I clamp the **total** rate (interest + skew) to the window cap.
-   - At full long skew in Window A this gives `0.00057 % + 0.03 %`, clamped to 0.03 %.
-   - The alternative is to cap only the skew term, so the total can exceed the cap by the interest component.
-3. **live-min Window A when Tradegate is stale** (ADR-0008, proposed rows).
-   - US live → index = FV (ADR-driven), and the market is degraded (CB3).
-   - US not live → index = FV_last with widening, degraded.
-   - Both cases avoid any two-value median.
-4. **CB7 measurement.** "House equity" includes unrealized PnL marked at the current mark.
+All four maths interpretations from v2 were **confirmed** on 2026-10-27, with additions (§0 "M0 review").
 
 **Needed later (answer before the listed milestone)**
 

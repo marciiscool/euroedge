@@ -1,6 +1,6 @@
 # ADR-0013 — House & insurance genesis capital, CB7, Invariant 7
 
-- **Status:** Accepted (founder, 2026-10-27). Items marked _proposed_ still need founder review.
+- **Status:** Accepted (founder, 2026-10-27; Invariant 7 interpretation confirmed, full form and CB7 hysteresis added at M0 review). Items still marked _proposed_ need founder review.
 - **Review gate:** math
 
 ## Context
@@ -21,34 +21,29 @@ The house is the counterparty to every trade. Test USDC is non-transferable exce
 - **Invariant 1 (restated):** Σ ledger balances = genesis + Σ deposits − Σ executed withdrawals, exactly.
 - _Proposed:_ house/insurance top-ups use the same path (`mintGenesis`-style, logged, admin-only). Each top-up needs founder approval.
 
-### CB7 — capital floor
+### CB7 — capital floor (with hysteresis)
 
-Global reduce-only while either holds:
+- **Trigger:** global reduce-only when `houseEquity < 20 % × 50,000,000` (10,000,000) **or** `insuranceBalance < 20 % × 5,000,000` (1,000,000).
+- **Release:** only once **both** are above 30 % of genesis (15,000,000 and 1,500,000), so CB7 does not flap in fast markets.
+- `houseEquity` = house cash + house unrealized PnL at the latest mark event + accrued, unsettled funding.
 
-- `houseEquity < 20 % × 50,000,000` (10,000,000), or
-- `insuranceBalance < 20 % × 5,000,000` (1,000,000).
+### Invariant 7 — solvency (confirmed)
 
-`houseEquity` = house cash + house unrealized PnL at the current mark + accrued, unsettled funding.
+Checked with a runtime assert on **every event**:
 
-_Proposed:_ CB7 clears only by an admin event, after recapitalisation.
+`Σ_users max(0, equity_i) + max(0, houseEquity) + insuranceBalance ≤ vaultBalance`
 
-### Invariant 7 — solvency
+- `houseEquity` = cash + unrealized PnL at the latest mark event (founder-confirmed interpretation).
+- `vaultBalance` = the engine's view of Vault holdings (= Σ ledger balances, by Invariant 1).
 
-Checked on **every event** with a runtime assert:
+### Invariants 8 and 9
 
-`Σ_users withdrawable_i ≤ vaultBalance − houseEquity − insuranceBalance`
+Checked on every event as separate asserts:
 
-where:
+- **Invariant 8:** `houseEquity ≥ 0`.
+- **Invariant 9:** `insuranceBalance ≥ 0`.
 
-- `withdrawable_i = max(0, equity_i − IM_i)`, the amount the user could withdraw now;
-- `vaultBalance` = the engine's view of Vault holdings (equal to Σ ledger balances, by Invariant 1).
-
-_Interpretation pending founder confirmation._ "House" means **house equity** (cash + unrealized PnL), not house cash.
-
-- With house cash, the check fails whenever users are in profit: their withdrawable balance includes unrealized gains, while the house's offsetting loss is not yet realised.
-- With house equity, the right-hand side equals `Σ_users equity + fees + funding-clearing + vault-pending`. The check then catches broken equity maths and negative clearing accounts.
-
-_Proposed:_ on a violation the engine **fail-stops** (it stops applying events, raises an alert and serves read-only) rather than continuing on suspect state.
+_Proposed:_ on any violation the engine **fail-stops** (it stops applying events, raises an alert and serves read-only) rather than continuing on suspect state.
 
 ## Consequences
 
