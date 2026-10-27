@@ -1,0 +1,26 @@
+import { createHash } from 'node:crypto';
+import type { EngineState } from '../core/state.ts';
+import { canonicalJson } from './canonical.ts';
+
+const byKey = <T>(entries: Iterable<[string, T]>) =>
+  [...entries].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+
+/** Deterministic, complete serialization of engine state (for replay == live, Invariant 6). */
+export function stateSnapshot(state: EngineState): unknown {
+  return {
+    seq: state.seq,
+    ts: state.ts,
+    genesis: state.genesis,
+    netDeposits: state.netDeposits,
+    markets: byKey(state.markets).map(([, m]) => ({ ...m, units: { ...m.units } })),
+    accounts: byKey(state.accounts).map(([id, a]) => ({ id, positions: byKey(a.positions) })),
+    ledger: state.ledger.entries(),
+    idempotency: byKey(state.idempotency),
+  };
+}
+
+/** sha256 of the canonical state snapshot. Equal digests ⇔ bit-for-bit equal state. */
+export const stateDigest = (state: EngineState): string =>
+  createHash('sha256')
+    .update(canonicalJson(stateSnapshot(state)))
+    .digest('hex');
