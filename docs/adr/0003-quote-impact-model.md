@@ -4,7 +4,9 @@
 - **Review gate:** math
 
 ## Context
+
 The house is the only counterparty (brief §7.1). Its quotes must:
+
 - be size-aware;
 - widen with σ_FV;
 - skew with inventory;
@@ -13,6 +15,7 @@ The house is the only counterparty (brief §7.1). Its quotes must:
 The ladder in the UI must match what actually fills.
 
 ## Decision
+
 Every term below is computed in fixed point inside `risk-core`. Parameters are per market and per window in `windows.yaml`.
 
 **1. Marginal price for EUR notional `x`** (side sign `± = +1` buy, `−1` sell):
@@ -27,6 +30,7 @@ In code it is evaluated with an integer power and lookup, so no floats.
 The skew widens the side that adds to house inventory and tightens the side that reduces it.
 
 **4. Flow shift:** `shift = clamp(κ · netFlow, ±0.5 h)`.
+
 - `netFlow` is an EWMA over event time.
 - Each wallet's contribution is capped per window of event time.
 - The shift moves **quotes only**. It never moves FV, index or mark.
@@ -40,9 +44,11 @@ The skew widens the side that adds to house inventory and tightens the side that
 **8. Ladder.** The ladder (€1k / €5k / €25k / €100k) is computed with the **same function** that fills.
 
 **9. Resting limits.**
+
 - A resting limit fills **at its limit price** when the executable price for its **full size** crosses it, and pays the maker fee.
 - No partial fills for resting orders in v1. This is a proposal (R17) pending founder confirmation.
 
 ## Consequences
+
 - Calibration uses the informed-arbitrageur bot: spreads must keep the toxic-flow cost per €1M OI within budget.
 - In step 3, the same model becomes the real market maker (plus hedging cost terms). In step 2, it is replaced by the partner's book behind `ExecutionAdapter`.
