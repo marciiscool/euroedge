@@ -9,7 +9,8 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "sample": "node scripts/generate-sample.ts"
   },
   "dependencies": {
     "@euroedge/calendar": "workspace:*",
