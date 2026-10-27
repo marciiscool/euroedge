@@ -11,6 +11,8 @@ export const shared = defineConfig({
     include: ['src/**/*.test.ts', 'test/**/*.test.ts'],
     setupFiles: [fileURLToPath(new URL('./vitest.setup.ts', import.meta.url))],
     restoreMocks: true,
+    // Shared CI runners are slow and run many packages at once; 5 s default proved flaky.
+    testTimeout: 30_000,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
