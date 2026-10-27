@@ -1,0 +1,27 @@
+{
+  "Meta": {
+    "title": "EuroEdge — Perpetuals auf europäische Aktien (Testnet)",
+    "description": "Europäische Aktien. Perpetual. Rund um die Uhr fair bewertet. Öffentliches Testnet mit Spielgeld."
+  },
+  "Banner": {
+    "testnet": "Testnet",
+    "text": "Nur Spielgeld — Test-USDC haben keinen Wert. Keine Anlageberatung. Außerhalb der Börsenzeiten sind Preise Modellschätzungen."
+  },
+  "Home": {
+    "headline": "Europäische Aktien. Perpetual. Rund um die Uhr fair bewertet.",
+    "status": "Das Testnet befindet sich im Aufbau."
+  },
+  "Theme": {
+    "toggle": "Zum {theme} Design wechseln",
+    "dark": "dunklen",
+    "light": "hellen"
+  },
+  "Locale": {
+    "switch": "Language: English",
+    "label": "Sprache"
+  },
+  "Footer": {
+    "riskWarning": "Perpetual Futures sind komplexe gehebelte Produkte. In diesem Testnet ist alles Guthaben Spielgeld und hat keinen Wert.",
+    "chartsNotice": "Charts von TradingView Lightweight Charts™ (Apache-2.0)."
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "Meta": {
+    "title": "EuroEdge — European equity perpetuals (testnet)",
+    "description": "European stocks. Perpetual. Fairly priced 24/7. Public testnet with play money."
+  },
+  "Banner": {
+    "testnet": "Testnet",
+    "text": "Play money only — Test USDC has no value. No investment advice. Outside exchange hours, prices are model estimates."
+  },
+  "Home": {
+    "headline": "European stocks. Perpetual. Fairly priced 24/7.",
+    "status": "The testnet is under construction."
+  },
+  "Theme": {
+    "toggle": "Switch to {theme} theme",
+    "dark": "dark",
+    "light": "light"
+  },
+  "Locale": {
+    "switch": "Sprache: Deutsch",
+    "label": "Language"
+  },
+  "Footer": {
+    "riskWarning": "Perpetual futures are complex leveraged products. On this testnet all funds are play money and have no value.",
+    "chartsNotice": "Charts by TradingView Lightweight Charts™ (Apache-2.0)."
+  }
+}

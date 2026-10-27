@@ -7,3 +7,4 @@ coverage
 contracts/lib
 contracts/out
 data/sample/*.csv
+**/next-env.d.ts

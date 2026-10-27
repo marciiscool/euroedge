@@ -1,0 +1,28 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import './tokens.css';
+
+/* Scan the shared UI package for class names (apps only auto-detect their own sources). */
+@source '../';
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    /* Tabular figures for every number (brief §11.1). */
+    font-feature-settings:
+      'tnum' 1,
+      'cv11' 1;
+  }
+
+  .font-mono,
+  code,
+  kbd {
+    font-feature-settings:
+      'tnum' 1,
+      'zero' 1;
+  }
+}

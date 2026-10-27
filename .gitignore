@@ -14,3 +14,4 @@ test-results/
 contracts/out/
 contracts/cache/
 contracts/broadcast/*/31337/
+next-env.d.ts
