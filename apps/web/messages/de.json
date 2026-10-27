@@ -79,10 +79,10 @@
     "notional": "Nominalwert",
     "fee": "Gebühr ({bps} bp)",
     "margin": "Margin bei {lev}x",
-    "submit": "{size} Kontrakte {side}",
+    "submit": "{size} Kontrakte {sideVerb}",
     "submitting": "Wird gesendet…",
     "loginToTrade": "Melden Sie sich an, um mit Spielgeld zu handeln.",
-    "filled": "{side} {size} ausgeführt zu {price} (Gebühr {fee} USDC)",
+    "filled": "{sideNoun} über {size} ausgeführt zu {price} (Gebühr {fee} USDC)",
     "networkError": "Die Order konnte nicht gesendet werden. Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
     "reject": {
       "not-genesis": "Das Testnet startet gerade. Bitte versuchen Sie es gleich noch einmal.",
@@ -111,6 +111,10 @@
     "close": "Schließen",
     "closed": "Position geschlossen, realisiert {pnl} USDC",
     "devLogin": "Mit Spielgeld starten",
-    "devLoginHint": "Entwickler-Login: keine Wallet nötig. Sie erhalten 10.000 Test-USDC ohne Wert."
+    "devLoginHint": "Entwickler-Login: keine Wallet nötig. Sie erhalten 10.000 Test-USDC ohne Wert.",
+    "buyVerb": "kaufen",
+    "sellVerb": "verkaufen",
+    "buyNoun": "Kauf",
+    "sellNoun": "Verkauf"
   }
 }

@@ -49,8 +49,8 @@ export function OrderTicket({
         setStatus({
           kind: 'ok',
           text: t('filled', {
-            side: t(r.fill.side),
-            size: r.fill.size,
+            sideNoun: t(`${r.fill.side}Noun`),
+            size: formatNumber(r.fill.size, locale),
             price: formatNumber(r.fill.price, locale),
             fee: formatNumber(r.fill.fee, locale),
           }),
@@ -140,7 +140,12 @@ export function OrderTicket({
         size="lg"
         disabled={!loggedIn || !validSize || busy || market === undefined}
       >
-        {busy ? t('submitting') : t('submit', { side: t(side), size: validSize ? size : '—' })}
+        {busy
+          ? t('submitting')
+          : t('submit', {
+              sideVerb: t(`${side}Verb`),
+              size: validSize ? formatNumber(size, locale) : '—',
+            })}
       </Button>
       {!loggedIn && <p className="text-xs text-muted-foreground">{t('loginToTrade')}</p>}
       <p

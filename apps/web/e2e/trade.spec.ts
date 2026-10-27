@@ -27,6 +27,6 @@ test('rejects an order beyond the window leverage cap with a clear message', asy
   await page.getByRole('button', { name: 'Start with play money' }).click();
   await expect(page.getByText('Equity')).toBeVisible({ timeout: 15_000 });
   await page.getByLabel('Size (contracts)').fill('500');
-  await page.getByRole('button', { name: /^Buy 500 contracts$/ }).click();
+  await page.getByRole('button', { name: /^Buy 500\.00 contracts$/ }).click();
   await expect(page.locator('form [role=status]')).toContainText('Not enough margin');
 });
