@@ -15,3 +15,23 @@
 | Determinism lint | In `packages/{fixed,ledger,risk-core}` and `apps/engine/src/core`: ban `Date`, `Math`, timers, `performance`, `process`, `Number.parseFloat`, and non-integer numeric literals | Enforces ADR-0001.                                                                                                                                                                                                        |
 | Tests            | Vitest 5 projects, fast-check 4, Playwright                                                                                                                                    |                                                                                                                                                                                                                           |
 | Git hooks        | lefthook (Prettier on staged files, commitlint)                                                                                                                                |                                                                                                                                                                                                                           |
+
+## Amendments (M0, 2026-10-27)
+
+**Web linting**
+
+- `apps/web` uses `@next/eslint-plugin-next` + `eslint-plugin-react-hooks` on top of the root config.
+- `eslint-plugin-react`, `eslint-plugin-import` and `eslint-plugin-jsx-a11y` (and therefore `eslint-config-next`) do not yet declare ESLint 10 support.
+- Accessibility is enforced by axe-core in Playwright (M7-27).
+- **Fallback:** if static a11y linting proves necessary before those plugins support ESLint 10, drop to ESLint 9 (founder-approved fallback).
+
+**Supply-chain policy**
+
+- pnpm 12's `minimumReleaseAge` (24 h) is kept and set explicitly.
+- Install scripts are denied by default (`allowBuilds`). Currently denied: lefthook, @swc/core, @parcel/watcher; none needs its script.
+- typescript-eslint is pinned to 8.72.0 because 8.72.1 was less than 24 h old.
+
+**Other**
+
+- `no-unsafe-unary-minus` is off: it is a false positive for branded bigints.
+- `next-env.d.ts` is generated and gitignored.
