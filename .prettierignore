@@ -8,3 +8,6 @@ contracts/lib
 contracts/out
 data/sample/*.csv
 **/next-env.d.ts
+
+# Vendored third-party skills stay byte-identical to their pinned upstream.
+.claude/skills/*/

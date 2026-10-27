@@ -4,6 +4,15 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Research (2026-10-27)
+
+#### Added
+
+- `.claude/skills/`: three reviewed, pinned, MIT-licensed agent skills (`web-interface-guidelines`, `make-interfaces-feel-better`, `accessibility`) with provenance in `.claude/skills/README.md`.
+- `CLAUDE.md`: precedence rules and skill overrides for coding agents.
+- `docs/research/skills-review.md`: every candidate from skill-issue.in and why it was installed, parked or rejected.
+- `docs/research/ui/design-notes.md`: interim UI principles and the WCAG 2.2 requirements they surfaced (2.1.4 single-key shortcuts must be switchable off; 2.4.11; 2.5.7; 2.5.8).
+
 ### M0 — Scaffold (2026-10-27)
 
 #### Added
