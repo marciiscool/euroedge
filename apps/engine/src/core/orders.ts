@@ -8,6 +8,7 @@ import {
   type Position,
 } from '@euroedge/risk-core';
 import { accountEquity, initialRequirement } from './accounting.ts';
+import { recordFlow } from './flow.ts';
 import { executablePrice } from './quote.ts';
 import type { AccountId, MarketId, Side } from './events.ts';
 import type { EngineOutput } from './outputs.ts';
@@ -92,7 +93,7 @@ export function decide(state: EngineState, o: OrderRequest): OrderOutcome {
   if (!reduces && (data.breaker !== 'none' || state.capitalFloor)) return reject('circuit-breaker');
   const risk = m.windows[data.window];
   // House quote for the full size (ADR-0003): σ, inventory skew, convex impact, flow shift.
-  const price = executablePrice(m, qty);
+  const price = executablePrice(m, qty, state.ts);
   if (price === undefined) return reject('no-market-data');
   const side: Side = qty > 0n ? 'buy' : 'sell';
   if (o.limitPrice !== undefined && (side === 'buy' ? price > o.limitPrice : price < o.limitPrice))
@@ -120,6 +121,8 @@ export function decide(state: EngineState, o: OrderRequest): OrderOutcome {
   const deltaCost = r.position.cost - pos.cost;
   acc.positions.set(o.market, r.position);
   m.house = { lots: m.house.lots - qty, cost: m.house.cost - deltaCost };
+  // Voluntary user fills feed the flow shift (M4-03); liquidations do not pass through here.
+  recordFlow(m, o.account, qty > 0n ? notional : -notional, state.ts);
   const postings: Posting[] = [];
   const user = userAccount(o.account);
   if (fee > 0n) postings.push({ from: user, to: SYSTEM.fees, amount: fee, reason: 'fee' });

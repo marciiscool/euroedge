@@ -75,6 +75,8 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
         windows: input.windows,
         fundingInterestBpsPerYear: input.fundingInterestBpsPerYear,
         partialLiquidationBufferBps: input.partialLiquidationBufferBps,
+        flowParams: input.flow,
+        flow: existing?.flow ?? { sum: 0n, sec: ts / 1000n, window: 0n, wallets: new Map() },
         funding: existing?.funding ?? { lastHour: ts / HOUR_MS, index: 0n, lastRate: 0n },
         data: existing?.data,
         house: existing?.house ?? FLAT,

@@ -38,6 +38,16 @@ export interface WindowRisk {
   readonly impactAlphaHalves: bigint;
 }
 
+export interface FlowParams {
+  /** κ: shift in ppm per 1 000 000 USDC of decayed net flow; 0 = no shift. */
+  readonly kappaPpmPerMUsdc: bigint;
+  /** τ: net flow decays by (1 − 1/τ) per second. */
+  readonly tauSec: bigint;
+  /** Max |notional| one wallet adds per window, µUSDC. */
+  readonly walletCap: Usdc;
+  readonly walletWindowSec: bigint;
+}
+
 export type EngineInput =
   | { readonly type: 'ClockTick' }
   | {
@@ -59,6 +69,8 @@ export type EngineInput =
       readonly liquidationPenaltyBps: bigint;
       /** Partial liquidation target buffer over MM, bps; null = full liquidation only (v1 logs). */
       readonly partialLiquidationBufferBps: bigint | null;
+      /** Flow shift (ADR-0003 step 4; values proposed in ADR-0019). */
+      readonly flow: FlowParams;
       /** Funding interest component, longs pay shorts (ADR-0016). */
       readonly fundingInterestBpsPerYear: bigint;
       readonly windows: Readonly<Record<WindowId, WindowRisk>>;

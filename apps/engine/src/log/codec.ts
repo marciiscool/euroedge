@@ -7,7 +7,7 @@ import { canonicalBytes } from './canonical.ts';
 export const EVENT_VERSIONS: Readonly<Record<EngineInput['type'], number>> = {
   ClockTick: 1,
   GenesisCapital: 1,
-  MarketListed: 3,
+  MarketListed: 4,
   MarketData: 2,
   DevDeposit: 1,
   PlaceOrder: 3,
@@ -62,6 +62,10 @@ export const inputSchema = z.discriminatedUnion('type', [
     liquidationPenaltyBps: nonNeg,
     fundingInterestBpsPerYear: nonNeg.default(0n),
     partialLiquidationBufferBps: nonNeg.nullable().default(null),
+    // v1–v3 logs predate the flow shift: κ = 0, i.e. no shift.
+    flow: z
+      .object({ kappaPpmPerMUsdc: nonNeg, tauSec: pos, walletCap: nonNeg, walletWindowSec: pos })
+      .default({ kappaPpmPerMUsdc: 0n, tauSec: 300n, walletCap: 0n, walletWindowSec: 60n }),
     windows: z.object({ A: windowRisk, B: windowRisk, C: windowRisk, D: windowRisk }),
   }),
   z.object({

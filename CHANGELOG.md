@@ -25,6 +25,12 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - `PlaceOrder` v2 and a new `CancelOrder` input; open orders appear in the account snapshot.
   - API: `type`/`limitPrice` on `POST /api/orders`, and `DELETE /api/orders/:id`.
   - Terminal: a market/limit switch, a limit price field and an open-orders table with cancel.
+- Flow shift (M4-03, ADR-0003 step 4; parameters proposed in ADR-0019):
+  - Voluntary user fills feed an exponentially decayed net flow per market: a factor of `1 − 1/τ` per second, in fixed point.
+  - Each wallet counts for at most `walletCap` per window. Liquidations do not count.
+  - The quotes, never FV, index or mark, shift by `κ · netFlow`, clamped to ±h/2.
+  - `windows.yaml` gets a `flow` block; `MarketListed` v4 (older logs: no shift).
+- Fixed: a config change to only the funding interest, the partial-liquidation buffer or the flow parameters now re-lists the market at startup.
 - House quote model (M4-02, ADR-0003; parameters proposed in ADR-0019):
   - The half-spread widens with σ_FV and skews with house inventory.
   - Fills pay a convex size impact `γ/(α+1)·(q/x_ref)^α`, in integer maths (α = 1.5 via an integer square root).

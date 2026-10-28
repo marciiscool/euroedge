@@ -14,7 +14,7 @@ export function marketSnapshot(state: EngineState, id: string): MarketSnapshot |
   const d = m?.data;
   if (m === undefined || d === undefined) return undefined;
   const risk = m.windows[d.window];
-  const q = marketQuote(m);
+  const q = marketQuote(m, state.ts);
   if (q === undefined) return undefined;
   const px = (t: bigint) => ticksToPrice(m.units, ticks(t));
   return {

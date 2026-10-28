@@ -40,6 +40,12 @@ export function marketListedInput(
     maintenanceMarginBps: BigInt(w.maintenanceMarginBps[m.kind]),
     fundingInterestBpsPerYear: BigInt(w.fundingInterestBpsPerYear),
     partialLiquidationBufferBps: BigInt(w.partialLiquidationBufferBps),
+    flow: {
+      kappaPpmPerMUsdc: BigInt(w.flow.kappaPpmPerMUsdc),
+      tauSec: BigInt(w.flow.tauSec),
+      walletCap: usdc(BigInt(w.flow.walletCapUsdc) * 1_000_000n),
+      walletWindowSec: BigInt(w.flow.walletWindowSec),
+    },
     liquidationPenaltyBps: BigInt(w.liquidationPenaltyBps[m.kind]),
     windows: { A: risk('A'), B: risk('B'), C: risk('C'), D: risk('D') },
   };
