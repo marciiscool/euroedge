@@ -45,6 +45,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - The 50 bp/s step cap is suspended for 60 s.
   - An open outside the prior band sets the market reduce-only for 5 min (breaker `SNAP`).
   - Live-min VWAP reconciliation and the 3-min-VWAP liquidation price arrive with the vendor feed and M4.
+- Public methodology v1 (`docs/methodology/README.md`), covering FV, index, mark, snap, baskets and breakers (M3-18).
 - Golden vectors (M3-17): hand-derived fee, liquidation-price and FV examples in `docs/methodology/examples/`, checked in CI. Funding vectors follow in M4.
 - σ-floor fit (M3-16): walk-forward per-window proposal (`--fit`). It is not applied; the Window A band semantics need a founder decision.
 
