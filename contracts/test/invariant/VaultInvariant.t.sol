@@ -72,10 +72,10 @@ contract VaultHandler is Test {
         if (withdrawable[u] == 0) return;
         amount = bound(amount, 1, withdrawable[u]);
         uint256 room = vault.dailyLimit()
-            - (vault.currentDay() == block.timestamp / 1 days ? vault.withdrawnToday() : 0);
+            - (vault.currentDay() == vm.getBlockTimestamp() / 1 days ? vault.withdrawnToday() : 0);
         if (amount > room) return;
         uint256 nonce = nextNonce++;
-        uint256 deadline = block.timestamp + 1 hours;
+        uint256 deadline = vm.getBlockTimestamp() + 1 hours;
         vault.withdraw(u, amount, nonce, deadline, _auth(u, amount, nonce, deadline));
         withdrawable[u] -= amount;
         totalWithdrawn += amount;
@@ -86,7 +86,7 @@ contract VaultHandler is Test {
         if (usedNonces.length == 0) return;
         uint256 nonce = usedNonces[i % usedNonces.length];
         address u = users[0];
-        uint256 deadline = block.timestamp + 1 hours;
+        uint256 deadline = vm.getBlockTimestamp() + 1 hours;
         try vault.withdraw(u, 1, nonce, deadline, _auth(u, 1, nonce, deadline)) {
             replaySucceeded = true;
         } catch {}
@@ -95,16 +95,16 @@ contract VaultHandler is Test {
     function expired(uint256 who) external {
         address u = users[who % 3];
         uint256 nonce = nextNonce++;
-        uint256 deadline = block.timestamp;
+        uint256 deadline = vm.getBlockTimestamp();
         bytes memory auth = _auth(u, 1, nonce, deadline);
-        vm.warp(block.timestamp + 1);
+        vm.warp(vm.getBlockTimestamp() + 1);
         try vault.withdraw(u, 1, nonce, deadline, auth) {
             expiredSucceeded = true;
         } catch {}
     }
 
     function nextDay() external {
-        vm.warp(block.timestamp + 1 days);
+        vm.warp(vm.getBlockTimestamp() + 1 days);
     }
 }
 
