@@ -26,6 +26,11 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Read models (M4-22):
+  - The engine projects fills, the order lifecycle, liquidations and cash flows (funding, dividends, withdrawals) into `rm_*` tables (migration 0005).
+  - Rows are keyed by (seq, output index), so writes are idempotent; a cursor is committed with them.
+  - On startup, or after a failed write, the engine catches up by replaying the log.
+  - New `CashFlow` output per account for funding and dividends.
 - Stress scenarios (M4-27), each with Invariants 1–10 checked after every event:
   - a −25 % Monday gap after a window-D weekend: longs liquidated, insurance absorbs the shortfall;
   - a bad print: dropped at the band check, then held by a reduce-only breaker;
