@@ -29,6 +29,7 @@ export function stateSnapshot(state: EngineState): unknown {
     withdrawals: byKey(state.withdrawals),
     withdrawalNonce: state.withdrawalNonce,
     dividends: byKey(state.dividends),
+    chainLogs: byKey(state.chainLogs),
   };
 }
 

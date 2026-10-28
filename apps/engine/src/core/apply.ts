@@ -9,6 +9,7 @@ import { evaluateCapitalFloor } from './capital.ts';
 import { evaluateHouseLoss, rollHouseDay } from './house-risk.ts';
 import { executeOrder } from './orders.ts';
 import { requestWithdrawal, settleWithdrawal } from './withdrawals.ts';
+import { chainDeposit, vaultWithdrawn } from './chain.ts';
 import { applyDividend } from './dividends.ts';
 import { trackSnap } from './snap.ts';
 import { adjustMarket, freezeMarket, unfreezeMarket } from './corporate-actions.ts';
@@ -207,6 +208,12 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
 
     case 'DividendExDate':
       return applyDividend(state, input);
+
+    case 'ChainDeposit':
+      return chainDeposit(state, input);
+
+    case 'VaultWithdrawn':
+      return vaultWithdrawn(state, input);
 
     case 'RequestWithdrawal':
       return requestWithdrawal(state, input);

@@ -10,7 +10,7 @@ import { canonicalBytes } from './canonical.ts';
  */
 
 /** 2: withdrawals, dividends and corporate-action freezes joined the state (M4). */
-export const STATE_FORMAT = 4; // 3: earnings windows (M4-08); 4: snap period (M4-13)
+export const STATE_FORMAT = 5; // 3: earnings (M4-08); 4: snap (M4-13); 5: chain logs (M5-09)
 
 type Plain = null | boolean | number | string | Plain[] | { [k: string]: Plain };
 

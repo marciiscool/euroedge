@@ -188,6 +188,23 @@ export type EngineInput =
       readonly actionId: string;
     }
   | {
+      /** Indexer (M5-09): a Vault `Deposited` log at the safe tag. Credited once per log. */
+      readonly type: 'ChainDeposit';
+      readonly account: AccountId;
+      readonly amount: Usdc;
+      readonly txHash: string;
+      readonly logIndex: number;
+    }
+  | {
+      /** Indexer (M5-09): a Vault `Withdrawn` log; settles the pending withdrawal with this nonce. */
+      readonly type: 'VaultWithdrawn';
+      readonly account: AccountId;
+      readonly amount: Usdc;
+      readonly nonce: bigint;
+      readonly txHash: string;
+      readonly logIndex: number;
+    }
+  | {
       /** Reserve collateral for an on-chain withdrawal to the account's address (M4-18). */
       readonly type: 'RequestWithdrawal';
       readonly requestId: string;
