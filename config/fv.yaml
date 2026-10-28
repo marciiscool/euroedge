@@ -24,3 +24,5 @@ breakers:
   basketDrawdownBp: 700
   basketCooldownSeconds: 900
   markPinnedSeconds: 60
+# Reopen snap (brief §6.4): step cap suspended after the opening print; open outside the prior band → reduce-only.
+snap: { capSuspendSeconds: 60, outsideBandReduceOnlySeconds: 300 }

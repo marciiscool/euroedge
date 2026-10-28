@@ -40,6 +40,11 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - Reports MAE/RMSE, p99.9, improvement vs the last close, band coverage and a PIT histogram, per window.
   - Comparisons are dividend-aware.
   - Sample report in `docs/backtest/`.
+- Reopen snap (M3-08/09):
+  - The opening-auction print (never an indicative) re-centres FV, index and band.
+  - The 50 bp/s step cap is suspended for 60 s.
+  - An open outside the prior band sets the market reduce-only for 5 min (breaker `SNAP`).
+  - Live-min VWAP reconciliation and the 3-min-VWAP liquidation price arrive with the vendor feed and M4.
 - σ-floor fit (M3-16): walk-forward per-window proposal (`--fit`). It is not applied; the Window A band semantics need a founder decision.
 
 ### M2 — Data layer (complete, on `integration/m2`)

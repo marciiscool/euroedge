@@ -52,6 +52,10 @@ export const fvParamsSchema = z.object({
       basketCooldownSeconds: 900,
       markPinnedSeconds: 60,
     }),
+  /** Reopen snap (brief §6.4). */
+  snap: z
+    .object({ capSuspendSeconds: nonNeg, outsideBandReduceOnlySeconds: nonNeg })
+    .default({ capSuspendSeconds: 60, outsideBandReduceOnlySeconds: 300 }),
   dkkPeg: z
     .object({ central: z.number().positive(), alertBp: nonNeg })
     .default({ central: 7.46038, alertBp: 50 }),

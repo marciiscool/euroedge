@@ -2,7 +2,7 @@ import type { FvParams, Window } from '@euroedge/shared';
 import type { SourceContribution } from './model.ts';
 
 /** Circuit breakers evaluated from market data (brief §6.5). CB5–CB7 live in the engine (M4). */
-export type BreakerId = 'CB1' | 'CB2' | 'CB3' | 'CB3-TG' | 'CB4' | 'CB8';
+export type BreakerId = 'CB1' | 'CB2' | 'CB3' | 'CB3-TG' | 'CB4' | 'CB8' | 'SNAP';
 
 /** Strongest effect wins: freeze > reduce-only > degraded (no opens, wider spreads) > no-opens. */
 export type BreakerEffect = 'none' | 'no-opens' | 'degraded' | 'reduce-only';
@@ -19,6 +19,7 @@ const EFFECT: Record<BreakerId, BreakerEffect> = {
   'CB3-TG': 'reduce-only',
   CB4: 'reduce-only',
   CB8: 'degraded',
+  SNAP: 'reduce-only',
 };
 
 export interface BreakerInput {
@@ -38,6 +39,8 @@ export interface BreakerInput {
   readonly mark: bigint;
   readonly bandLo: bigint;
   readonly bandHi: bigint;
+  /** Reopen snap (brief §6.4): an open outside the prior band → reduce-only for a while. */
+  readonly snap?: { readonly ts: number; readonly outsideBand: boolean };
 }
 
 export interface BreakerChange {
@@ -79,6 +82,8 @@ class Hysteresis {
 /** Per-market breaker state machine. Deterministic in its inputs (event time only). */
 export class MarketBreakers {
   private readonly p: FvParams['breakers'];
+  private readonly snapMs: number;
+  private snapUntil: number | undefined;
   private readonly cb1: Hysteresis;
   private readonly tg: Hysteresis;
   private readonly cb8: Hysteresis;
@@ -87,6 +92,7 @@ export class MarketBreakers {
 
   constructor(params: FvParams) {
     this.p = params.breakers;
+    this.snapMs = params.snap.outsideBandReduceOnlySeconds * 1000;
     this.cb1 = new Hysteresis(this.p.divergenceSeconds * 1000, this.p.divergenceSeconds * 1000);
     this.tg = new Hysteresis(
       this.p.tradegateStaleEscalationSeconds * 1000,
@@ -106,6 +112,8 @@ export class MarketBreakers {
       Math.abs(Math.log(adr.implied / tg.implied)) > this.p.divergenceSigmas * i.sigma;
     if (this.cb1.update(diverged, i.ts)) next.add('CB1');
     if (i.primaryHalted) next.add('CB2');
+    if (i.snap?.outsideBand === true) this.snapUntil = i.snap.ts + this.snapMs;
+    if (this.snapUntil !== undefined && i.ts < this.snapUntil) next.add('SNAP');
     // CB3: index stale (no fresh signal) beyond the window's limit.
     const freshest = i.sources.reduce((m, s) => Math.min(m, s.ageMs), Infinity);
     if (freshest !== Infinity) this.lastFresh = i.ts - freshest;
