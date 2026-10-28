@@ -28,3 +28,4 @@ export {
   type QuoteInputs,
   type QuoteParams,
 } from './quote.ts';
+export { cappedFlow, decayFlow, flowDecayFactor, flowShiftPpm } from './flow.ts';

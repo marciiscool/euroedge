@@ -41,6 +41,9 @@ export function bootstrapInputs(
         minNotional: cur.minNotional,
         mm: cur.maintenanceMarginBps,
         pen: cur.liquidationPenaltyBps,
+        fund: cur.fundingInterestBpsPerYear,
+        buffer: cur.partialLiquidationBufferBps,
+        flow: cur.flowParams,
         windows: cur.windows,
       }) ===
         canonicalJson({
@@ -50,6 +53,9 @@ export function bootstrapInputs(
           minNotional: desired.minNotional,
           mm: desired.maintenanceMarginBps,
           pen: desired.liquidationPenaltyBps,
+          fund: desired.fundingInterestBpsPerYear,
+          buffer: desired.partialLiquidationBufferBps,
+          flow: desired.flow,
           windows: desired.windows,
         });
     if (!same) inputs.push(desired);

@@ -18,6 +18,7 @@ export function stateSnapshot(state: EngineState): unknown {
       ...m,
       data: m.data ?? null,
       units: { ...m.units },
+      flow: { ...m.flow, wallets: byKey(m.flow.wallets) },
     })),
     accounts: byKey(state.accounts).map(([id, a]) => ({ id, positions: byKey(a.positions) })),
     ledger: state.ledger.entries(),

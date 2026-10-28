@@ -82,4 +82,7 @@ liquidationPenaltyBps: { stock: 100, basket: 50 }
 # MM × (1 + buffer). Proposed default 25 %, founder to confirm.
 partialLiquidationBufferBps: 2500
 fundingInterestBpsPerYear: 500
+# Flow shift (ADR-0003 step 4): quotes (never FV, index or mark) shift with decayed net user
+# flow, capped at ±h/2. PROPOSED values (ADR-0019), founder to confirm.
+flow: { kappaPpmPerMUsdc: 100, tauSec: 300, walletCapUsdc: 250000, walletWindowSec: 60 }
 markStepCapBpsPerSecond: 50

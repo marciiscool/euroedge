@@ -1,7 +1,15 @@
 import type { MarketUnits, Ticks, Usdc } from '@euroedge/fixed';
 import { Ledger } from '@euroedge/ledger';
 import type { Position } from '@euroedge/risk-core';
-import type { AccountId, BreakerEffect, MarketId, Side, WindowId, WindowRisk } from './events.ts';
+import type {
+  AccountId,
+  BreakerEffect,
+  FlowParams,
+  MarketId,
+  Side,
+  WindowId,
+  WindowRisk,
+} from './events.ts';
 
 export interface MarketData {
   readonly window: WindowId;
@@ -26,6 +34,14 @@ export interface MarketState {
   data: MarketData | undefined;
   readonly fundingInterestBpsPerYear: bigint;
   readonly partialLiquidationBufferBps: bigint | null;
+  readonly flowParams: FlowParams;
+  /** Decayed net user flow (µUSDC) as of `sec`, and per-wallet usage in window `window`. */
+  readonly flow: {
+    sum: bigint;
+    sec: bigint;
+    window: bigint;
+    readonly wallets: Map<AccountId, bigint>;
+  };
   /** Funding (ADR-0016): last settled hour (event-time hours since epoch) and cumulative rate. */
   funding: { lastHour: bigint; index: bigint; lastRate: bigint };
   /** House position = exact negative of all user positions (lots and cost). */

@@ -205,6 +205,16 @@ export const windowsFileSchema = z.object({
   liquidationPenaltyBps: z.object({ stock: bps, basket: bps }),
   /** Partial liquidation restores equity to MM × (1 + buffer) (M4). */
   partialLiquidationBufferBps: bps,
+  /** Flow shift (ADR-0003 step 4). PROPOSED values, ADR-0019. */
+  flow: z.object({
+    /** κ: quote shift in ppm per 1 000 000 USDC of decayed net user flow. */
+    kappaPpmPerMUsdc: z.number().int().min(0),
+    /** τ: net flow decays by (1 − 1/τ) per second. */
+    tauSec: z.number().int().min(1),
+    /** Max |notional| (whole USDC) one wallet adds to the flow per window. */
+    walletCapUsdc: z.number().int().min(0),
+    walletWindowSec: z.number().int().min(1),
+  }),
   /** Funding interest component, longs pay shorts (ADR-0016). */
   fundingInterestBpsPerYear: bps,
   /** Mark step cap outside SNAP (ADR-0009). */

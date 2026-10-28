@@ -69,6 +69,7 @@ export const listASML: EngineInput = {
   minNotional: usdc(10n * USDC),
   maintenanceMarginBps: 1000n,
   liquidationPenaltyBps: 100n,
+  flow: { kappaPpmPerMUsdc: 0n, tauSec: 300n, walletCap: usdc(0n), walletWindowSec: 60n },
   fundingInterestBpsPerYear: 500n,
   partialLiquidationBufferBps: 2500n,
   windows: WINDOWS,
@@ -121,13 +122,21 @@ export const order = (
 export class Harness {
   readonly state: EngineState = createState();
   readonly log: EngineInput[] = [];
+  /** Extra event time added by `skip` (ms). */
+  private offset = 0n;
+
+  /** Moves event time forward by `ms` for all later inputs. */
+  skip(ms: bigint): this {
+    this.offset += ms;
+    return this;
+  }
 
   run(...inputs: EngineInput[]): EngineOutput[] {
     return inputs.flatMap((input) => {
       this.log.push(input);
       return apply(this.state, {
         seq: this.state.seq + 1n,
-        ts: 1_793_000_000_000n + this.state.seq * 1000n,
+        ts: 1_793_000_000_000n + this.state.seq * 1000n + this.offset,
         v: 1,
         input,
       });
