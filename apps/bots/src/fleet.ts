@@ -2,13 +2,20 @@ import type { Intent, Random, Strategy } from './strategies.ts';
 
 /** How bots see the venue and trade on it; the HMAC API client (M6-03) replaces the stream. */
 export interface BotTransport {
-  /** Current mark, or undefined while the market has no data. */
-  mark(market: string): Promise<number | undefined>;
+  /** Current mark, FV and house bid/ask, or undefined while the market has no data. */
+  quote(market: string): Promise<Quote | undefined>;
   /** Signed position in lots. */
   position(account: string, market: string): Promise<bigint>;
   /** One-time play-money credit (sim tier only). */
   fund(account: string): Promise<void>;
   place(account: string, market: string, intent: Intent, requestId: string): Promise<void>;
+}
+
+export interface Quote {
+  readonly mark: number;
+  readonly fv: number;
+  readonly bid: number;
+  readonly ask: number;
 }
 
 export interface Bot {
@@ -57,15 +64,18 @@ export class BotFleet {
   async tick(): Promise<number> {
     let sent = 0;
     for (const market of this.markets) {
-      const mark = await this.transport.mark(market);
-      if (mark === undefined) continue;
+      const quote = await this.transport.quote(market);
+      if (quote === undefined) continue;
       const marks = this.history.get(market) ?? [];
-      marks.push(mark);
+      marks.push(quote.mark);
       if (marks.length > this.keep) marks.shift();
       this.history.set(market, marks);
       for (const bot of this.bots) {
         const position = await this.transport.position(bot.account, market);
-        const intent = bot.strategy.decide({ marks, position }, this.rng);
+        const intent = bot.strategy.decide(
+          { marks, position, fv: quote.fv, bid: quote.bid, ask: quote.ask },
+          this.rng,
+        );
         if (intent === null || intent.lots <= 0n) continue;
         this.n += 1;
         await this.transport.place(bot.account, market, intent, `${bot.account}-${this.n}`);

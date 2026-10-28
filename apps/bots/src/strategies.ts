@@ -12,6 +12,10 @@ export interface BotView {
   readonly marks: readonly number[];
   /** Signed position in lots. */
   readonly position: bigint;
+  /** Current fair value and the house's best bid/ask, when known. */
+  readonly fv?: number;
+  readonly bid?: number;
+  readonly ask?: number;
 }
 
 export interface Intent {
@@ -97,5 +101,38 @@ export const meanReversion = (
     const dev = (view.marks[n - 1] ?? ewma) / ewma - 1;
     if (Math.abs(dev) < threshold) return null;
     return bounded(view, s, dev > 0 ? 'sell' : 'buy', size(s, rng));
+  },
+});
+
+/**
+ * Whale (M4-26): rare, very large orders. Trades never move the mark (only market data
+ * does), so a whale cannot push others into liquidation; the engine tests assert this.
+ */
+export const whale = (
+  s: Sizing = { activity: 0.02, minLots: 50_000n, maxLots: 250_000n, maxPosition: 1_000_000n },
+): Strategy => ({
+  name: 'whale',
+  decide(view, rng) {
+    if (view.marks.length === 0 || rng.uniform() >= s.activity) return null;
+    return bounded(view, s, rng.uniform() < 0.5 ? 'buy' : 'sell', size(s, rng));
+  },
+});
+
+/**
+ * Arbitrageur (M4-25): buys when FV is above the ask by `edge` (fraction), sells when it is
+ * below the bid. Live it only sees the current FV; the engine simulation gives it the next one.
+ */
+export const arbitrageur = (
+  edge = 0.0015,
+  s: Sizing = { ...DEFAULT_SIZING, activity: 1 },
+): Strategy => ({
+  name: 'arbitrageur',
+  decide(view, rng) {
+    const { fv, bid, ask } = view;
+    if (fv === undefined || bid === undefined || ask === undefined || rng.uniform() >= s.activity)
+      return null;
+    if (fv > ask * (1 + edge)) return bounded(view, s, 'buy', size(s, rng));
+    if (fv < bid * (1 - edge)) return bounded(view, s, 'sell', size(s, rng));
+    return null;
   },
 });

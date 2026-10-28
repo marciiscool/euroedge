@@ -26,6 +26,10 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Adversarial bots (M4-25/26):
+  - Engine simulations: a 10 M USDC whale cannot trigger any liquidation, because trades never move the mark.
+  - An informed arbitrageur that knows the next FV measures the house's cost per €1 M traded and per €1 M OI per hour, under the M1 quote and under the ADR-0019 proposal (`pnpm --filter @euroedge/engine bench:adversarial`).
+  - The bots app gains whale and arbitrageur strategies (4 of each per 200 bots).
 - Snap period (M4-13), on the move into window A:
   - If the opening mark lands outside the last band, the market is reduce-only for 5 minutes (`snap-outside-band`; resting orders wait).
   - For 3 minutes the opening print alone never liquidates a solvent account; from the next print on, the trigger uses the mean mark since the snap. Insolvent accounts are always liquidated.

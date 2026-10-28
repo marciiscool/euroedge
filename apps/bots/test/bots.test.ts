@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { Rng } from '@euroedge/data-adapters';
 import { BotFleet, makeBots, type BotTransport } from '../src/fleet.ts';
-import { meanReversion, momentum, noise, type Intent, type Random } from '../src/strategies.ts';
+import {
+  arbitrageur,
+  meanReversion,
+  momentum,
+  noise,
+  whale,
+  type Intent,
+  type Random,
+} from '../src/strategies.ts';
 
 const always: Random = { uniform: () => 0 }; // acts every tick, minimum size, picks "buy"
 const rising = Array.from({ length: 20 }, (_, i) => 700 + i);
@@ -49,7 +57,10 @@ describe('bot fleet (M4-23)', () => {
     const funded: string[] = [];
     let mark = 700;
     const transport: BotTransport = {
-      mark: () => Promise.resolve((mark += 1)),
+      quote: () => {
+        mark += 1;
+        return Promise.resolve({ mark, fv: mark, bid: mark - 0.35, ask: mark + 0.35 });
+      },
       position: () => Promise.resolve(0n),
       fund: (a) => Promise.resolve(void funded.push(a)),
       place: (account, _m, intent, requestId) =>
@@ -69,12 +80,32 @@ describe('bot fleet (M4-23)', () => {
 
   it('skips markets without data', async () => {
     const transport: BotTransport = {
-      mark: () => Promise.resolve(undefined),
+      quote: () => Promise.resolve(undefined),
       position: () => Promise.resolve(0n),
       fund: () => Promise.resolve(),
       place: () => Promise.reject(new Error('must not trade')),
     };
     const fleet = new BotFleet(makeBots(3, [noise()]), ['ASML-PERP'], transport, new Rng(1));
     expect(await fleet.tick()).toBe(0);
+  });
+});
+
+describe('whale and arbitrageur strategies (M4-25/26)', () => {
+  it('the whale trades rarely and big, within its limit', () => {
+    const w = whale();
+    expect(w.decide({ marks: [700], position: 0n }, { uniform: () => 0.5 })).toBeNull();
+    const i = w.decide({ marks: [700], position: 0n }, always);
+    expect(i?.lots).toBe(50_000n);
+    expect(w.decide({ marks: [700], position: 1_000_000n }, always)?.reduceOnly).toBe(true);
+  });
+
+  it('the arbitrageur trades only when FV is outside the quote by its edge', () => {
+    const a = arbitrageur();
+    const at = (fv: number) =>
+      a.decide({ marks: [700], position: 0n, fv, bid: 699.65, ask: 700.35 }, always);
+    expect(at(700)).toBeNull();
+    expect(at(702)?.side).toBe('buy');
+    expect(at(698)?.side).toBe('sell');
+    expect(a.decide({ marks: [700], position: 0n }, always)).toBeNull(); // no FV known
   });
 });

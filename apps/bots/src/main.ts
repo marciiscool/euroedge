@@ -3,7 +3,7 @@ import { Rng } from '@euroedge/data-adapters';
 import { createValkey, runService } from '@euroedge/service-kit';
 import { loadConfig } from './config.ts';
 import { BotFleet, makeBots } from './fleet.ts';
-import { meanReversion, momentum, noise } from './strategies.ts';
+import { arbitrageur, meanReversion, momentum, noise, whale } from './strategies.ts';
 import { valkeyTransport } from './transport.ts';
 
 const config = loadConfig();
@@ -17,7 +17,12 @@ await runService(
     }
     const valkey = createValkey(config.VALKEY_URL, 'bots');
     const fleet = new BotFleet(
-      makeBots(config.BOTS_COUNT, [noise(), momentum(), meanReversion()]),
+      // Mostly background flow; one whale and one arbitrageur per 50 bots.
+      makeBots(config.BOTS_COUNT, [
+        ...Array.from({ length: 16 }, () => [noise(), momentum(), meanReversion()]).flat(),
+        whale(),
+        arbitrageur(),
+      ]),
       config.BOTS_MARKETS.split(',').map((m) => m.trim()),
       valkeyTransport(valkey, config.BOTS_FUND_USDC),
       new Rng(config.BOTS_SEED),
