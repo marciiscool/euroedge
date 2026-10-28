@@ -30,6 +30,14 @@ Fund the three ETH roles with Base Sepolia ETH. 0.05 ETH each is plenty to start
    - Allowed origins: `http://localhost:8080`.
    - Set `NEXT_PUBLIC_PRIVY_APP_ID` to the app id.
 
+## Lean trial (fewest steps)
+
+For a first trial, two things are enough: Base Sepolia ETH on the **deployer** address only, and the Privy app id.
+
+- **Safe and Etherscan key are optional.** Without `ADMIN_SAFE`, the deployer key stays admin; hand over to a Safe later. Without `ETHERSCAN_API_KEY`, the contracts deploy unverified on Basescan.
+- **0.0003 ETH is enough to deploy.** At testnet gas prices the whole deploy costs about 0.0001 ETH. Coinbase's developer faucet (CDP portal) pays 0.0001 ETH per claim with no mainnet balance required; claim a few times. Alchemy's faucet requires 0.001 ETH on Ethereum mainnet.
+- **One funded address.** After funding the deployer, `pnpm chain:fund` passes 0.0001 ETH each to the relayer and the root poster.
+
 ## 3. Preflight
 
 ```bash

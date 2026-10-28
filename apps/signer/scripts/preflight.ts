@@ -17,6 +17,10 @@ const ok: string[] = [];
 const bad: string[] = [];
 const check = (cond: boolean, pass: string, fail: string) =>
   cond ? ok.push(pass) : bad.push(fail);
+const warn: string[] = [];
+/** Optional for a testnet trial: reported, but does not block the deploy. */
+const optional = (cond: boolean, pass: string, note: string) =>
+  cond ? ok.push(pass) : warn.push(note);
 const KEY = /^0x[0-9a-fA-F]{64}$/;
 const addr = (name: string): Address | undefined => {
   const k = env[name] ?? '';
@@ -49,20 +53,32 @@ check(
   'all four keys are different',
   'keys must be four different keys (brief §12)',
 );
+// Base Sepolia gas is tiny: the whole deploy costs ≈ 0.0001 ETH (2026-10-28). Fund only the
+// deployer; `pnpm chain:fund` passes some on to the relayer and the root poster.
 if (client !== undefined) {
-  for (const role of ['deployer', 'relayer', 'rootPoster'] as const) {
-    const a = roles[role];
-    if (a === undefined) continue;
-    const eth = Number(formatEther(await client.getBalance({ address: a })));
-    check(
-      eth >= 0.01,
+  const balance = async (a: Address | undefined) =>
+    a === undefined ? 0 : Number(formatEther(await client.getBalance({ address: a })));
+  const dep = await balance(roles.deployer);
+  check(
+    dep >= 0.0003,
+    `deployer holds ${dep.toFixed(4)} ETH`,
+    `deployer ${String(roles.deployer)} holds ${dep.toFixed(4)} ETH: send it at least 0.0003 Base Sepolia ETH`,
+  );
+  for (const role of ['relayer', 'rootPoster'] as const) {
+    const eth = await balance(roles[role]);
+    optional(
+      eth >= 0.00005,
       `${role} holds ${eth.toFixed(4)} ETH`,
-      `${role} ${a} holds ${eth.toFixed(4)} ETH: fund it with Base Sepolia ETH (≥ 0.01)`,
+      `${role} has no ETH yet: run \`pnpm chain:fund\` once the deployer is funded`,
     );
   }
 }
 const safe = env['ADMIN_SAFE'] ?? '';
-check(isAddress(safe), `ADMIN_SAFE ${safe}`, 'ADMIN_SAFE missing (your Safe on Base Sepolia)');
+optional(
+  isAddress(safe),
+  `ADMIN_SAFE ${safe}`,
+  'no ADMIN_SAFE: the deployer key stays admin (fine for a trial; hand over to a Safe later)',
+);
 if (client !== undefined && isAddress(safe)) {
   const code = await client.getCode({ address: safe });
   check(
@@ -71,10 +87,10 @@ if (client !== undefined && isAddress(safe)) {
     'ADMIN_SAFE has no code on Base Sepolia: is it the right network?',
   );
 }
-check(
+optional(
   (env['ETHERSCAN_API_KEY'] ?? '') !== '',
   'ETHERSCAN_API_KEY set (Basescan verification)',
-  'ETHERSCAN_API_KEY missing (Etherscan v2 key, works for Basescan)',
+  'no ETHERSCAN_API_KEY: contracts deploy unverified on Basescan (verify later)',
 );
 check(
   (env['NEXT_PUBLIC_PRIVY_APP_ID'] ?? '').length === 25,
@@ -132,6 +148,7 @@ if (!existsSync(file)) {
 }
 
 for (const line of ok) console.log(`  ✓ ${line}`);
+for (const line of warn) console.log(`  ! ${line}`);
 for (const line of bad) console.log(`  ✗ ${line}`);
 console.log(bad.length === 0 ? '\nAll checks passed.' : `\n${bad.length} to fix.`);
 process.exitCode = bad.length === 0 ? 0 : 1;

@@ -15,6 +15,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - `GENESIS_SOURCE=chain` makes the engine wait for the Vault's genesis.
   - With contracts configured, the API disables the sign-in play-money credit and the dev login, so every balance is backed by the Vault.
   - `scripts/stack.sh` also starts relayer, indexer and signer (idle unless enabled).
+  - Lean trial: Safe and Etherscan key optional, only the deployer needs faucet ETH; `pnpm chain:fund` passes some on to the relayer and the root poster.
 - Web funds panel (M5), shown after wallet sign-in:
   - Shows the wallet's Test USDC and how much can still be claimed.
   - Claim and deposit are one click each: the Privy wallet signs, the relayer pays gas.
