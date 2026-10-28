@@ -8,6 +8,10 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Vault indexer (M5-09):
+  - Polls Vault logs up to the `safe` block from a Postgres cursor and forwards `GenesisFunded` → `GenesisCapital`, `Deposited` → `ChainDeposit` and `Withdrawn` → `VaultWithdrawn` to the engine (at-least-once).
+  - The engine applies each log once per (txHash, logIndex), and settles a withdrawal only if account and amount match the signed reservation.
+  - Checked against contracts deployed on anvil.
 - Foundry project (M5-01): OpenZeppelin 5.6.1 and forge-std 1.17 as pinned submodules, solc 0.8.30. CI runs forge fmt/build/test and Slither.
 - `TestUSDC` (M5-02):
   - Non-transferable except faucet → user and user ↔ Vault.
