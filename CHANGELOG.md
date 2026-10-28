@@ -8,6 +8,22 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Engine signer (M5-08):
+  - `apps/signer` signs each pending withdrawal reservation once as the Vault's EIP-712 `Withdrawal`, with the deadline floored to seconds.
+  - The key sits behind an interface (local key now, KMS later).
+  - The engine publishes withdrawal records, a pending set and a stream for it.
+- Withdrawal expiry (M5-10): once the safe block is past a deadline and the nonce is still unused there, the indexer sends `WithdrawalExpired` and the engine re-credits.
+- Hourly balance roots (M5-12):
+  - A shared OpenZeppelin-standard Merkle tree, cross-checked against the Solidity contract.
+  - The engine snapshots wallet cash each hour, the signer app posts the root with its own key, and `GET /api/proofs/:account` serves proofs.
+  - `POST/GET /api/withdrawals`.
+- Local chain end-to-end test (M5-13), `pnpm --filter @euroedge/indexer test:chain` with `FOUNDRY_BIN`. Against the real contracts on anvil:
+  1. gasless claim and deposit through the relayer;
+  2. the indexer credits the deposit;
+  3. trade;
+  4. engine-reserved, signer-authorised withdrawal paid by the Vault and settled by the indexer;
+  5. root posted and verified on-chain;
+  6. an unused withdrawal expires and is re-credited.
 - Gasless relayer (M5-11):
   - `POST /relay/claim` and `/relay/deposit` (routed by Caddy) submit user-signed `claimFor` and `depositWithPermit`.
   - Same-origin only, rate-limited per wallet (5/h) and IP (20/h) (proposals).
