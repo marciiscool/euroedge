@@ -77,6 +77,19 @@ scripts/stack.sh stop
 
 ![M1 terminal](docs/screenshots/m1/terminal-dark-en.png)
 
+### Sign in with email, Google or a wallet
+
+Sign-in works like Hyperliquid's (ADR-0020). Privy offers email codes, Google and external wallets in one window. Users without a wallet get an embedded one. Our API then sets the session via SIWE.
+
+To enable it:
+
+1. Create an app at privy.io.
+2. Enable email and Google.
+3. Allow `http://localhost:8080`.
+4. Set `NEXT_PUBLIC_PRIVY_APP_ID` in `.env` and rebuild the web app.
+
+Without an app id only the dev login shows.
+
 ## Everyday commands
 
 | Command                        | What it does                                                             |
@@ -95,6 +108,7 @@ The db integration test runs when `DATABASE_URL` is set (it is, via `.env`).
 - Every setting is an env var, validated by zod at start-up (`@euroedge/shared/config`).
 - `DATA_TIER` is `sim` (default), `replay` or `live-min`. In `sim` and `replay`, every price carries a "SIMULATED PRICES" watermark, and the leaderboard and accuracy page are off.
 - Paid data APIs are never called without keys.
+- Wallet sign-in: `NEXT_PUBLIC_PRIVY_APP_ID`; the API checks SIWE against `SIWE_DOMAIN` (default: the host of `PUBLIC_ORIGIN`) and `CHAIN_ID`. Set `BASE_SEPOLIA_RPC_URL` so smart wallets (ERC-1271/6492) can sign in too.
 - `DEV_LOGIN=true` is refused unless `DATA_TIER=sim` and `DEPLOY_ENV` is `local` or `ci`. Enforced by the runtime config loader, the web build and CI.
 
 ## Backtest

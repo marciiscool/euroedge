@@ -39,3 +39,10 @@ export function formatCountdown(ms: number): string {
   const m = Math.floor((s % 3600) / 60);
   return h > 0 ? `${h} h ${m} min` : `${m} min ${s % 60} s`;
 }
+
+/** `0x1234…abcd` for wallet accounts; dev accounts stay as they are. */
+export function shortAccount(account: string): string {
+  return /^0x[0-9a-f]{40}$/i.test(account)
+    ? `${account.slice(0, 6)}…${account.slice(-4)}`
+    : account;
+}

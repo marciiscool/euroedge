@@ -53,7 +53,13 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(name === undefined ? {} : { name }),
     }),
-  logout: () => call<{ account: null }>('/api/dev/logout', { method: 'POST', body: '{}' }),
+  logout: () => call<{ account: null }>('/api/auth/logout', { method: 'POST', body: '{}' }),
+  nonce: () => call<{ nonce: string; domain: string; chainId: number }>('/api/auth/nonce'),
+  siwe: (message: string, signature: string) =>
+    call<{ account: string }>('/api/auth/siwe', {
+      method: 'POST',
+      body: JSON.stringify({ message, signature }),
+    }),
   market: (id: string) =>
     call<{ market: MarketSnapshot; fv: FvDisplaySnapshot | null }>(`/api/markets/${id}`),
   fvHistory: (id: string, minutes = 120) =>
