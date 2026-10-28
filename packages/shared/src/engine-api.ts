@@ -4,6 +4,8 @@ import { z } from 'zod';
 export const STREAMS = {
   /** Engine input commands (canonical JSON, bigints as strings). */
   engineInput: 'engine:input',
+  /** Withdrawal reservations for the engine signer (M5-08): `{ id }` per entry. */
+  withdrawals: 'engine:withdrawals',
 } as const;
 
 export const CHANNELS = {
@@ -18,7 +20,40 @@ export const KEYS = {
   account: (id: string) => `state:account:${id}`,
   market: (id: string) => `state:market:${id}`,
   fv: (id: string) => `state:fv:${id}`,
+  /** Withdrawal record (M4-18), JSON of `WithdrawalRecord`, written by the engine. */
+  withdrawal: (id: string) => `state:withdrawal:${id}`,
+  /** Its authorisation (M5-08), JSON of `WithdrawalAuth`, written by the signer. */
+  withdrawalAuth: (id: string) => `state:withdrawal-auth:${id}`,
+  /** Ids of pending withdrawals (indexer expiry check, M5-10). */
+  pendingWithdrawals: 'state:withdrawals:pending',
+  /** Ids of one account's withdrawals. */
+  accountWithdrawals: (account: string) => `state:withdrawals:account:${account}`,
 } as const;
+
+/** A withdrawal as the engine reserved it (M4-18), written by the engine on every change. */
+export const withdrawalRecordSchema = z.object({
+  id: z.string(),
+  account: z.string(),
+  /** µUSDC. */
+  amount: z.string().regex(/^\d+$/),
+  nonce: z.string().regex(/^\d+$/),
+  deadlineMs: z.string().regex(/^\d+$/),
+  status: z.enum(['pending', 'executed', 'expired']),
+});
+export type WithdrawalRecord = z.infer<typeof withdrawalRecordSchema>;
+
+/**
+ * The engine signer's EIP-712 authorisation for a withdrawal (M5-08), written by the signer.
+ * `deadlineSec` = ⌊deadlineMs / 1000⌋, so the chain deadline never outlives the engine's.
+ */
+export const withdrawalAuthSchema = z.object({
+  id: z.string(),
+  vault: z.string(),
+  chainId: z.number().int(),
+  deadlineSec: z.string().regex(/^\d+$/),
+  signature: z.string(),
+});
+export type WithdrawalAuth = z.infer<typeof withdrawalAuthSchema>;
 
 const dec = z.string().regex(/^-?\d+(\.\d+)?$/);
 const int = z.string().regex(/^-?\d+$/);

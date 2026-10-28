@@ -1,5 +1,12 @@
 import type { Redis } from '@euroedge/service-kit';
-import { CHANNELS, KEYS } from '@euroedge/shared';
+import {
+  CHANNELS,
+  ENGINE_STREAM_MAXLEN,
+  KEYS,
+  STREAMS,
+  type WithdrawalRecord,
+} from '@euroedge/shared';
+import type { EngineOutput } from './core/outputs.ts';
 import type { EngineState } from './core/state.ts';
 import type { BatchResult } from './sequencer.ts';
 import { accountSnapshot, marketSnapshot, orderResult } from './snapshots.ts';
@@ -22,6 +29,7 @@ export async function publishBatch(
     if (result !== undefined) pipe.publish(CHANNELS.results, JSON.stringify(result));
     if (output.type === 'MarketChanged') markets.add(output.market);
     if (output.type === 'AccountChanged') accounts.add(output.account);
+    publishWithdrawal(pipe, state, output);
   }
   for (const id of markets) {
     for (const acc of state.accounts.values())
@@ -56,4 +64,41 @@ export async function publishAll(valkey: Redis, state: EngineState): Promise<voi
       })),
     ],
   });
+}
+
+type Pipeline = ReturnType<Redis['pipeline']>;
+
+/**
+ * Withdrawal records for the signer (M5-08), the indexer's expiry check (M5-10) and the API:
+ * the record on every change, the pending set, and a stream entry per new reservation.
+ */
+function publishWithdrawal(pipe: Pipeline, state: EngineState, o: EngineOutput): void {
+  const id =
+    o.type === 'WithdrawalReserved'
+      ? o.duplicate
+        ? undefined
+        : o.withdrawalId
+      : o.type === 'WithdrawalSettled'
+        ? o.withdrawalId
+        : undefined;
+  if (id === undefined) return;
+  const w = state.withdrawals.get(id);
+  if (w === undefined) return;
+  const record: WithdrawalRecord = {
+    id,
+    account: w.account,
+    amount: w.amount.toString(),
+    nonce: w.nonce.toString(),
+    deadlineMs: w.deadline.toString(),
+    status: w.status,
+  };
+  pipe.set(KEYS.withdrawal(id), JSON.stringify(record));
+  if (w.status === 'pending') {
+    pipe
+      .sadd(KEYS.pendingWithdrawals, id)
+      .sadd(KEYS.accountWithdrawals(w.account), id)
+      .xadd(STREAMS.withdrawals, 'MAXLEN', '~', String(ENGINE_STREAM_MAXLEN), '*', 'id', id);
+  } else {
+    pipe.srem(KEYS.pendingWithdrawals, id);
+  }
 }
