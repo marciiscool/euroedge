@@ -1,5 +1,7 @@
 # Risk parameters per window (brief §7.2, ADR-0016). Integers only (bps, ppm, leverage).
 # priceLimit (max fill deviation from the index) is NOT fvBand (model confidence).
+# fundingOiCapUsdc: net user OI skew (USDC at mark) at which the skew term reaches the window cap
+# (ADR-0016). Proposed defaults, founder to confirm.
 windows:
   A:
     {
@@ -10,6 +12,7 @@ windows:
       makerFeeBps: 1,
       houseHalfSpreadBps: 5,
       fundingCapPpmPerHour: 300,
+      fundingOiCapUsdc: 2000000,
     }
   B:
     {
@@ -20,6 +23,7 @@ windows:
       makerFeeBps: 2,
       houseHalfSpreadBps: 10,
       fundingCapPpmPerHour: 200,
+      fundingOiCapUsdc: 1000000,
     }
   C:
     {
@@ -30,6 +34,7 @@ windows:
       makerFeeBps: 3,
       houseHalfSpreadBps: 20,
       fundingCapPpmPerHour: 100,
+      fundingOiCapUsdc: 500000,
     }
   # D: ±min(3 %, 1/maxLev); skew add-on on fees arrives in M4.
   D:
@@ -41,6 +46,7 @@ windows:
       makerFeeBps: 5,
       houseHalfSpreadBps: 35,
       fundingCapPpmPerHour: null,
+      fundingOiCapUsdc: 0,
     }
 maintenanceMarginBps: { stock: 1000, basket: 500 }
 liquidationPenaltyBps: { stock: 100, basket: 50 }

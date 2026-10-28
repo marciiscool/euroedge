@@ -36,4 +36,11 @@ export type EngineOutput =
     }
   | { readonly type: 'InputIgnored'; readonly input: string; readonly reason: string }
   | { readonly type: 'AccountChanged'; readonly account: AccountId }
-  | { readonly type: 'MarketChanged'; readonly market: MarketId };
+  | { readonly type: 'MarketChanged'; readonly market: MarketId }
+  | {
+      /** Hourly funding settled: positive rate = longs paid shorts (Rate, 1e18 per hour). */
+      readonly type: 'FundingSettled';
+      readonly market: MarketId;
+      readonly hour: bigint;
+      readonly rate: bigint;
+    };

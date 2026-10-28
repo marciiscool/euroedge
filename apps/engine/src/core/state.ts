@@ -24,6 +24,9 @@ export interface MarketState {
   readonly liquidationPenaltyBps: bigint;
   readonly windows: Readonly<Record<WindowId, WindowRisk>>;
   data: MarketData | undefined;
+  readonly fundingInterestBpsPerYear: bigint;
+  /** Funding (ADR-0016): last settled hour (event-time hours since epoch) and cumulative rate. */
+  funding: { lastHour: bigint; index: bigint; lastRate: bigint };
   /** House position = exact negative of all user positions (lots and cost). */
   house: Position;
 }

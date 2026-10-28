@@ -18,6 +18,10 @@ export interface WindowRisk {
   readonly takerFeeBps: bigint;
   readonly houseHalfSpreadBps: bigint;
   readonly priceLimitBps: bigint;
+  /** Hourly cap on the total funding rate, ppm; null = interest only (Window D). */
+  readonly fundingCapPpmPerHour: bigint | null;
+  /** Net user OI skew (µUSDC) at which the skew term reaches the cap. */
+  readonly fundingOiCap: Usdc;
 }
 
 export type EngineInput =
@@ -39,6 +43,8 @@ export type EngineInput =
       readonly minNotional: Usdc;
       readonly maintenanceMarginBps: bigint;
       readonly liquidationPenaltyBps: bigint;
+      /** Funding interest component, longs pay shorts (ADR-0016). */
+      readonly fundingInterestBpsPerYear: bigint;
       readonly windows: Readonly<Record<WindowId, WindowRisk>>;
     }
   | {
