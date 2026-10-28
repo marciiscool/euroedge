@@ -7,6 +7,7 @@ import { createState } from '../src/core/state.ts';
 import { decodeEvent, encodeEvent } from '../src/log/codec.ts';
 import { stateDigest } from '../src/log/digest.ts';
 import { replay } from '../src/log/replay.ts';
+import { decodeState, encodeState } from '../src/log/state-codec.ts';
 import { listASML, USDC } from './fixtures.ts';
 
 const ACCOUNTS = ['a', 'b', 'c', 'd', 'e'];
@@ -259,5 +260,28 @@ describe('engine invariants under random inputs (fast-check, 15 000+ steps)', ()
     expect(totals.resting).toBeGreaterThan(100);
     expect(totals.oco).toBeGreaterThan(0);
     expect(totals.fundings).toBeGreaterThan(100);
+  }, 120_000);
+
+  it('restore(snapshot at any seq) + replay of the rest == the live state (M4-19)', () => {
+    fc.assert(
+      fc.property(
+        fc.array(fc.oneof({ weight: 30, arbitrary: step }, { weight: 1, arbitrary: gapStep }), {
+          minLength: 100,
+          maxLength: 400,
+        }),
+        fc.double({ min: 0, max: 1, noNaN: true }),
+        (steps, at) => {
+          const { state, events } = runLive(toInputs(steps));
+          const cut = Math.floor(at * events.length);
+          const snap = encodeState(replay(events.slice(0, cut)));
+          // Stable bytes, and decoding loses nothing.
+          expect(encodeState(decodeState(snap)).equals(snap)).toBe(true);
+          const restored = replay(events.slice(cut), decodeState(snap));
+          expect(stateDigest(restored)).toBe(stateDigest(state));
+          expect(encodeState(restored).equals(encodeState(state))).toBe(true);
+        },
+      ),
+      { numRuns: 40 },
+    );
   }, 120_000);
 });

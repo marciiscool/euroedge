@@ -9,9 +9,10 @@ import {
   type WindowsFile,
 } from '@euroedge/shared';
 import { bootstrapInputs } from './bootstrap.ts';
-import { apply } from './core/apply.ts';
-import { createState, type EngineState } from './core/state.ts';
-import { chainHash, decodeEvent, GENESIS_HASH } from './log/codec.ts';
+import type { EngineState } from './core/state.ts';
+import { stateDigest } from './log/digest.ts';
+import { restoreFromLog, SnapshotMismatch } from './log/restore.ts';
+import { encodeState } from './log/state-codec.ts';
 import { EventStore } from './log/store.ts';
 import { publishAll, publishBatch } from './publisher.ts';
 import { Sequencer } from './sequencer.ts';
@@ -24,6 +25,8 @@ export interface EngineOptions {
   readonly windows: WindowsFile;
   readonly log: Logger;
   readonly clockTickMs?: number;
+  /** Store a state snapshot every N events (M4-19); 0 disables. Default 10 000. */
+  readonly snapshotEvery?: number;
 }
 
 export interface RunningEngine {
@@ -54,14 +57,38 @@ export async function startEngine(o: EngineOptions): Promise<RunningEngine> {
   const store = new EventStore(o.databaseUrl);
   await store.acquireWriterLock();
 
-  const state = createState();
-  let prev = GENESIS_HASH;
-  for await (const rec of store.readAll()) {
-    prev = chainHash(prev, rec.body);
-    if (prev !== rec.hash) throw new Error(`hash chain broken at seq ${rec.seq}`);
-    apply(state, decodeEvent(rec.body));
+  // Restore from the newest snapshot if it checks out against the log; else from genesis.
+  const [latest] = await store.snapshots(true);
+  let restored;
+  try {
+    restored = await restoreFromLog(store.readAll(), latest);
+  } catch (err) {
+    if (!(err instanceof SnapshotMismatch)) throw err;
+    o.log.warn({ err }, 'snapshot rejected; replaying from genesis');
+    restored = await restoreFromLog(store.readAll());
   }
-  o.log.info({ seq: state.seq.toString(), head: prev }, 'engine state replayed from log');
+  const { state } = restored;
+  o.log.info(
+    { seq: state.seq.toString(), head: restored.head.hash, snapshot: restored.from.toString() },
+    'engine state restored from log',
+  );
+  const every = BigInt(o.snapshotEvery ?? 10_000);
+  let lastSnapshot = restored.from;
+  const maybeSnapshot = async () => {
+    if (every <= 0n || state.seq / every <= lastSnapshot / every) return;
+    const body = encodeState(state);
+    try {
+      await store.writeSnapshot({
+        seq: state.seq,
+        chainHash: store.head.hash,
+        digest: stateDigest(state),
+        body,
+      });
+      lastSnapshot = state.seq;
+    } catch (err) {
+      o.log.warn({ err, seq: state.seq.toString() }, 'snapshot write failed');
+    }
+  };
 
   const valkey = createValkey(o.valkeyUrl, 'engine');
   const reader = createValkey(o.valkeyUrl, 'engine-reader');
@@ -108,6 +135,7 @@ export async function startEngine(o: EngineOptions): Promise<RunningEngine> {
         for (const s of batch.skipped) o.log.warn(s, 'invalid engine input skipped');
         cursor = messages.at(-1)?.id ?? cursor;
         await publishBatch(valkey, state, batch);
+        await maybeSnapshot();
       } catch (err) {
         o.log.fatal({ err }, 'engine fail-stop: state may be ahead of the log; exiting to rebuild');
         process.exit(1);

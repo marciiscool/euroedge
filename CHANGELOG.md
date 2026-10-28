@@ -25,6 +25,13 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - `PlaceOrder` v2 and a new `CancelOrder` input; open orders appear in the account snapshot.
   - API: `type`/`limitPrice` on `POST /api/orders`, and `DELETE /api/orders/:id`.
   - Terminal: a market/limit switch, a limit price field and an open-orders table with cancel.
+- State snapshots (M4-19):
+  - Lossless state codec: bigints stay bigints, Maps keep insertion order.
+  - `engine_snapshots` table (migration 0004). The engine stores a snapshot every `ENGINE_SNAPSHOT_EVERY` events (default 10 000).
+  - At startup the newest snapshot is used only if its digest matches its body and its chain hash matches the log. The whole hash chain is still verified from genesis.
+  - Otherwise the engine replays from genesis.
+  - Verifier CLI `pnpm --filter @euroedge/engine verify`: full replay from genesis with invariants, compared with every snapshot.
+  - Property test: restoring at any seq and replaying the rest equals the live state byte for byte.
 - CB7 capital floor (M4-15, ADR-0013):
   - The engine checks after every event; while CB7 is active, every market is reduce-only.
   - It trips when house equity (cash + uPnL at mark) or the insurance balance falls below 20 % of its genesis amount, and releases only when both are above 30 %.
