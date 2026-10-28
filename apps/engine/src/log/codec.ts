@@ -10,7 +10,7 @@ export const EVENT_VERSIONS: Readonly<Record<EngineInput['type'], number>> = {
   MarketListed: 2,
   MarketData: 2,
   DevDeposit: 1,
-  PlaceOrder: 2,
+  PlaceOrder: 3,
   CancelOrder: 1,
   ClosePosition: 1,
 };
@@ -81,6 +81,8 @@ export const inputSchema = z.discriminatedUnion('type', [
     qty: pos,
     reduceOnly: z.boolean(),
     limitPrice: pos.optional(),
+    stop: z.object({ price: pos, kind: z.enum(['stop', 'take-profit']) }).optional(),
+    ocoGroup: id.optional(),
   }),
   z.object({ type: z.literal('CancelOrder'), requestId: id, account: id, orderId: id }),
   z.object({

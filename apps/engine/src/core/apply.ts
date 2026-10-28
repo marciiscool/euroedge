@@ -4,7 +4,7 @@ import { FLAT } from '@euroedge/risk-core';
 import type { EngineEvent, EngineInput } from './events.ts';
 import { assertInvariants } from './invariants.ts';
 import { liquidateUnderwater } from './liquidation.ts';
-import { cancelOrder, matchResting, placeLimitOrder } from './limits.ts';
+import { cancelOrder, matchResting, placeRestingOrder } from './limits.ts';
 import { executeOrder } from './orders.ts';
 import { HOUR_MS, settleFunding } from './funding.ts';
 import type { EngineOutput } from './outputs.ts';
@@ -128,15 +128,17 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
     }
 
     case 'PlaceOrder':
-      if (input.limitPrice !== undefined)
-        return placeLimitOrder(state, {
+      if (input.limitPrice !== undefined || input.stop !== undefined)
+        return placeRestingOrder(state, {
           requestId: input.requestId,
           idempotencyKey: input.idempotencyKey,
           account: input.account,
           market: input.market,
           qty: input.side === 'buy' ? input.qty : -input.qty,
           reduceOnly: input.reduceOnly,
-          limitPrice: input.limitPrice,
+          limitPrice: input.limitPrice ?? null,
+          stop: input.stop ?? null,
+          ocoGroup: input.ocoGroup ?? null,
         });
       return executeOrder(state, {
         requestId: input.requestId,

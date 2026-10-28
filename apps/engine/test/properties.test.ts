@@ -16,6 +16,19 @@ type Step =
   | { kind: 'deposit'; account: string; amount: bigint }
   | { kind: 'order'; account: string; buy: boolean; qty: bigint; reduceOnly: boolean; key: number }
   | { kind: 'close'; account: string }
+  | {
+      kind: 'resting';
+      account: string;
+      buy: boolean;
+      qty: bigint;
+      reduceOnly: boolean;
+      key: number;
+      type: 'limit' | 'stop' | 'take-profit' | 'stop-limit';
+      /** Offset of the limit / trigger from the current price, bp. */
+      bp: number;
+      oco: number | null;
+    }
+  | { kind: 'cancel'; account: string; key: number }
   | { kind: 'tick' };
 
 const step: fc.Arbitrary<Step> = fc.oneof(
@@ -52,6 +65,33 @@ const step: fc.Arbitrary<Step> = fc.oneof(
     arbitrary: fc.record({
       kind: fc.constant('close' as const),
       account: fc.constantFrom(...ACCOUNTS),
+    }),
+  },
+  {
+    weight: 3,
+    arbitrary: fc.record({
+      kind: fc.constant('resting' as const),
+      account: fc.constantFrom(...ACCOUNTS),
+      buy: fc.boolean(),
+      qty: fc.bigInt({ min: 1n, max: 30_000n }),
+      reduceOnly: fc.boolean(),
+      key: fc.integer({ min: 0, max: 50 }),
+      type: fc.constantFrom(
+        'limit' as const,
+        'stop' as const,
+        'take-profit' as const,
+        'stop-limit' as const,
+      ),
+      bp: fc.integer({ min: -150, max: 150 }),
+      oco: fc.option(fc.integer({ min: 0, max: 2 })),
+    }),
+  },
+  {
+    weight: 1,
+    arbitrary: fc.record({
+      kind: fc.constant('cancel' as const),
+      account: fc.constantFrom(...ACCOUNTS),
+      key: fc.integer({ min: 0, max: 50 }),
     }),
   },
   { weight: 1, arbitrary: fc.constant({ kind: 'tick' as const }) },
@@ -126,6 +166,33 @@ function toInputs(steps: Step[]): EngineInput[] {
           market: 'ASML-PERP',
         });
         break;
+      case 'resting': {
+        const at = ticks(px + (px * BigInt(s.bp)) / 10_000n);
+        inputs.push({
+          type: 'PlaceOrder',
+          requestId: `r${n}`,
+          idempotencyKey: `k${s.key}`,
+          account: s.account,
+          market: 'ASML-PERP',
+          side: s.buy ? 'buy' : 'sell',
+          qty: lots(s.qty),
+          reduceOnly: s.reduceOnly,
+          ...(s.type === 'limit' || s.type === 'stop-limit' ? { limitPrice: at } : {}),
+          ...(s.type === 'limit'
+            ? {}
+            : { stop: { price: at, kind: s.type === 'take-profit' ? 'take-profit' : 'stop' } }),
+          ...(s.oco === null ? {} : { ocoGroup: `g${s.oco}` }),
+        });
+        break;
+      }
+      case 'cancel':
+        inputs.push({
+          type: 'CancelOrder',
+          requestId: `x${n}`,
+          account: s.account,
+          orderId: `k${s.key}`,
+        });
+        break;
       case 'tick':
         inputs.push({ type: 'ClockTick' });
         break;
@@ -137,11 +204,12 @@ function toInputs(steps: Step[]): EngineInput[] {
 function runLive(inputs: EngineInput[]) {
   const state = createState();
   const events: EngineEvent[] = [];
-  const counts = { fills: 0, liquidations: 0, rejections: 0 };
+  const counts = { fills: 0, liquidations: 0, rejections: 0, resting: 0, oco: 0, fundings: 0 };
   inputs.forEach((input, i) => {
     const e: EngineEvent = {
       seq: BigInt(i + 1),
-      ts: 1_793_000_000_000n + BigInt(i) * 1000n,
+      // 37 s apart: each run spans several funding hours.
+      ts: 1_793_000_000_000n + BigInt(i) * 37_000n,
       v: 1,
       input,
     };
@@ -150,6 +218,10 @@ function runLive(inputs: EngineInput[]) {
       if (o.type === 'OrderFilled' && !o.duplicate) counts.fills += 1;
       if (o.type === 'Liquidated') counts.liquidations += 1;
       if (o.type === 'OrderRejected') counts.rejections += 1;
+      // Fills on market data come from resting limit / stop orders.
+      if (o.type === 'OrderFilled' && input.type === 'MarketData') counts.resting += 1;
+      if (o.type === 'OrderCancelled' && o.reason === 'oco') counts.oco += 1;
+      if (o.type === 'FundingSettled') counts.fundings += 1;
     }
   });
   return { state, events, counts };
@@ -157,7 +229,7 @@ function runLive(inputs: EngineInput[]) {
 
 describe('engine invariants under random inputs (fast-check, 15 000+ steps)', () => {
   it('holds invariants 1, 2, 4, 5, 7, 8, 9 after every event, and replay(log) == live state', () => {
-    let totals = { steps: 0, fills: 0, liquidations: 0 };
+    let totals = { steps: 0, fills: 0, liquidations: 0, resting: 0, oco: 0, fundings: 0 };
     fc.assert(
       fc.property(
         fc.array(fc.oneof({ weight: 30, arbitrary: step }, { weight: 1, arbitrary: gapStep }), {
@@ -172,14 +244,20 @@ describe('engine invariants under random inputs (fast-check, 15 000+ steps)', ()
             steps: totals.steps + events.length,
             fills: totals.fills + counts.fills,
             liquidations: totals.liquidations + counts.liquidations,
+            resting: totals.resting + counts.resting,
+            oco: totals.oco + counts.oco,
+            fundings: totals.fundings + counts.fundings,
           };
         },
       ),
       { numRuns: 50 },
     );
-    // The generator must actually exercise trading and liquidation.
+    // The generator must actually exercise trading, resting/stop orders, OCO, funding and liquidation.
     expect(totals.steps).toBeGreaterThan(15_000);
     expect(totals.fills).toBeGreaterThan(1_000);
     expect(totals.liquidations).toBeGreaterThan(0);
+    expect(totals.resting).toBeGreaterThan(100);
+    expect(totals.oco).toBeGreaterThan(0);
+    expect(totals.fundings).toBeGreaterThan(100);
   }, 120_000);
 });

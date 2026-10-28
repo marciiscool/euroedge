@@ -25,6 +25,15 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - `PlaceOrder` v2 and a new `CancelOrder` input; open orders appear in the account snapshot.
   - API: `type`/`limitPrice` on `POST /api/orders`, and `DELETE /api/orders/:id`.
   - Terminal: a market/limit switch, a limit price field and an open-orders table with cancel.
+- Stop and take-profit orders (M4-07):
+  - `PlaceOrder` v3 takes `stop: { price, kind: 'stop' | 'take-profit' }` and an optional `ocoGroup`.
+  - Triggers are evaluated on the mark. A buy stop or sell take-profit fires at mark ≥ price; a sell stop or buy take-profit fires at mark ≤ price.
+  - A fired stop executes as a taker: market, or at its limit for a stop-limit. A stop-limit that does not cross keeps resting as a maker limit.
+  - TP/SL: when one order of an account's OCO group fills, the others are cancelled (reason `oco`).
+  - Placement rejects a stop that would fire at once (`would-trigger`), and a reduce-only stop with no position to reduce.
+  - Opening stops wait out circuit breakers.
+  - The account snapshot and the terminal's open-orders table show triggers; stop-market orders are listed as "Market".
+  - The property test now also places limits, stops, take-profits, OCO pairs and cancels, spread over several funding hours.
 - Partial-first liquidation:
   - The engine closes the fewest lots of the triggering position, at mark with the penalty to insurance, so that equity is back at MM × (1 + buffer).
   - Formula: `k = ⌈(T·MM·10⁴ − E·10⁸) / (mark·tv·(T·mm − pen·10⁴))⌉` with `T = 10⁴ + buffer`.

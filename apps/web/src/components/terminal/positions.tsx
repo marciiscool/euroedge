@@ -143,7 +143,7 @@ export function Positions({
           <table className="w-full text-xs">
             <thead className="text-left text-muted-foreground">
               <tr>
-                {['market', 'side', 'size', 'limitPrice'].map((k) => (
+                {['market', 'side', 'size', 'trigger', 'limitPrice'].map((k) => (
                   <th key={k} scope="col" className="px-4 py-2 font-normal">
                     {t(k)}
                   </th>
@@ -164,7 +164,14 @@ export function Positions({
                     {t(`${o.side}Noun`)}
                   </td>
                   <td className="px-4 py-2">{formatNumber(o.size, locale)}</td>
-                  <td className="px-4 py-2">{formatNumber(o.limitPrice, locale)}</td>
+                  <td className="px-4 py-2">
+                    {o.stop === null
+                      ? '–'
+                      : `${o.stop.triggersOn === 'rise' ? '≥' : '≤'} ${formatNumber(o.stop.price, locale)}`}
+                  </td>
+                  <td className="px-4 py-2">
+                    {o.limitPrice === null ? t('atMarket') : formatNumber(o.limitPrice, locale)}
+                  </td>
                   <td className="px-4 py-2 text-right font-sans">
                     <Button
                       variant="outline"
