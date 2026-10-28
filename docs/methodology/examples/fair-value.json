@@ -1,0 +1,66 @@
+{
+  "description": "Inverse-variance combination (brief §6.1): v_k = σ_k² + λ·age_k; w_k ∝ 1/v_k; σ_FV = max(σ_floor, φ·(Σ1/v_k)^(−1/2)); FV = C·e^ŝ; band = FV·e^(±k·σ).",
+  "status": "hand-derived by the build; awaiting a check against the founder spreadsheet",
+  "cases": [
+    {
+      "name": "Tradegate + ADR, Window B",
+      "anchor": 700.0,
+      "signals": [
+        {
+          "kind": "tradegate",
+          "s": 0.001,
+          "sigmaBp": 12,
+          "ageSeconds": 1
+        },
+        {
+          "kind": "adr",
+          "s": 0.003,
+          "sigmaBp": 20,
+          "ageSeconds": 10
+        }
+      ],
+      "params": {
+        "stalenessBp2PerSecond": 0.5,
+        "phi": 1.2,
+        "sigmaFloorBp": 10,
+        "bandSigmas": 2.5
+      },
+      "expected": {
+        "weights": [0.7370336669699727, 0.2629663330300273],
+        "s": 0.0015259326660600546,
+        "sigma": 0.0012383939818293365,
+        "fv": 701.0689682456028,
+        "bandLo": 698.9018257191514,
+        "bandHi": 703.242830609601
+      },
+      "working": "v = [144.5, 405.0] bp²; w = [0.737034, 0.262966]; ŝ = 0.00152593; σ = 1.2·10.3199 bp = 12.3839 bp; FV = 700·e^ŝ = 701.068968"
+    },
+    {
+      "name": "single signal below the floor",
+      "anchor": 700.0,
+      "signals": [
+        {
+          "kind": "tradegate",
+          "s": -0.002,
+          "sigmaBp": 5,
+          "ageSeconds": 0
+        }
+      ],
+      "params": {
+        "stalenessBp2PerSecond": 0.5,
+        "phi": 1.0,
+        "sigmaFloorBp": 10,
+        "bandSigmas": 2.5
+      },
+      "expected": {
+        "weights": [1.0],
+        "s": -0.002,
+        "sigma": 0.001,
+        "fv": 698.6013990671331,
+        "bandLo": 696.8570768806993,
+        "bandHi": 700.3500875145852
+      },
+      "working": "σ = max(10 bp, 1.0·5 bp) = 10 bp (floor binds)"
+    }
+  ]
+}

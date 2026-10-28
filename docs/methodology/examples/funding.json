@@ -1,0 +1,5 @@
+{
+  "description": "Funding (ADR-0016): rate = clamp(premium + interest, ±cap) on the total, hourly. Vectors are added with the M4 funding engine.",
+  "status": "pending — funding is implemented in M4",
+  "cases": []
+}
