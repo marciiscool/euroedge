@@ -1,0 +1,41 @@
+{
+  "description": "Taker fee = ceil(|notional µUSDC| × bps / 10 000) (brief §7.1: fees round up).",
+  "status": "hand-derived by the build; awaiting a check against the founder spreadsheet",
+  "cases": [
+    {
+      "name": "1 ASML contract at 700.35, 5 bp",
+      "notionalMicroUsdc": "70035000",
+      "bps": 5,
+      "feeMicroUsdc": "35018",
+      "working": "70 035 000 × 5 / 10 000 = 35 017.5 → ceil 35 018"
+    },
+    {
+      "name": "exact",
+      "notionalMicroUsdc": "1000000",
+      "bps": 5,
+      "feeMicroUsdc": "500",
+      "working": "1 000 000 × 5 / 10 000 = 500"
+    },
+    {
+      "name": "dust rounds up to 1 µUSDC",
+      "notionalMicroUsdc": "1",
+      "bps": 5,
+      "feeMicroUsdc": "1",
+      "working": "0.0005 → ceil 1"
+    },
+    {
+      "name": "sell side uses |notional|",
+      "notionalMicroUsdc": "-70035000",
+      "bps": 5,
+      "feeMicroUsdc": "35018",
+      "working": "|−70 035 000| × 5 / 10 000 → 35 018"
+    },
+    {
+      "name": "Window C taker 12 bp",
+      "notionalMicroUsdc": "12345678",
+      "bps": 12,
+      "feeMicroUsdc": "14815",
+      "working": "12 345 678 × 12 / 10 000 = 14 814.8136 → ceil 14 815"
+    }
+  ]
+}
