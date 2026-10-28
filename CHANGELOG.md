@@ -4,6 +4,19 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### M4 — Full engine (in progress, on `integration/m4`)
+
+#### Added
+
+- Hourly funding (ADR-0016) on event time:
+  - The rate is interest (500 bp/yr) plus a skew term, with the cap applied to the total; Window D charges interest only.
+  - Longs pay when users are net long.
+  - Payments truncate toward zero, and the house takes the exact opposite, so funding is zero-sum.
+  - Underwater accounts are liquidated after settlement.
+  - New windows parameter `fundingOiCapUsdc` (proposed values).
+  - `MarketListed` v2, with v1 logs decoding as interest-free.
+  - Golden vectors in `funding.json`.
+
 ### M3 — Full fv-core (in progress, on `integration/m3`)
 
 #### Added

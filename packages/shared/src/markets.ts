@@ -175,6 +175,8 @@ export const windowParamsSchema = z.object({
   houseHalfSpreadBps: bps,
   /** Hourly funding cap on the total rate, ppm; null = interest only (Window D). */
   fundingCapPpmPerHour: z.number().int().min(0).nullable(),
+  /** Net user OI skew (USDC at mark) at which the skew term reaches the cap (ADR-0016). */
+  fundingOiCapUsdc: z.number().int().min(0),
 });
 export type WindowParams = z.infer<typeof windowParamsSchema>;
 

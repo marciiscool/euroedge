@@ -6,10 +6,38 @@ import { createState, type EngineState } from '../src/core/state.ts';
 
 /** windows.yaml values as engine params. */
 export const WINDOWS: Record<WindowId, WindowRisk> = {
-  A: { maxLeverage: 5n, takerFeeBps: 5n, houseHalfSpreadBps: 5n, priceLimitBps: 1000n },
-  B: { maxLeverage: 4n, takerFeeBps: 8n, houseHalfSpreadBps: 10n, priceLimitBps: 500n },
-  C: { maxLeverage: 3n, takerFeeBps: 12n, houseHalfSpreadBps: 20n, priceLimitBps: 400n },
-  D: { maxLeverage: 2n, takerFeeBps: 20n, houseHalfSpreadBps: 35n, priceLimitBps: 300n },
+  A: {
+    maxLeverage: 5n,
+    takerFeeBps: 5n,
+    houseHalfSpreadBps: 5n,
+    priceLimitBps: 1000n,
+    fundingCapPpmPerHour: 300n,
+    fundingOiCap: usdc(2_000_000_000_000n),
+  },
+  B: {
+    maxLeverage: 4n,
+    takerFeeBps: 8n,
+    houseHalfSpreadBps: 10n,
+    priceLimitBps: 500n,
+    fundingCapPpmPerHour: 200n,
+    fundingOiCap: usdc(1_000_000_000_000n),
+  },
+  C: {
+    maxLeverage: 3n,
+    takerFeeBps: 12n,
+    houseHalfSpreadBps: 20n,
+    priceLimitBps: 400n,
+    fundingCapPpmPerHour: 100n,
+    fundingOiCap: usdc(500_000_000_000n),
+  },
+  D: {
+    maxLeverage: 2n,
+    takerFeeBps: 20n,
+    houseHalfSpreadBps: 35n,
+    priceLimitBps: 300n,
+    fundingCapPpmPerHour: null,
+    fundingOiCap: usdc(0n),
+  },
 };
 
 export const USDC = 1_000_000n;
@@ -23,6 +51,7 @@ export const listASML: EngineInput = {
   minNotional: usdc(10n * USDC),
   maintenanceMarginBps: 1000n,
   liquidationPenaltyBps: 100n,
+  fundingInterestBpsPerYear: 500n,
   windows: WINDOWS,
 };
 

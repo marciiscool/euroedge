@@ -5,6 +5,7 @@ import type { EngineEvent, EngineInput } from './events.ts';
 import { assertInvariants } from './invariants.ts';
 import { liquidateUnderwater } from './liquidation.ts';
 import { executeOrder } from './orders.ts';
+import { HOUR_MS, settleFunding } from './funding.ts';
 import type { EngineOutput } from './outputs.ts';
 import type { EngineState } from './state.ts';
 
@@ -19,7 +20,8 @@ export function apply(state: EngineState, e: EngineEvent): EngineOutput[] {
   if (e.ts < state.ts) throw new Error(`time went backwards at seq ${e.seq}`);
   state.seq = e.seq;
   state.ts = e.ts;
-  const out = dispatch(state, e.input, e.ts);
+  // Hourly funding first: hours that ended before this input settle at the pre-input state.
+  const out = [...settleFunding(state, e.ts), ...dispatch(state, e.input, e.ts)];
   assertInvariants(state);
   return out;
 }
@@ -66,6 +68,8 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
         maintenanceMarginBps: input.maintenanceMarginBps,
         liquidationPenaltyBps: input.liquidationPenaltyBps,
         windows: input.windows,
+        fundingInterestBpsPerYear: input.fundingInterestBpsPerYear,
+        funding: existing?.funding ?? { lastHour: ts / HOUR_MS, index: 0n, lastRate: 0n },
         data: existing?.data,
         house: existing?.house ?? FLAT,
       });

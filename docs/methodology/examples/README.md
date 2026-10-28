@@ -2,7 +2,8 @@
 
 Hand-checkable examples for the money and model maths (brief §6.6). CI runs every file against the production code:
 
-- fees and liquidation price: `packages/risk-core/test/golden.test.ts`;
+- funding: `apps/engine/test/funding.test.ts`;
+- fees and liquidation price: `packages/risk-core/src/golden.test.ts`;
 - FV: `packages/fv-core/src/golden.test.ts`.
 
 | File                     | What                                        | Status                           |

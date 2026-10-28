@@ -17,6 +17,8 @@ export function marketListedInput(
       takerFeeBps: BigInt(p.takerFeeBps),
       houseHalfSpreadBps: BigInt(p.houseHalfSpreadBps),
       priceLimitBps: BigInt(p.priceLimitBps),
+      fundingCapPpmPerHour: p.fundingCapPpmPerHour === null ? null : BigInt(p.fundingCapPpmPerHour),
+      fundingOiCap: usdc(BigInt(p.fundingOiCapUsdc) * 1_000_000n),
     };
   };
   return {
@@ -28,6 +30,7 @@ export function marketListedInput(
     // 1 EUR-point = 1 USDC per contract: min notional in EUR == USDC.
     minNotional: usdc(parseDecimal(m.minNotional, 6)),
     maintenanceMarginBps: BigInt(w.maintenanceMarginBps[m.kind]),
+    fundingInterestBpsPerYear: BigInt(w.fundingInterestBpsPerYear),
     liquidationPenaltyBps: BigInt(w.liquidationPenaltyBps[m.kind]),
     windows: { A: risk('A'), B: risk('B'), C: risk('C'), D: risk('D') },
   };

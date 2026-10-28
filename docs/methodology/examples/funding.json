@@ -1,5 +1,50 @@
 {
-  "description": "Funding (ADR-0016): rate = clamp(premium + interest, ±cap) on the total, hourly. Vectors are added with the M4 funding engine.",
-  "status": "pending — funding is implemented in M4",
-  "cases": []
+  "description": "Funding (ADR-0016): hourly rate in 1e18 units = clamp(interest + skew, ±cap) on the total; skew = cap·clamp(netSkew/OIcap, −1, 1); Window D interest only. Payment = notional × rate / 1e18 toward zero; positive = user pays. The house takes the exact opposite (zero-sum).",
+  "status": "hand-derived by the build; awaiting a check against the founder spreadsheet",
+  "cases": [
+    {
+      "name": "Window A, 1.00 ASML long at 700, net skew 700 USDC, OI cap 2M USDC",
+      "interestBpsPerYear": 500,
+      "capPpmPerHour": 300,
+      "oiCapMicroUsdc": "2000000000000",
+      "netSkewMicroUsdc": "700000000",
+      "notionalMicroUsdc": "700000000",
+      "rate": "5812762557077",
+      "paymentMicroUsdc": "4068",
+      "working": "interest = 500e18/(1e4·8760) = 5 707 762 557 077; skew = 3e14·7e8/2e12 = 1.05e11; total = 5 812 762 557 077 (< cap 3e14); pay = 7e8·rate/1e18 = 4 068.93 → 4 068"
+    },
+    {
+      "name": "Window D, interest only",
+      "interestBpsPerYear": 500,
+      "capPpmPerHour": null,
+      "oiCapMicroUsdc": "0",
+      "netSkewMicroUsdc": "700000000",
+      "notionalMicroUsdc": "700000000",
+      "rate": "5707762557077",
+      "paymentMicroUsdc": "3995",
+      "working": "rate = 5 707 762 557 077; pay = 3 995.43 → 3 995"
+    },
+    {
+      "name": "Skew saturates: users net short beyond the OI cap",
+      "interestBpsPerYear": 500,
+      "capPpmPerHour": 300,
+      "oiCapMicroUsdc": "1000000",
+      "netSkewMicroUsdc": "-700000000",
+      "notionalMicroUsdc": "-700000000",
+      "rate": "-294292237442923",
+      "paymentMicroUsdc": "206004",
+      "working": "skew = clamp(3e14·(−7e8)/1e6, ±3e14) = −3e14; total = clamp(−3e14 + 5.708e12, ±3e14) = −294 292 237 442 923; short pays (−7e8)·rate/1e18 = +206 004.57 → 206 004"
+    },
+    {
+      "name": "Cap binds on the total",
+      "interestBpsPerYear": 500,
+      "capPpmPerHour": 300,
+      "oiCapMicroUsdc": "1000000",
+      "netSkewMicroUsdc": "700000000",
+      "notionalMicroUsdc": "700000000",
+      "rate": "300000000000000",
+      "paymentMicroUsdc": "210000",
+      "working": "skew = +3e14 (saturated); interest + skew = 3.057e14 → clamp to cap 3e14; pay = 7e8·3e14/1e18 = 210 000"
+    }
+  ]
 }

@@ -7,7 +7,7 @@ import { canonicalBytes } from './canonical.ts';
 export const EVENT_VERSIONS: Readonly<Record<EngineInput['type'], number>> = {
   ClockTick: 1,
   GenesisCapital: 1,
-  MarketListed: 1,
+  MarketListed: 2,
   MarketData: 2,
   DevDeposit: 1,
   PlaceOrder: 1,
@@ -28,6 +28,9 @@ const windowRisk = z.object({
   takerFeeBps: nonNeg,
   houseHalfSpreadBps: nonNeg,
   priceLimitBps: nonNeg,
+  // v1 logs predate funding: no cap → interest only, which v1 logs also carry as 0.
+  fundingCapPpmPerHour: nonNeg.nullable().default(null),
+  fundingOiCap: nonNeg.default(0n),
 });
 
 /** Decoders: canonical JSON (bigints as strings) → typed inputs. */
@@ -48,6 +51,7 @@ export const inputSchema = z.discriminatedUnion('type', [
     minNotional: nonNeg,
     maintenanceMarginBps: pos,
     liquidationPenaltyBps: nonNeg,
+    fundingInterestBpsPerYear: nonNeg.default(0n),
     windows: z.object({ A: windowRisk, B: windowRisk, C: windowRisk, D: windowRisk }),
   }),
   z.object({
