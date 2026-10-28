@@ -13,10 +13,12 @@
   "dependencies": {
     "@euroedge/service-kit": "workspace:*",
     "@euroedge/shared": "workspace:*",
+    "viem": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "fastify": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

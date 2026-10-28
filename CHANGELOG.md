@@ -8,6 +8,12 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Gasless relayer (M5-11):
+  - `POST /relay/claim` and `/relay/deposit` (routed by Caddy) submit user-signed `claimFor` and `depositWithPermit`.
+  - Same-origin only, rate-limited per wallet (5/h) and IP (20/h) (proposals).
+  - Simulated first, so a failing request never costs gas, and errors come back by name (e.g. `InvalidSignature`).
+  - Sends from the relayer key with a nonce manager and warns when its ETH runs low.
+  - On anvil: a user claimed and deposited without spending any ETH.
 - Vault indexer (M5-09):
   - Polls Vault logs up to the `safe` block from a Postgres cursor and forwards `GenesisFunded` → `GenesisCapital`, `Deposited` → `ChainDeposit` and `Withdrawn` → `VaultWithdrawn` to the engine (at-least-once).
   - The engine applies each log once per (txHash, logIndex), and settles a withdrawal only if account and amount match the signed reservation.
