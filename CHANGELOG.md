@@ -8,6 +8,12 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- TradingView-style chart:
+  - Candlesticks of the mark with volume, an OHLC legend that follows the crosshair, and 1m–1D timeframes.
+  - TradingView's candle colours, on the same open-source library.
+  - The FV band kept as dashed lines.
+  - New `GET /api/markets/:id/candles`.
+- `pnpm chain:smoke`: the whole money path against the live stack with a throwaway wallet. First live run on Base Sepolia: claim 5 s, deposit credited 230 s, trade, withdrawal paid 235 s, settled 446 s, all passed.
 - Base Sepolia go-live kit (M5-14):
   - `pnpm chain:check` validates `.env` before and after the deploy (addresses, balances, Safe, Vault signer; never prints a key).
   - `scripts/deploy-base-sepolia.sh` deploys and verifies from the keys in `.env`.
