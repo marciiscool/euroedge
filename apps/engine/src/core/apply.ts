@@ -8,6 +8,7 @@ import { cancelOrder, matchResting, placeRestingOrder } from './limits.ts';
 import { evaluateCapitalFloor } from './capital.ts';
 import { evaluateHouseLoss, rollHouseDay } from './house-risk.ts';
 import { executeOrder } from './orders.ts';
+import { requestWithdrawal, settleWithdrawal } from './withdrawals.ts';
 import { HOUR_MS, settleFunding } from './funding.ts';
 import type { EngineOutput } from './outputs.ts';
 import type { EngineState } from './state.ts';
@@ -167,6 +168,15 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
 
     case 'CancelOrder':
       return cancelOrder(state, input);
+
+    case 'RequestWithdrawal':
+      return requestWithdrawal(state, input);
+
+    case 'WithdrawalExecuted':
+      return settleWithdrawal(state, input.withdrawalId, 'executed');
+
+    case 'WithdrawalExpired':
+      return settleWithdrawal(state, input.withdrawalId, 'expired');
 
     case 'ClosePosition':
       return executeOrder(state, {

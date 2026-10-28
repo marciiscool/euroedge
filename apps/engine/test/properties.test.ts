@@ -10,7 +10,14 @@ import { replay } from '../src/log/replay.ts';
 import { decodeState, encodeState } from '../src/log/state-codec.ts';
 import { listASML, USDC } from './fixtures.ts';
 
-const ACCOUNTS = ['a', 'b', 'c', 'd', 'e'];
+// Two wallet accounts so withdrawals (M4-18) can succeed.
+const ACCOUNTS = [
+  'a',
+  'b',
+  'c',
+  '0x000000000000000000000000000000000000000d',
+  '0x000000000000000000000000000000000000000e',
+];
 
 type Step =
   | { kind: 'move'; bp: number; window: WindowId; gap: boolean }
@@ -30,6 +37,8 @@ type Step =
       oco: number | null;
     }
   | { kind: 'cancel'; account: string; key: number }
+  | { kind: 'withdraw'; account: string; amount: bigint; key: number }
+  | { kind: 'settle'; account: string; key: number; executed: boolean }
   | { kind: 'tick' };
 
 const step: fc.Arbitrary<Step> = fc.oneof(
@@ -96,6 +105,24 @@ const step: fc.Arbitrary<Step> = fc.oneof(
     }),
   },
   { weight: 1, arbitrary: fc.constant({ kind: 'tick' as const }) },
+  {
+    weight: 1,
+    arbitrary: fc.record({
+      kind: fc.constant('withdraw' as const),
+      account: fc.constantFrom(...ACCOUNTS),
+      amount: fc.bigInt({ min: 1n, max: 15_000n * USDC }),
+      key: fc.integer({ min: 0, max: 10 }),
+    }),
+  },
+  {
+    weight: 1,
+    arbitrary: fc.record({
+      kind: fc.constant('settle' as const),
+      account: fc.constantFrom(...ACCOUNTS),
+      key: fc.integer({ min: 0, max: 10 }),
+      executed: fc.boolean(),
+    }),
+  },
 );
 // Occasional large gaps (±5–40 %), as at a Monday open or a jump.
 const gapStep: fc.Arbitrary<Step> = fc.record({
@@ -192,6 +219,20 @@ function toInputs(steps: Step[]): EngineInput[] {
           requestId: `x${n}`,
           account: s.account,
           orderId: `k${s.key}`,
+        });
+        break;
+      case 'withdraw':
+        inputs.push({
+          type: 'RequestWithdrawal',
+          requestId: `w${s.key}`,
+          account: s.account,
+          amount: usdc(s.amount),
+        });
+        break;
+      case 'settle':
+        inputs.push({
+          type: s.executed ? 'WithdrawalExecuted' : 'WithdrawalExpired',
+          withdrawalId: `${s.account}:w${s.key}`,
         });
         break;
       case 'tick':

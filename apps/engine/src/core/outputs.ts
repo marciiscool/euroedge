@@ -1,6 +1,7 @@
 import type { Ticks, Usdc } from '@euroedge/fixed';
 import type { AccountId, MarketId } from './events.ts';
 import type { Fill, RejectReason } from './state.ts';
+import type { WithdrawalRejectReason } from './withdrawals.ts';
 
 /** Engine OUTPUTS: derived from inputs, recomputed on replay, never logged (ADR-0001). */
 export type EngineOutput =
@@ -50,6 +51,29 @@ export type EngineOutput =
       readonly active: boolean;
       /** Today's house loss when tripped, µUSDC. */
       readonly loss: bigint;
+    }
+  | {
+      readonly type: 'WithdrawalReserved';
+      readonly requestId: string;
+      readonly withdrawalId: string;
+      readonly account: AccountId;
+      readonly amount: bigint;
+      readonly nonce: bigint;
+      readonly deadline: bigint;
+      readonly duplicate: boolean;
+    }
+  | {
+      readonly type: 'WithdrawalRejected';
+      readonly requestId: string;
+      readonly account: AccountId;
+      readonly reason: WithdrawalRejectReason;
+    }
+  | {
+      readonly type: 'WithdrawalSettled';
+      readonly withdrawalId: string;
+      readonly account: AccountId;
+      readonly amount: bigint;
+      readonly outcome: 'executed' | 'expired';
     }
   | { readonly type: 'InputIgnored'; readonly input: string; readonly reason: string }
   | { readonly type: 'AccountChanged'; readonly account: AccountId }

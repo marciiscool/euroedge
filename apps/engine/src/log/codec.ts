@@ -14,6 +14,9 @@ export const EVENT_VERSIONS: Readonly<Record<EngineInput['type'], number>> = {
   CancelOrder: 1,
   HouseRiskParams: 1,
   ClosePosition: 1,
+  RequestWithdrawal: 1,
+  WithdrawalExecuted: 1,
+  WithdrawalExpired: 1,
 };
 
 export const GENESIS_HASH = createHash('sha256').update('euroedge-genesis-v1').digest('hex');
@@ -100,6 +103,9 @@ export const inputSchema = z.discriminatedUnion('type', [
   }),
   z.object({ type: z.literal('HouseRiskParams'), dailyLossLimit: pos.nullable() }),
   z.object({ type: z.literal('CancelOrder'), requestId: id, account: id, orderId: id }),
+  z.object({ type: z.literal('RequestWithdrawal'), requestId: id, account: id, amount: pos }),
+  z.object({ type: z.literal('WithdrawalExecuted'), withdrawalId: z.string().min(1).max(160) }),
+  z.object({ type: z.literal('WithdrawalExpired'), withdrawalId: z.string().min(1).max(160) }),
   z.object({
     type: z.literal('ClosePosition'),
     requestId: id,
