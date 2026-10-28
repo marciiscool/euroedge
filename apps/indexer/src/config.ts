@@ -16,6 +16,8 @@ export const configShape = {
   VAULT_ADDRESS: address.optional(),
   INDEXER_START_BLOCK: z.coerce.bigint().min(0n).default(0n),
   INDEXER_POLL_MS: z.coerce.number().int().min(250).default(4_000),
+  /** Blocks per eth_getLogs. Alchemy's free tier allows 10; paid RPCs take thousands. */
+  INDEXER_MAX_RANGE: z.coerce.bigint().min(1n).default(2_000n),
 } as const;
 
 export const loadConfig = (source?: Record<string, string | undefined>) => {

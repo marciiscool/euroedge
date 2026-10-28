@@ -41,6 +41,7 @@ services:
     environment:
       WEB_UPSTREAM: ${WEB_UPSTREAM:-host.docker.internal:3000}
       API_UPSTREAM: ${API_UPSTREAM:-host.docker.internal:4000}
+      RELAYER_UPSTREAM: ${RELAYER_UPSTREAM:-host.docker.internal:4040}
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     volumes:

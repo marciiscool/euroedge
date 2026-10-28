@@ -75,6 +75,23 @@ export class VaultIndexer {
     this.maxRange = o.maxRange ?? 2_000n;
   }
 
+  /**
+   * Steps until the cursor reaches the safe block or `maxSteps` ranges are done; returns the
+   * number of logs forwarded. Lets a small `maxRange` (free RPC tiers allow 10 blocks per
+   * eth_getLogs) still keep up with the chain.
+   */
+  async catchUp(maxSteps: number): Promise<number> {
+    let logs = 0;
+    for (let i = 0; i < maxSteps; i++) {
+      const before = await this.cursor.get();
+      logs += await this.step();
+      const after = await this.cursor.get();
+      if (after === undefined || after === before || after >= (await this.reader.safeBlock()))
+        break;
+    }
+    return logs;
+  }
+
   /** Forwards one range up to the safe block; returns the number of logs forwarded. */
   async step(): Promise<number> {
     const safe = await this.reader.safeBlock();

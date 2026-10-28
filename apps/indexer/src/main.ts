@@ -42,6 +42,7 @@ await runService(
       cursor: pgCursor(db, config.CHAIN_ID),
       sink,
       startBlock: config.INDEXER_START_BLOCK,
+      maxRange: config.INDEXER_MAX_RANGE,
     });
     // Pending withdrawals as the engine published them (M5-10).
     const pending = async () => {
@@ -54,7 +55,7 @@ await runService(
       if (busy) return;
       busy = true;
       indexer
-        .step()
+        .catchUp(50)
         .then(async (n) => {
           if (n > 0) service.log.info({ logs: n }, 'vault logs forwarded');
           const expired = await checkExpiries(await pending(), reader, sink);

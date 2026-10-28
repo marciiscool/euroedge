@@ -102,4 +102,27 @@ describe('vault indexer (M5-09)', () => {
     await expect(ix.step()).rejects.toThrow('valkey down');
     expect(state.cursor).toBeUndefined();
   });
+
+  it('catches up in many small ranges (free RPC tiers: 10 blocks per getLogs)', async () => {
+    const logs = [
+      log(105n, 0, 'Deposited', { user: USER, amount: 1n }),
+      log(149n, 0, 'Deposited', { user: USER, amount: 2n }),
+    ];
+    const { state, reader } = fakeChain(logs, 150n);
+    const ranges: [bigint, bigint][] = [];
+    const ix = new VaultIndexer({
+      reader: { ...reader, logs: (f, t) => (ranges.push([f, t]), reader.logs(f, t)) },
+      cursor: {
+        get: () => Promise.resolve(state.cursor),
+        set: (b) => Promise.resolve(void (state.cursor = b)),
+      },
+      sink: (i) => Promise.resolve(void state.sent.push(i)),
+      startBlock: 100n,
+      maxRange: 10n,
+    });
+    expect(await ix.catchUp(50)).toBe(2);
+    expect(state.cursor).toBe(150n);
+    expect(ranges.every(([f, t]) => t - f < 10n)).toBe(true);
+    expect(await ix.catchUp(50)).toBe(0); // nothing new
+  });
 });
