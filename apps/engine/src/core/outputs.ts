@@ -37,6 +37,13 @@ export type EngineOutput =
       readonly bandLo: Ticks;
       readonly bandHi: Ticks;
     }
+  | {
+      /** CB7 (ADR-0013) switched on or off: global reduce-only while active. */
+      readonly type: 'CapitalFloorChanged';
+      readonly active: boolean;
+      readonly houseEquity: bigint;
+      readonly insurance: bigint;
+    }
   | { readonly type: 'InputIgnored'; readonly input: string; readonly reason: string }
   | { readonly type: 'AccountChanged'; readonly account: AccountId }
   | { readonly type: 'MarketChanged'; readonly market: MarketId }

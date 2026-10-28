@@ -33,6 +33,7 @@ export function marketSnapshot(state: EngineState, id: string): MarketSnapshot |
     tickSize: m.units.tickSize,
     lotSize: m.units.lotSize,
     minNotional: usdcStr(m.minNotional),
+    capitalFloor: state.capitalFloor,
   };
 }
 

@@ -99,6 +99,10 @@ export interface EngineState {
   seq: bigint;
   ts: bigint;
   genesis: boolean;
+  /** Genesis amounts, the reference for CB7 (ADR-0013); null before genesis. */
+  genesisCapital: { readonly house: bigint; readonly insurance: bigint } | null;
+  /** CB7 active: global reduce-only (no new exposure in any market). */
+  capitalFloor: boolean;
   /** Genesis + deposits − executed withdrawals, tracked independently of the ledger (Invariant 1). */
   netDeposits: bigint;
   readonly markets: Map<MarketId, MarketState>;
@@ -115,6 +119,8 @@ export function createState(): EngineState {
     seq: 0n,
     ts: 0n,
     genesis: false,
+    genesisCapital: null,
+    capitalFloor: false,
     netDeposits: 0n,
     markets: new Map(),
     accounts: new Map(),

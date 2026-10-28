@@ -5,6 +5,7 @@ import type { EngineEvent, EngineInput } from './events.ts';
 import { assertInvariants } from './invariants.ts';
 import { liquidateUnderwater } from './liquidation.ts';
 import { cancelOrder, matchResting, placeRestingOrder } from './limits.ts';
+import { evaluateCapitalFloor } from './capital.ts';
 import { executeOrder } from './orders.ts';
 import { HOUR_MS, settleFunding } from './funding.ts';
 import type { EngineOutput } from './outputs.ts';
@@ -23,6 +24,8 @@ export function apply(state: EngineState, e: EngineEvent): EngineOutput[] {
   state.ts = e.ts;
   // Hourly funding first: hours that ended before this input settle at the pre-input state.
   const out = [...settleFunding(state, e.ts), ...dispatch(state, e.input, e.ts)];
+  // CB7 on the post-event state; it takes effect from the next input.
+  out.push(...evaluateCapitalFloor(state));
   assertInvariants(state);
   return out;
 }
@@ -44,6 +47,7 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
       ]);
       state.netDeposits += input.house + input.insurance;
       state.genesis = true;
+      state.genesisCapital = { house: input.house, insurance: input.insurance };
       return [];
     }
 

@@ -88,8 +88,8 @@ export function decide(state: EngineState, o: OrderRequest): OrderOutcome {
   const reduces = pos.lots !== 0n && pos.lots > 0n !== qty > 0n && abs(qty) <= abs(pos.lots);
   if ((o.reduceOnly || closing) && !reduces) return reject('reduce-only');
 
-  // Circuit breakers (brief §6.5): every non-none effect blocks new exposure.
-  if (!reduces && data.breaker !== 'none') return reject('circuit-breaker');
+  // Circuit breakers (brief §6.5): every non-none effect, and CB7 globally, blocks new exposure.
+  if (!reduces && (data.breaker !== 'none' || state.capitalFloor)) return reject('circuit-breaker');
   const risk = m.windows[data.window];
   // Degraded markets quote twice the usual half-spread.
   const halfSpread =
