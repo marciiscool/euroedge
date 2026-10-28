@@ -42,6 +42,8 @@ export const marketSnapshotSchema = z.object({
   tickSize: dec,
   lotSize: dec,
   minNotional: dec,
+  /** CB7 (ADR-0013): global reduce-only while house or insurance capital is below its floor. */
+  capitalFloor: z.boolean().default(false),
 });
 export type MarketSnapshot = z.infer<typeof marketSnapshotSchema>;
 
