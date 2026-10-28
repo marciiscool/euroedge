@@ -2,6 +2,7 @@ import { usdc } from '@euroedge/fixed';
 import { SYSTEM, userAccount, type Posting } from '@euroedge/ledger';
 import { applyFill, FLAT, liquidationPenalty, notionalUsdc } from '@euroedge/risk-core';
 import { accountEquity, accountMaintenance } from './accounting.ts';
+import { ADL_POLICY } from './adl.ts';
 import type { MarketId } from './events.ts';
 import type { EngineOutput } from './outputs.ts';
 import type { EngineState } from './state.ts';
@@ -157,10 +158,23 @@ function liquidateFully(state: EngineState, account: string): EngineOutput[] {
       ]);
     }
     const shortfall = cash < 0n ? -cash : 0n;
+    let houseCover = 0n;
     if (shortfall > 0n) {
-      state.ledger.post([
-        { from: SYSTEM.insurance, to: user, amount: usdc(shortfall), reason: 'insurance-cover' },
-      ]);
+      const split = ADL_POLICY.cover(state, shortfall);
+      houseCover = split.house;
+      if (split.insurance > 0n)
+        state.ledger.post([
+          {
+            from: SYSTEM.insurance,
+            to: user,
+            amount: usdc(split.insurance),
+            reason: 'insurance-cover',
+          },
+        ]);
+      if (split.house > 0n)
+        state.ledger.post([
+          { from: SYSTEM.house, to: user, amount: usdc(split.house), reason: 'insurance-cover' },
+        ]);
     }
     out.push(
       {
@@ -168,7 +182,8 @@ function liquidateFully(state: EngineState, account: string): EngineOutput[] {
         account: acc.id,
         markets: closed,
         penalty: usdc(charged),
-        insuranceCover: usdc(shortfall),
+        insuranceCover: usdc(shortfall - houseCover),
+        ...(houseCover > 0n ? { houseCover: usdc(houseCover) } : {}),
         partial: false,
       },
       { type: 'AccountChanged', account: acc.id },
