@@ -176,6 +176,18 @@ export const windowParamsSchema = z.object({
   /** Hourly funding cap on the total rate, ppm; null = interest only (Window D). */
   fundingCapPpmPerHour: z.number().int().min(0).nullable(),
   /** Net user OI skew (USDC at mark) at which the skew term reaches the cap (ADR-0016). */
+  /** Quote model (ADR-0003); PROPOSED values, ADR-0019. a: share of σ_FV added to the half-spread. */
+  sigmaSpreadBps: bps,
+  /** s: inventory skew at a house inventory of inventoryCapUsdc. */
+  inventorySkewBps: bps,
+  /** House inventory (whole USDC at FV) of full skew; null = no skew. */
+  inventoryCapUsdc: z.number().int().min(1).nullable(),
+  /** γ: marginal size impact at impactRefUsdc. */
+  impactBps: bps,
+  /** x_ref, whole USDC. */
+  impactRefUsdc: z.number().int().min(1),
+  /** α of the convex impact (ADR-0003: 1.5–2; integer maths supports these two). */
+  impactAlpha: z.enum(['1.5', '2']),
   fundingOiCapUsdc: z.number().int().min(0),
 });
 export type WindowParams = z.infer<typeof windowParamsSchema>;

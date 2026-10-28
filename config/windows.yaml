@@ -2,6 +2,10 @@
 # priceLimit (max fill deviation from the index) is NOT fvBand (model confidence).
 # fundingOiCapUsdc: net user OI skew (USDC at mark) at which the skew term reaches the window cap
 # (ADR-0016). Proposed defaults, founder to confirm.
+# Quote model (ADR-0003). PROPOSED values (ADR-0019), founder to confirm:
+#   sigmaSpreadBps (a): share of σ_FV added to the half-spread; inventorySkewBps (s) at a house
+#   inventory of inventoryCapUsdc; impactBps (γ) is the marginal impact at impactRefUsdc (x_ref),
+#   convex with impactAlpha (α). A fill pays the average impact γ/(α+1)·(q/x_ref)^α.
 windows:
   A:
     {
@@ -13,6 +17,12 @@ windows:
       houseHalfSpreadBps: 5,
       fundingCapPpmPerHour: 300,
       fundingOiCapUsdc: 2000000,
+      sigmaSpreadBps: 1000,
+      inventorySkewBps: 3,
+      inventoryCapUsdc: 2000000,
+      impactBps: 5,
+      impactRefUsdc: 100000,
+      impactAlpha: '1.5',
     }
   B:
     {
@@ -24,6 +34,12 @@ windows:
       houseHalfSpreadBps: 10,
       fundingCapPpmPerHour: 200,
       fundingOiCapUsdc: 1000000,
+      sigmaSpreadBps: 2500,
+      inventorySkewBps: 5,
+      inventoryCapUsdc: 1000000,
+      impactBps: 10,
+      impactRefUsdc: 100000,
+      impactAlpha: '1.5',
     }
   C:
     {
@@ -35,6 +51,12 @@ windows:
       houseHalfSpreadBps: 20,
       fundingCapPpmPerHour: 100,
       fundingOiCapUsdc: 500000,
+      sigmaSpreadBps: 2500,
+      inventorySkewBps: 10,
+      inventoryCapUsdc: 500000,
+      impactBps: 20,
+      impactRefUsdc: 100000,
+      impactAlpha: '1.5',
     }
   # D: ±min(3 %, 1/maxLev); skew add-on on fees arrives in M4.
   D:
@@ -47,6 +69,12 @@ windows:
       houseHalfSpreadBps: 35,
       fundingCapPpmPerHour: null,
       fundingOiCapUsdc: 0,
+      sigmaSpreadBps: 2500,
+      inventorySkewBps: 15,
+      inventoryCapUsdc: 500000,
+      impactBps: 30,
+      impactRefUsdc: 100000,
+      impactAlpha: '1.5',
     }
 maintenanceMarginBps: { stock: 1000, basket: 500 }
 liquidationPenaltyBps: { stock: 100, basket: 50 }

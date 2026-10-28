@@ -58,6 +58,25 @@ export function mulDivRem(a: bigint, b: bigint, d: bigint): { q: bigint; rem: bi
   return { q: n / d, rem: n % d };
 }
 
+/** ⌊√n⌋ for n ≥ 0 (Newton's method on bigints, exact). */
+export function isqrt(n: bigint): bigint {
+  if (n < 0n) throw new RangeError('isqrt of a negative number');
+  if (n < 2n) return n;
+  let x = n;
+  let y = (x + 1n) / 2n;
+  while (y < x) {
+    x = y;
+    y = (x + n / x) / 2n;
+  }
+  return x;
+}
+
+/** ⌈√n⌉ for n ≥ 0. */
+export function isqrtCeil(n: bigint): bigint {
+  const r = isqrt(n);
+  return r * r === n ? r : r + 1n;
+}
+
 export const pow10 = (k: number): bigint => {
   if (!Number.isSafeInteger(k) || k < 0) throw new RangeError(`pow10: invalid exponent ${k}`);
   return 10n ** BigInt(k);

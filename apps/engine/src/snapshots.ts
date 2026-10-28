@@ -1,8 +1,9 @@
 import { formatDecimal, lots, lotsToQty, ticks, ticksToPrice, usdc } from '@euroedge/fixed';
-import { averageEntry, houseQuote, liquidationPrice } from '@euroedge/risk-core';
+import { averageEntry, liquidationPrice } from '@euroedge/risk-core';
 import type { AccountSnapshot, MarketSnapshot, OrderResult } from '@euroedge/shared';
 import { accountEquity, accountMaintenance, positionUpnl } from './core/accounting.ts';
 import type { EngineOutput } from './core/outputs.ts';
+import { marketQuote } from './core/quote.ts';
 import type { EngineState } from './core/state.ts';
 
 const usdcStr = (v: bigint) => formatDecimal(v, 6);
@@ -13,7 +14,8 @@ export function marketSnapshot(state: EngineState, id: string): MarketSnapshot |
   const d = m?.data;
   if (m === undefined || d === undefined) return undefined;
   const risk = m.windows[d.window];
-  const q = houseQuote(d.fv, risk.houseHalfSpreadBps);
+  const q = marketQuote(m);
+  if (q === undefined) return undefined;
   const px = (t: bigint) => ticksToPrice(m.units, ticks(t));
   return {
     market: id,
@@ -34,6 +36,11 @@ export function marketSnapshot(state: EngineState, id: string): MarketSnapshot |
     lotSize: m.units.lotSize,
     minNotional: usdcStr(m.minNotional),
     capitalFloor: state.capitalFloor,
+    ladder: q.ladder.map((r) => ({
+      notional: usdcStr(r.notional),
+      bid: px(r.bid),
+      ask: px(r.ask),
+    })),
   };
 }
 

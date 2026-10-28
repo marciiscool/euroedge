@@ -44,6 +44,8 @@ export const marketSnapshotSchema = z.object({
   minNotional: dec,
   /** CB7 (ADR-0013): global reduce-only while house or insurance capital is below its floor. */
   capitalFloor: z.boolean().default(false),
+  /** Executable prices for €1k / €5k / €25k / €100k (ADR-0003 step 8), same function as fills. */
+  ladder: z.array(z.object({ notional: dec, bid: dec, ask: dec })).default([]),
 });
 export type MarketSnapshot = z.infer<typeof marketSnapshotSchema>;
 

@@ -91,7 +91,16 @@ where `L₀ = 1 000` and `Bᵢ` are the constituents' base prices. In the live t
 
 Breakers are evaluated each second on event time, logged with the market data the engine consumes, and shown in the terminal.
 
-## 7. Accuracy
+## 7. House quotes
+
+The house is the counterparty to every trade. It quotes around FV and never moves FV, index or mark with its own flow.
+
+- The half-spread widens with model uncertainty (σ_FV) and is wider in the off-hours windows.
+- It leans against the house's own inventory. When the house is long, buying gets slightly cheaper and selling slightly dearer.
+- Larger orders pay a convex size impact. The quote ladder shows the executable price for €1k, €5k, €25k and €100k, from the same calculation that fills.
+- Prices are rounded to the tick in the house's favour.
+
+## 8. Accuracy
 
 The backtest (`docs/backtest/`) replays recorded or simulated ticks through the same code. It scores the FV against the next official open:
 
@@ -102,6 +111,6 @@ The backtest (`docs/backtest/`) replays recorded or simulated ticks through the 
 
 Public accuracy figures are published only from real `live-min` data.
 
-## 8. Worked examples
+## 9. Worked examples
 
-`docs/methodology/examples/` holds hand-derived examples (fees, liquidation price, FV) that CI checks against the production code.
+`docs/methodology/examples/` holds hand-derived examples (fees, liquidation price, FV, house quote) that CI checks against the production code.

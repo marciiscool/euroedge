@@ -25,6 +25,13 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - `PlaceOrder` v2 and a new `CancelOrder` input; open orders appear in the account snapshot.
   - API: `type`/`limitPrice` on `POST /api/orders`, and `DELETE /api/orders/:id`.
   - Terminal: a market/limit switch, a limit price field and an open-orders table with cancel.
+- House quote model (M4-02, ADR-0003; parameters proposed in ADR-0019):
+  - The half-spread widens with σ_FV and skews with house inventory.
+  - Fills pay a convex size impact `γ/(α+1)·(q/x_ref)^α`, in integer maths (α = 1.5 via an integer square root).
+  - The ask rounds up and the bid down; degraded markets double the spread.
+  - Market snapshots carry a €1k–€100k ladder from the same function that fills.
+  - `MarketListed` v3. Older logs decode to the unchanged M1 quote.
+  - Golden vectors in `quote.json`; `isqrt`/`isqrtCeil` in `@euroedge/fixed`.
 - State snapshots (M4-19):
   - Lossless state codec: bigints stay bigints, Maps keep insertion order.
   - `engine_snapshots` table (migration 0004). The engine stores a snapshot every `ENGINE_SNAPSHOT_EVERY` events (default 10 000).

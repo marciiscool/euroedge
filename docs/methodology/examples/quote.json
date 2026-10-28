@@ -1,0 +1,236 @@
+{
+  "description": "House quote (ADR-0003): price = FV · (1 ± (m·max(0, h_base + a·σ + skew) + impact) + shift), m = 2 when degraded; skew = s · clamp(inv/invCap, −1, 1) · (−side); impact = γ/(α+1) · (q/x_ref)^α; shift clamped to ±m·(h_base + a·σ)/2. Every term in ppm, rounded up; ask ⌈⌉, bid ⌊⌋ to the tick.",
+  "status": "hand-derived by the build; parameter values are proposals (ADR-0019), awaiting the founder",
+  "cases": [
+    {
+      "name": "M1 quote: FV ± h_base only",
+      "params": {
+        "halfSpreadBps": 5,
+        "sigmaSpreadBps": 0,
+        "inventorySkewBps": 0,
+        "inventoryCapMicroUsdc": null,
+        "impactBps": 0,
+        "impactRefMicroUsdc": 100000000000,
+        "impactAlpha": "1.5"
+      },
+      "inputs": {
+        "fv": 70000,
+        "sigmaPpm": 0,
+        "inventoryMicroUsdc": 0,
+        "shiftPpm": 0,
+        "spreadMultiplier": 1
+      },
+      "notionalMicroUsdc": 0,
+      "ask": 70035,
+      "bid": 69965,
+      "working": "ask = ⌈700.00 × 1.0005⌉ = 700.35, bid = ⌊700.00 × 0.9995⌋ = 699.65"
+    },
+    {
+      "name": "σ widening: a = 25 % of σ_FV 800 ppm",
+      "params": {
+        "halfSpreadBps": 5,
+        "sigmaSpreadBps": 2500,
+        "inventorySkewBps": 0,
+        "inventoryCapMicroUsdc": null,
+        "impactBps": 0,
+        "impactRefMicroUsdc": 100000000000,
+        "impactAlpha": "1.5"
+      },
+      "inputs": {
+        "fv": 70000,
+        "sigmaPpm": 800,
+        "inventoryMicroUsdc": 0,
+        "shiftPpm": 0,
+        "spreadMultiplier": 1
+      },
+      "notionalMicroUsdc": 0,
+      "ask": 70049,
+      "bid": 69951,
+      "working": "h = 500 + ⌈800 × 2 500 / 10 000⌉ = 700 ppm; ask = ⌈70 049⌉, bid = ⌊69 951⌋"
+    },
+    {
+      "name": "inventory skew: house long half its cap",
+      "params": {
+        "halfSpreadBps": 5,
+        "sigmaSpreadBps": 0,
+        "inventorySkewBps": 5,
+        "inventoryCapMicroUsdc": 2000000000000,
+        "impactBps": 0,
+        "impactRefMicroUsdc": 100000000000,
+        "impactAlpha": "1.5"
+      },
+      "inputs": {
+        "fv": 70000,
+        "sigmaPpm": 0,
+        "inventoryMicroUsdc": 1000000000000,
+        "shiftPpm": 0,
+        "spreadMultiplier": 1
+      },
+      "notionalMicroUsdc": 0,
+      "ask": 70018,
+      "bid": 69947,
+      "working": "skew = 500 ppm × 0.5 = 250: ask h = 500 − 250 = 250 → ⌈70 017.5⌉ = 70 018; bid h = 750 → ⌊69 947.5⌋ = 69 947"
+    },
+    {
+      "name": "skew never quotes through FV",
+      "params": {
+        "halfSpreadBps": 5,
+        "sigmaSpreadBps": 0,
+        "inventorySkewBps": 50,
+        "inventoryCapMicroUsdc": 2000000000000,
+        "impactBps": 0,
+        "impactRefMicroUsdc": 100000000000,
+        "impactAlpha": "1.5"
+      },
+      "inputs": {
+        "fv": 70000,
+        "sigmaPpm": 0,
+        "inventoryMicroUsdc": 5000000000000,
+        "shiftPpm": 0,
+        "spreadMultiplier": 1
+      },
+      "notionalMicroUsdc": 0,
+      "ask": 70000,
+      "bid": 69615,
+      "working": "full inventory, s = 50 bp: ask h = max(0, 500 − 5 000) = 0 → ask = FV"
+    },
+    {
+      "name": "impact α = 1.5 at x_ref",
+      "params": {
+        "halfSpreadBps": 5,
+        "sigmaSpreadBps": 0,
+        "inventorySkewBps": 0,
+        "inventoryCapMicroUsdc": null,
+        "impactBps": 5,
+        "impactRefMicroUsdc": 100000000000,
+        "impactAlpha": "1.5"
+      },
+      "inputs": {
+        "fv": 70000,
+        "sigmaPpm": 0,
+        "inventoryMicroUsdc": 0,
+        "shiftPpm": 0,
+        "spreadMultiplier": 1
+      },
+      "notionalMicroUsdc": 100000000000,
+      "ask": 70049,
+      "bid": 69951,
+      "working": "impact = γ/(α+1) = 500 / 2.5 = 200 ppm; h = 700 → ask ⌈70 049⌉"
+    },
+    {
+      "name": "impact α = 1.5 at x_ref / 4",
+      "params": {
+        "halfSpreadBps": 5,
+        "sigmaSpreadBps": 0,
+        "inventorySkewBps": 0,
+        "inventoryCapMicroUsdc": null,
+        "impactBps": 5,
+        "impactRefMicroUsdc": 100000000000,
+        "impactAlpha": "1.5"
+      },
+      "inputs": {
+        "fv": 70000,
+        "sigmaPpm": 0,
+        "inventoryMicroUsdc": 0,
+        "shiftPpm": 0,
+        "spreadMultiplier": 1
+      },
+      "notionalMicroUsdc": 25000000000,
+      "ask": 70037,
+      "bid": 69963,
+      "working": "(0.25)^1.5 = 0.125 → 200 × 0.125 = 25 ppm; h = 525 → ask ⌈70 036.75⌉ = 70 037, bid ⌊69 963.25⌋ = 69 963"
+    },
+    {
+      "name": "impact α = 1.5 at €1 000 (ceiling root)",
+      "params": {
+        "halfSpreadBps": 5,
+        "sigmaSpreadBps": 0,
+        "inventorySkewBps": 0,
+        "inventoryCapMicroUsdc": null,
+        "impactBps": 5,
+        "impactRefMicroUsdc": 100000000000,
+        "impactAlpha": "1.5"
+      },
+      "inputs": {
+        "fv": 70000,
+        "sigmaPpm": 0,
+        "inventoryMicroUsdc": 0,
+        "shiftPpm": 0,
+        "spreadMultiplier": 1
+      },
+      "notionalMicroUsdc": 1000000000,
+      "ask": 70036,
+      "bid": 69964,
+      "working": "(0.01)^1.5 = 0.001 → 0.2 ppm → ⌈⌉ 1 ppm; h = 501 → ask ⌈70 035.07⌉ = 70 036"
+    },
+    {
+      "name": "impact α = 2 at x_ref",
+      "params": {
+        "halfSpreadBps": 5,
+        "sigmaSpreadBps": 0,
+        "inventorySkewBps": 0,
+        "inventoryCapMicroUsdc": null,
+        "impactBps": 5,
+        "impactRefMicroUsdc": 100000000000,
+        "impactAlpha": "2"
+      },
+      "inputs": {
+        "fv": 70000,
+        "sigmaPpm": 0,
+        "inventoryMicroUsdc": 0,
+        "shiftPpm": 0,
+        "spreadMultiplier": 1
+      },
+      "notionalMicroUsdc": 100000000000,
+      "ask": 70047,
+      "bid": 69953,
+      "working": "γ/3 = 166.67 → 167 ppm; h = 667 → ask ⌈70 046.69⌉ = 70 047"
+    },
+    {
+      "name": "flow shift clamped to h/2",
+      "params": {
+        "halfSpreadBps": 5,
+        "sigmaSpreadBps": 0,
+        "inventorySkewBps": 0,
+        "inventoryCapMicroUsdc": null,
+        "impactBps": 0,
+        "impactRefMicroUsdc": 100000000000,
+        "impactAlpha": "1.5"
+      },
+      "inputs": {
+        "fv": 70000,
+        "sigmaPpm": 0,
+        "inventoryMicroUsdc": 0,
+        "shiftPpm": 400,
+        "spreadMultiplier": 1
+      },
+      "notionalMicroUsdc": 0,
+      "ask": 70053,
+      "bid": 69982,
+      "working": "shift 400 → 250 ppm: ask ⌈70 000 × 1.00075⌉ = 70 053 (70 052.5), bid ⌊70 000 × 0.99975⌋ = 69 982"
+    },
+    {
+      "name": "degraded market doubles h",
+      "params": {
+        "halfSpreadBps": 5,
+        "sigmaSpreadBps": 0,
+        "inventorySkewBps": 0,
+        "inventoryCapMicroUsdc": null,
+        "impactBps": 0,
+        "impactRefMicroUsdc": 100000000000,
+        "impactAlpha": "1.5"
+      },
+      "inputs": {
+        "fv": 70000,
+        "sigmaPpm": 0,
+        "inventoryMicroUsdc": 0,
+        "shiftPpm": 0,
+        "spreadMultiplier": 2
+      },
+      "notionalMicroUsdc": 0,
+      "ask": 70070,
+      "bid": 69930,
+      "working": "h = 1 000 ppm: ask 70 070, bid 69 930"
+    }
+  ]
+}

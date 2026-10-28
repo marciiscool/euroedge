@@ -20,6 +20,13 @@ export function marketListedInput(
       priceLimitBps: BigInt(p.priceLimitBps),
       fundingCapPpmPerHour: p.fundingCapPpmPerHour === null ? null : BigInt(p.fundingCapPpmPerHour),
       fundingOiCap: usdc(BigInt(p.fundingOiCapUsdc) * 1_000_000n),
+      sigmaSpreadBps: BigInt(p.sigmaSpreadBps),
+      inventorySkewBps: BigInt(p.inventorySkewBps),
+      inventoryCap:
+        p.inventoryCapUsdc === null ? null : usdc(BigInt(p.inventoryCapUsdc) * 1_000_000n),
+      impactBps: BigInt(p.impactBps),
+      impactRef: usdc(BigInt(p.impactRefUsdc) * 1_000_000n),
+      impactAlphaHalves: p.impactAlpha === '2' ? 4n : 3n,
     };
   };
   return {
