@@ -11,7 +11,7 @@ Format: lightweight MADR (`0000-template.md`). One decision per file, numbered, 
 | [0003](0003-quote-impact-model.md)              | Quote / impact model                                      | Accepted         | math |
 | [0004](0004-calendar-data.md)                   | Calendar data                                             | Accepted         | –    |
 | [0005](0005-shadcn-base-ui.md)                  | shadcn on Base UI                                         | Accepted         | –    |
-| [0006](0006-wagmi-2.md)                         | wagmi 2 + RainbowKit 2.2                                  | Accepted         | –    |
+| [0006](0006-wagmi-2.md)                         | wagmi 2 + RainbowKit 2.2 (RainbowKit → ADR-0020)          | Accepted         | –    |
 | [0007](0007-ui-benchmark.md)                    | UI benchmark                                              | Accepted (draft) | –    |
 | [0008](0008-live-min-window-a.md)               | live-min Window A index, anchor, CB2, stale escalation    | Accepted         | math |
 | [0009](0009-mark-band-vs-step-cap.md)           | Mark: band clamp vs step cap; CB8                         | Accepted         | math |
@@ -24,3 +24,4 @@ Format: lightweight MADR (`0000-template.md`). One decision per file, numbered, 
 | [0016](0016-risk-parameter-defaults.md)         | Risk parameter defaults                                   | Accepted         | math |
 | [0017](0017-override-line-markets.md)           | Override-line markets (NOVO, SHEL)                        | Accepted         | math |
 | [0019](0019-quote-and-house-risk-parameters.md) | Quote model, flow shift, house risk: proposed parameters  | Proposed         | math |
+| [0020](0020-privy-social-login.md)              | Social login with Privy embedded wallets                  | Accepted         | –    |
