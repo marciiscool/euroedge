@@ -29,3 +29,7 @@ exclude_lints = ["block-timestamp"]
 
 [fmt]
 line_length = 100
+
+# Slither (CI, slither.config.json here and at the repo root): the `timestamp` detector is
+# excluded. Claim windows and signature deadlines compare against block.timestamp by design;
+# validators can skew it by seconds, which is irrelevant at hour and day scales.

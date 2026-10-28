@@ -91,7 +91,7 @@ export type EngineOutput =
       readonly type: 'CashFlow';
       readonly account: AccountId;
       readonly market: MarketId;
-      readonly kind: 'funding' | 'dividend';
+      readonly kind: 'funding' | 'dividend' | 'deposit';
       readonly amount: bigint;
     }
   | {

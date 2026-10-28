@@ -1,0 +1,6 @@
+{
+  "filter_paths": "contracts/lib|contracts/test|contracts/script|lib|test|script",
+  "exclude_informational": true,
+  "exclude_low": false,
+  "detectors_to_exclude": "timestamp"
+}

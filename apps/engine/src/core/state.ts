@@ -174,6 +174,8 @@ export interface EngineState {
   readonly withdrawals: Map<string, Withdrawal>;
   /** Next withdrawal nonce. */
   withdrawalNonce: bigint;
+  /** Chain logs already applied, `${txHash}:${logIndex}` → seq (M5-09): re-indexing is harmless. */
+  readonly chainLogs: Map<string, bigint>;
   /** Applied dividends, `${market}:${exDate}` → event time (M4-16). */
   readonly dividends: Map<string, bigint>;
 }
@@ -195,5 +197,6 @@ export function createState(): EngineState {
     withdrawals: new Map(),
     withdrawalNonce: 0n,
     dividends: new Map(),
+    chainLogs: new Map(),
   };
 }

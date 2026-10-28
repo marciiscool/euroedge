@@ -67,7 +67,14 @@ export function project(outputs: readonly ProjectedOutput[]): Rows {
         ]);
         break;
       case 'CashFlow':
-        rows.cashFlows.push([...key, o.account, o.kind, o.market, null, o.amount]);
+        rows.cashFlows.push([
+          ...key,
+          o.account,
+          o.kind,
+          o.market === '' ? null : o.market,
+          null,
+          o.amount,
+        ]);
         break;
       case 'WithdrawalReserved':
         if (!o.duplicate)

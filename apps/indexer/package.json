@@ -13,10 +13,13 @@
   "dependencies": {
     "@euroedge/service-kit": "workspace:*",
     "@euroedge/shared": "workspace:*",
+    "pg": "catalog:",
+    "viem": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@types/pg": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
