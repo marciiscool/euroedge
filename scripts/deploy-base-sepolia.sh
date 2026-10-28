@@ -22,6 +22,6 @@ VERIFY=()
 if [ -n "${ETHERSCAN_API_KEY:-}" ]; then VERIFY=(--verify --etherscan-api-key "$ETHERSCAN_API_KEY"); fi
 cd contracts
 "${BIN}forge" script script/Deploy.s.sol \
-  --rpc-url "$BASE_SEPOLIA_RPC_URL" --broadcast "${VERIFY[@]}"
+  --rpc-url "$BASE_SEPOLIA_RPC_URL" --broadcast ${VERIFY[@]+"${VERIFY[@]}"}
 echo
 cat deployments/84532.json
