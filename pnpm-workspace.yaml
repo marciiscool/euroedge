@@ -67,3 +67,14 @@ minimumReleaseAgeExclude:
 
 # Supply-chain policy: refuse package versions younger than 24 h (pnpm default, made explicit).
 minimumReleaseAge: 1440
+
+# Transitive fixes for the wallet stack (ADR-0020).
+overrides:
+  'ws@>=8.0.0 <8.21.0': 8.22.0
+
+auditConfig:
+  ignoreGhsas:
+    # zod 3 inside WalletConnect/Reown, pulled in by Privy. Browser-only: the "oversized
+    # collection" DoS needs an attacker to feed data into the user's own wallet UI. Our own
+    # zod is 4.6.7 (patched). Revisit when Privy ships WalletConnect on zod 4.
+    - GHSA-mrhx-c7xc-m3w5
