@@ -11,6 +11,11 @@
 		reverse_proxy {$API_UPSTREAM}
 	}
 
+	# Gasless claim/deposit relayer (M5-11).
+	handle /relay/* {
+		reverse_proxy {$RELAYER_UPSTREAM:localhost:4040}
+	}
+
 	handle /ws {
 		reverse_proxy {$API_UPSTREAM}
 	}
