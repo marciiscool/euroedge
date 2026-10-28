@@ -4,6 +4,24 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### M5 — Chain (in progress, on `integration/m5`)
+
+#### Added
+
+- Foundry project (M5-01): OpenZeppelin 5.6.1 and forge-std 1.17 as pinned submodules, solc 0.8.30. CI runs forge fmt/build/test and Slither.
+- `TestUSDC` (M5-02):
+  - Non-transferable except faucet → user and user ↔ Vault.
+  - Claims capped per 24 h and per lifetime (10 000 / 100 000, proposals), gasless via EIP-712 `claimFor`.
+  - Permit for EOAs and ERC-1271 wallets (ADR-0014).
+  - One-time genesis mint into the Vault (ADR-0013).
+- `Vault` (M5-03/04):
+  - `deposit`, and `depositWithPermit` for the relayer (front-run-safe).
+  - Engine-signed EIP-712 `withdraw` with an unordered nonce bitmap, a deadline and a global daily limit (1 000 000/day, proposal).
+  - Multisig pause, signer rotation, one-time genesis record.
+- Vault invariants and fuzz tests (M5-05): vault holdings = genesis + deposits − withdrawals ≥ genesis + Σ withdrawable; no nonce works twice; the daily limit holds.
+- `BalanceRoot` (M5-06): hourly Merkle roots with the engine seq, verifiable by anyone.
+- Deploy script and runbook (M5-07): genesis, hand-over to a Safe, `deployments/<chainId>.json`; checked end to end on anvil.
+
 ### Login & wallet (ADR-0020)
 
 #### Added
