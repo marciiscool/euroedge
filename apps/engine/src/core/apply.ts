@@ -4,12 +4,13 @@ import { FLAT } from '@euroedge/risk-core';
 import type { EngineEvent, EngineInput } from './events.ts';
 import { assertInvariants } from './invariants.ts';
 import { liquidateUnderwater } from './liquidation.ts';
-import { cancelOrder, matchResting, placeRestingOrder } from './limits.ts';
+import { cancelMarketOrders, cancelOrder, matchResting, placeRestingOrder } from './limits.ts';
 import { evaluateCapitalFloor } from './capital.ts';
 import { evaluateHouseLoss, rollHouseDay } from './house-risk.ts';
 import { executeOrder } from './orders.ts';
 import { requestWithdrawal, settleWithdrawal } from './withdrawals.ts';
 import { applyDividend } from './dividends.ts';
+import { adjustMarket, freezeMarket, unfreezeMarket } from './corporate-actions.ts';
 import { HOUR_MS, settleFunding } from './funding.ts';
 import type { EngineOutput } from './outputs.ts';
 import type { EngineState } from './state.ts';
@@ -92,6 +93,7 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
         funding: existing?.funding ?? { lastHour: ts / HOUR_MS, index: 0n, lastRate: 0n },
         data: existing?.data,
         house: existing?.house ?? FLAT,
+        corporateAction: existing?.corporateAction ?? null,
       });
       return [{ type: 'MarketChanged', market: input.market }];
     }
@@ -176,6 +178,15 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
 
     case 'CancelOrder':
       return cancelOrder(state, input);
+
+    case 'CorporateActionFreeze':
+      return freezeMarket(state, input, (market) => cancelMarketOrders(state, market));
+
+    case 'CorporateActionAdjust':
+      return adjustMarket(state, input);
+
+    case 'CorporateActionUnfreeze':
+      return unfreezeMarket(state, input);
 
     case 'DividendExDate':
       return applyDividend(state, input);

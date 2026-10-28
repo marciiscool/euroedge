@@ -92,6 +92,12 @@ export type EngineOutput =
       readonly kind: 'funding' | 'dividend';
       readonly amount: bigint;
     }
+  | {
+      readonly type: 'CorporateActionChanged';
+      readonly market: MarketId;
+      readonly actionId: string;
+      readonly stage: 'frozen' | 'adjusted' | 'unfrozen';
+    }
   | { readonly type: 'InputIgnored'; readonly input: string; readonly reason: string }
   | { readonly type: 'AccountChanged'; readonly account: AccountId }
   | { readonly type: 'MarketChanged'; readonly market: MarketId }
@@ -108,7 +114,7 @@ export type EngineOutput =
       readonly requestId: string;
       readonly account: AccountId;
       readonly orderId: string;
-      readonly reason: RejectReason | 'user' | 'oco';
+      readonly reason: RejectReason | 'user' | 'oco' | 'corporate-action';
     }
   | {
       /** Hourly funding settled: positive rate = longs paid shorts (Rate, 1e18 per hour). */

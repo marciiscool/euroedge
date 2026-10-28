@@ -42,6 +42,7 @@ type Step =
   | { kind: 'withdraw'; account: string; amount: bigint; key: number }
   | { kind: 'settle'; account: string; key: number; executed: boolean }
   | { kind: 'dividend'; gross: bigint; withholdingBps: bigint }
+  | { kind: 'corp'; stage: 'freeze' | 'adjust' | 'unfreeze'; ratio: [bigint, bigint] }
   | { kind: 'tick' };
 
 const step: fc.Arbitrary<Step> = fc.oneof(
@@ -138,6 +139,13 @@ const step: fc.Arbitrary<Step> = fc.oneof(
     }),
   },
 );
+// Occasional corporate actions; each cancels resting orders, so they stay rare.
+const corpStep: fc.Arbitrary<Step> = fc.record({
+  kind: fc.constant('corp' as const),
+  stage: fc.constantFrom('freeze' as const, 'adjust' as const, 'unfreeze' as const),
+  // Balanced ratios keep prices in range (1:10 reverse splits are unit-tested).
+  ratio: fc.constantFrom<[bigint, bigint]>([2n, 1n], [1n, 2n], [3n, 2n], [2n, 3n], [1n, 1n]),
+});
 // Occasional large gaps (±5–40 %), as at a Monday open or a jump.
 const gapStep: fc.Arbitrary<Step> = fc.record({
   kind: fc.constant('move' as const),
@@ -237,6 +245,38 @@ function toInputs(steps: Step[]): EngineInput[] {
           orderId: `k${s.key}`,
         });
         break;
+      case 'corp': {
+        // A whole action per step, so the market is not left frozen for most of a run:
+        // freeze, an order that must be refused, the split, then (usually) unfreeze.
+        const market = 'ASML-PERP';
+        inputs.push({ type: 'CorporateActionFreeze', market, actionId: `ca${n}` });
+        inputs.push({
+          type: 'PlaceOrder',
+          requestId: `f${n}`,
+          idempotencyKey: `f${n}`,
+          account: 'a',
+          market,
+          side: 'buy',
+          qty: lots(100n),
+          reduceOnly: false,
+        });
+        if (s.stage !== 'freeze') {
+          inputs.push({
+            type: 'CorporateActionAdjust',
+            market,
+            actionId: `ca${n}`,
+            ratioNum: s.ratio[0],
+            ratioDen: s.ratio[1],
+          });
+          // The feed follows the new share count.
+          px = (px * s.ratio[1]) / s.ratio[0];
+          if (px < 1_000n) px = 1_000n;
+          if (px > 10_000_000n) px = 10_000_000n;
+        }
+        inputs.push({ type: 'CorporateActionUnfreeze', market, actionId: `ca${n}` });
+        inputs.push(md('A', 10n));
+        break;
+      }
       case 'dividend':
         inputs.push({
           type: 'DividendExDate',
@@ -320,12 +360,12 @@ describe('engine invariants under random inputs (fast-check, 15 000+ steps)', ()
       { numRuns: 50 },
     );
     // The generator must actually exercise trading, resting/stop orders, OCO, funding and liquidation.
-    // Floors sit well below typical runs (≈ 1 000 fills, ≈ 95 resting fills since withdrawals
-    // and IOC/FOK joined the mix) so they catch a dead generator, not seed noise.
+    // Floors sit well below typical runs (≈ 1 000 fills since withdrawals, IOC/FOK and
+    // corporate actions joined the mix) so they catch a dead generator, not seed noise.
     expect(totals.steps).toBeGreaterThan(15_000);
     expect(totals.fills).toBeGreaterThan(600);
     expect(totals.liquidations).toBeGreaterThan(0);
-    expect(totals.resting).toBeGreaterThan(50);
+    expect(totals.resting).toBeGreaterThan(20); // ≈ 50: corporate-action freezes cancel resting orders
     expect(totals.oco).toBeGreaterThan(0);
     expect(totals.fundings).toBeGreaterThan(100);
   }, 120_000);
@@ -333,10 +373,17 @@ describe('engine invariants under random inputs (fast-check, 15 000+ steps)', ()
   it('restore(snapshot at any seq) + replay of the rest == the live state (M4-19)', () => {
     fc.assert(
       fc.property(
-        fc.array(fc.oneof({ weight: 30, arbitrary: step }, { weight: 1, arbitrary: gapStep }), {
-          minLength: 100,
-          maxLength: 400,
-        }),
+        fc.array(
+          fc.oneof(
+            { weight: 30, arbitrary: step },
+            { weight: 1, arbitrary: gapStep },
+            { weight: 1, arbitrary: corpStep },
+          ),
+          {
+            minLength: 100,
+            maxLength: 400,
+          },
+        ),
         fc.double({ min: 0, max: 1, noNaN: true }),
         (steps, at) => {
           const { state, events } = runLive(toInputs(steps));

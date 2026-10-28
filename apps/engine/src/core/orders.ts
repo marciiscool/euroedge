@@ -78,6 +78,7 @@ export function decide(state: EngineState, o: OrderRequest): OrderOutcome {
   if (!state.genesis) return reject('not-genesis');
   const m = state.markets.get(o.market);
   if (m === undefined) return reject('unknown-market');
+  if (m.corporateAction !== null) return reject('market-frozen');
   const data = m.data;
   if (data === undefined) return reject('no-market-data');
   const acc = state.accounts.get(o.account);

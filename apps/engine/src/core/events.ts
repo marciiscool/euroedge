@@ -154,6 +154,26 @@ export type EngineInput =
       readonly withholdingBps: bigint;
     }
   | {
+      /** Admin (M4-17): freeze a market for a corporate action; resting orders are cancelled. */
+      readonly type: 'CorporateActionFreeze';
+      readonly market: MarketId;
+      readonly actionId: string;
+    }
+  | {
+      /** Admin: apply a split num:den (one old share becomes num/den new shares). */
+      readonly type: 'CorporateActionAdjust';
+      readonly market: MarketId;
+      readonly actionId: string;
+      readonly ratioNum: bigint;
+      readonly ratioDen: bigint;
+    }
+  | {
+      /** Admin: resume trading after the corporate action. */
+      readonly type: 'CorporateActionUnfreeze';
+      readonly market: MarketId;
+      readonly actionId: string;
+    }
+  | {
       /** Reserve collateral for an on-chain withdrawal to the account's address (M4-18). */
       readonly type: 'RequestWithdrawal';
       readonly requestId: string;
