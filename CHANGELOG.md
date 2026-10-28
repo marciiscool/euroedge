@@ -26,6 +26,11 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Withdrawal reservation (M4-18, logic only):
+  - `RequestWithdrawal` moves free collateral (equity − initial margin, at most cash) from the user to `vault-pending`, with a sequential EIP-712 nonce and a 1-hour deadline (proposal).
+  - `WithdrawalExecuted` (vault-pending → external, net deposits fall) or `WithdrawalExpired` (after the deadline, back to the user) settles it exactly once.
+  - Requests are idempotent per request id; only wallet accounts can withdraw.
+  - New Invariant 10: vault-pending equals Σ pending withdrawals, and pending withdrawals count as vault claims in Invariant 7.
 - Hourly funding (ADR-0016) on event time:
   - The rate is interest (500 bp/yr) plus a skew term, with the cap applied to the total; Window D charges interest only.
   - Longs pay when users are net long.

@@ -114,6 +114,19 @@ export interface RestingOrder {
   readonly ocoGroup: string | null;
 }
 
+/** An on-chain withdrawal reserved by the engine (M4-18): user → vault-pending until settled. */
+export interface Withdrawal {
+  /** `${account}:${requestId}`. */
+  readonly id: string;
+  readonly account: AccountId;
+  readonly amount: Usdc;
+  /** EIP-712 nonce for the Vault (M5-04), unique per withdrawal. */
+  readonly nonce: bigint;
+  /** Event-time ms after which the authorisation is void on-chain. */
+  readonly deadline: bigint;
+  readonly status: 'pending' | 'executed' | 'expired';
+}
+
 export interface EngineState {
   seq: bigint;
   ts: bigint;
@@ -138,6 +151,10 @@ export interface EngineState {
   readonly idempotency: Map<string, OrderOutcome>;
   /** `${account}:${orderId}` → resting limit order, matched in insertion (time) order. */
   readonly orders: Map<string, RestingOrder>;
+  /** Withdrawals by id, in request order (M4-18). */
+  readonly withdrawals: Map<string, Withdrawal>;
+  /** Next withdrawal nonce. */
+  withdrawalNonce: bigint;
 }
 
 export function createState(): EngineState {
@@ -154,5 +171,7 @@ export function createState(): EngineState {
     ledger: new Ledger(),
     idempotency: new Map(),
     orders: new Map(),
+    withdrawals: new Map(),
+    withdrawalNonce: 0n,
   };
 }

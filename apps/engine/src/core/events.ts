@@ -133,6 +133,23 @@ export type EngineInput =
       readonly dailyLossLimit: Usdc | null;
     }
   | {
+      /** Reserve collateral for an on-chain withdrawal to the account's address (M4-18). */
+      readonly type: 'RequestWithdrawal';
+      readonly requestId: string;
+      readonly account: AccountId;
+      readonly amount: Usdc;
+    }
+  | {
+      /** Indexer: the Vault paid the withdrawal out (safe tag). */
+      readonly type: 'WithdrawalExecuted';
+      readonly withdrawalId: string;
+    }
+  | {
+      /** Indexer: the deadline passed with the nonce unused; the amount is re-credited. */
+      readonly type: 'WithdrawalExpired';
+      readonly withdrawalId: string;
+    }
+  | {
       readonly type: 'ClosePosition';
       readonly requestId: string;
       readonly idempotencyKey: string;

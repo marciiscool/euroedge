@@ -25,6 +25,8 @@ export function stateSnapshot(state: EngineState): unknown {
     ledger: state.ledger.entries(),
     idempotency: byKey(state.idempotency),
     orders: byKey(state.orders),
+    withdrawals: byKey(state.withdrawals),
+    withdrawalNonce: state.withdrawalNonce,
   };
 }
 

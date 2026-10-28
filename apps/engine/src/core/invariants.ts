@@ -1,6 +1,7 @@
 import { SYSTEM } from '@euroedge/ledger';
 import { accountEquity, houseEquity } from './accounting.ts';
 import type { EngineState } from './state.ts';
+import { pendingWithdrawals } from './withdrawals.ts';
 
 export class InvariantViolation extends Error {
   readonly invariant: number;
@@ -55,6 +56,10 @@ export function assertInvariants(state: EngineState): void {
     if (house < 0n) throw new InvariantViolation(8, `house equity ${house}`);
     if (insurance < 0n) throw new InvariantViolation(9, `insurance ${insurance}`);
   }
-  const lhs = userSum + (house > 0n ? house : 0n) + insurance;
+  // 10. vault-pending holds exactly the pending withdrawals; they are claims on the vault too.
+  const pending = ledger.balance(SYSTEM.vaultPending) as bigint;
+  if (pending !== pendingWithdrawals(state))
+    throw new InvariantViolation(10, `vault-pending ${pending} ≠ Σ pending withdrawals`);
+  const lhs = userSum + (house > 0n ? house : 0n) + insurance + pending;
   if (lhs > internal) throw new InvariantViolation(7, `claims ${lhs} > vault ${internal}`);
 }
