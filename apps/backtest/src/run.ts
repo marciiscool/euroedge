@@ -55,7 +55,24 @@ function toEur(t: Tick, fx: ReadonlyMap<string, number>): number | undefined {
  * FV is sampled every N seconds of event time; each sample is scored against the next official
  * open (the primary's opening-auction print) and against the naive "last close".
  */
+export interface ScoredSample extends Resolved {
+  readonly market: string;
+  readonly window: Window;
+  /** Sample time (event time). */
+  readonly ts: number;
+  /** σ_FV used for the band, bp. */
+  readonly sigmaBp: number;
+}
+
 export function runBacktest(ticks: readonly Tick[], o: RunOptions): BacktestReport {
+  return scoreTicks(ticks, o).report;
+}
+
+/** Runs the replay and returns the report plus every scored sample (for fitting, M3-16). */
+export function scoreTicks(
+  ticks: readonly Tick[],
+  o: RunOptions,
+): { report: BacktestReport; samples: ScoredSample[] } {
   const every = (o.evaluateEverySeconds ?? 900) * 1000;
   const runs = o.markets
     .filter((m) => m.kind === 'stock')
@@ -64,7 +81,7 @@ export function runBacktest(ticks: readonly Tick[], o: RunOptions): BacktestRepo
       pipe: new MarketFvPipeline(m, o.params, o.stepCapBpsPerSecond),
       primary: `${m.primaryMic}:${m.primarySymbol ?? ''}`,
       pending: [] as Pending[],
-      resolved: [] as (Resolved & { window: Window })[],
+      resolved: [] as ScoredSample[],
       opens: 0,
       nextEval: undefined as number | undefined,
       // Local ex-dates: a sample taken cum-dividend is scored against an ex-dividend open net of D.
@@ -107,6 +124,9 @@ export function runBacktest(ticks: readonly Tick[], o: RunOptions): BacktestRepo
               .reduce((a, x) => a + x.gross, 0);
             const fv = p.fv - d;
             r.resolved.push({
+              market: r.m.id,
+              ts: p.ts,
+              sigmaBp: p.sigma * 1e4,
               window: p.window,
               errBp: 1e4 * Math.log(fv / open),
               naiveBp: 1e4 * Math.log((p.anchor - d) / open),
@@ -120,7 +140,7 @@ export function runBacktest(ticks: readonly Tick[], o: RunOptions): BacktestRepo
       r.pipe.onTick(t);
     }
   }
-  return {
+  const report: BacktestReport = {
     version: 1,
     data: [...o.data],
     evaluateEverySeconds: every / 1000,
@@ -141,4 +161,5 @@ export function runBacktest(ticks: readonly Tick[], o: RunOptions): BacktestRepo
       'Baskets, the false-liquidation rate and the informed-arbitrageur PnL arrive with the M4 engine bots.',
     ],
   };
+  return { report, samples: runs.flatMap((r) => r.resolved) };
 }

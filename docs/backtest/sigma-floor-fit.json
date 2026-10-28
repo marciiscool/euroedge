@@ -1,0 +1,39 @@
+{
+  "method": "walk-forward 50/50, quantile of |error| / bandSigmas",
+  "targetCoverage": 0.985,
+  "splitTs": 1805728500000,
+  "sigmaFloorBp": {
+    "A": {
+      "currentFloorBp": 5,
+      "recommendedFloorBp": 98,
+      "trainN": 985,
+      "testN": 500,
+      "testCoverageCurrent": 0.196,
+      "testCoverageRecommended": 0.946
+    },
+    "B": {
+      "currentFloorBp": 10,
+      "recommendedFloorBp": 79,
+      "trainN": 580,
+      "testN": 480,
+      "testCoverageCurrent": 0.4292,
+      "testCoverageRecommended": 0.9833
+    },
+    "C": {
+      "currentFloorBp": 20,
+      "recommendedFloorBp": 84,
+      "trainN": 800,
+      "testN": 600,
+      "testCoverageCurrent": 0.865,
+      "testCoverageRecommended": 1
+    },
+    "D": {
+      "currentFloorBp": 30,
+      "recommendedFloorBp": 78,
+      "trainN": 1315,
+      "testN": 2100,
+      "testCoverageCurrent": 0.9733,
+      "testCoverageRecommended": 0.9848
+    }
+  }
+}

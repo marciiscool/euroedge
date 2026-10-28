@@ -28,3 +28,25 @@ How it works:
 - The band covers only about 73 % of opens, against a 98–99.5 % target. The seed σ describes "now", not the horizon to the next open.
 - Fitting σ, λ, φ and q to this report is M3-16. Until then the seed parameters stay, and that is flagged for founder review.
 - These are simulated prices. Real accuracy comes from `live-min` recordings (LR track).
+
+## σ-floor fit (M3-16, `sigma-floor-fit.json`)
+
+```
+pnpm --filter @euroedge/backtest start -- --data data/sample --fit --out docs/backtest/sigma-floor-fit.json
+```
+
+Method: walk-forward. The first half of the samples trains a per-window floor, set to the 98.5 % quantile of |error| divided by `bandSigmas`. The second half tests it.
+
+| Window | Current floor | Recommended | Out-of-sample coverage: now → recommended |
+| ------ | ------------: | ----------: | ----------------------------------------: |
+| A      |          5 bp |       98 bp |                               20 % → 95 % |
+| B      |         10 bp |       79 bp |                               43 % → 98 % |
+| C      |         20 bp |       84 bp |                              87 % → 100 % |
+| D      |         30 bp |       78 bp |                               97 % → 98 % |
+
+**Not applied: founder decision needed.**
+
+- **B/C/D.** The recommendation follows the brief's coverage target directly.
+- **A.** Scoring a live-session band against the next day's open asks it to cover an overnight horizon. A ±2.5 % band in Window A would stop the band clamp from protecting the mark.
+- **Proposal.** Keep the A floor small and measure A coverage against the official close instead. Alternatively, add a horizon term `q · hours-to-next-open` to the band in B/C/D only.
+- The final fit (σ_k, λ, φ, q, basis half-life) waits for real `live-min` recordings. Fitting on simulated data mostly recovers the simulator's own parameters.
