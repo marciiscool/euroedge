@@ -29,6 +29,7 @@ describe.skipIf(url === undefined)('read models (integration, M4-22)', () => {
     u.pathname = `/${dbName}`;
     await migrate(u.toString());
     store = new EventStore(u.toString());
+    await store.acquireWriterLock();
     db = new pg.Pool({ connectionString: u.toString() });
     const inputs: EngineInput[] = [
       {
