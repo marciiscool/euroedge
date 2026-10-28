@@ -132,7 +132,11 @@ function FundsLive({ account, chain }: { account: Address; chain: TokenChain }) 
     const value = parseUsdc(amount);
     if (value === undefined) return setMessage({ ok: false, text: t('enterAmount') });
     if (walletBalance !== undefined && value > walletBalance)
-      return setMessage({ ok: false, text: t('notEnough') });
+      // An empty wallet with Test USDC left to claim: say what to do, not just "not enough".
+      return setMessage({
+        ok: false,
+        text: walletBalance === 0n && (claimable ?? 0n) > 0n ? t('claimFirst') : t('notEnough'),
+      });
     setBusy('deposit');
     try {
       const deadline = signatureDeadline(Date.now());

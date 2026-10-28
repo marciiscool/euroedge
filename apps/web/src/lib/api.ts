@@ -65,6 +65,15 @@ export interface RelayBody {
   readonly nonce?: string;
 }
 
+export interface Candle {
+  readonly t: number;
+  readonly open: string;
+  readonly high: string;
+  readonly low: string;
+  readonly close: string;
+  readonly volumeLots: string;
+}
+
 export interface FvPoint {
   readonly t: number;
   readonly fv: string;
@@ -90,6 +99,8 @@ export const api = {
     }),
   market: (id: string) =>
     call<{ market: MarketSnapshot; fv: FvDisplaySnapshot | null }>(`/api/markets/${id}`),
+  candles: (id: string, interval: string) =>
+    call<{ candles: Candle[] }>(`/api/markets/${id}/candles?interval=${interval}&limit=300`),
   fvHistory: (id: string, minutes = 120) =>
     call<{ points: FvPoint[] }>(`/api/markets/${id}/fv?minutes=${minutes}`),
   account: () => call<AccountSnapshot>('/api/account'),

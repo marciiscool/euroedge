@@ -235,6 +235,64 @@ export async function buildApi(app: FastifyInstance, deps: ApiDeps): Promise<voi
     };
   });
 
+  // Candles of the mark (M6-05/M7 chart): OHLC per interval from fv_series, volume from fills.
+  const INTERVALS: Record<string, string> = {
+    '1m': '1 minute',
+    '5m': '5 minutes',
+    '15m': '15 minutes',
+    '1h': '1 hour',
+    '4h': '4 hours',
+    '1d': '1 day',
+  };
+  app.get<{ Params: { id: string }; Querystring: { interval?: string; limit?: string } }>(
+    '/api/markets/:id/candles',
+    async (req, reply) => {
+      if (!MARKET_ID.test(req.params.id)) return sendError(reply, 'not-found', 'unknown market');
+      const interval = INTERVALS[req.query.interval ?? '1m'];
+      if (interval === undefined)
+        return sendError(reply, 'bad-request', 'interval: 1m 5m 15m 1h 4h 1d');
+      const limit = Math.min(Math.max(Number(req.query.limit ?? 300) || 300, 10), 1_000);
+      const { rows } = await db.query<{
+        t: string;
+        o: string;
+        h: string;
+        l: string;
+        c: string;
+        v: string;
+      }>(
+        `WITH c AS (
+           SELECT time_bucket($2::interval, ts) AS b, first(mark, ts) AS o, max(mark) AS h,
+                  min(mark) AS l, last(mark, ts) AS c
+           FROM fv_series
+           WHERE market = $1 AND ts > now() - $2::interval * $3::int
+           GROUP BY 1
+         ), v AS (
+           SELECT time_bucket($2::interval, to_timestamp(ts_ms / 1000.0)) AS b, sum(qty_lots) AS v
+           FROM rm_fills
+           WHERE market = $1 AND ts_ms > (extract(epoch FROM now() - $2::interval * $3::int) * 1000)::bigint
+           GROUP BY 1
+         )
+         SELECT (extract(epoch FROM c.b) * 1000)::bigint::text AS t, c.o::text AS o, c.h::text AS h,
+                c.l::text AS l, c.c::text AS c, coalesce(v.v, 0)::text AS v
+         FROM c LEFT JOIN v USING (b) ORDER BY c.b`,
+        [req.params.id, interval, limit],
+      );
+      return {
+        market: req.params.id,
+        interval: req.query.interval ?? '1m',
+        // volumeLots: traded size in lots (lot size from the market snapshot).
+        candles: rows.map((r) => ({
+          t: Number(r.t),
+          open: r.o,
+          high: r.h,
+          low: r.l,
+          close: r.c,
+          volumeLots: r.v,
+        })),
+      };
+    },
+  );
+
   app.get<{ Params: { id: string }; Querystring: { minutes?: string } }>(
     '/api/markets/:id/fv',
     async (req, reply) => {

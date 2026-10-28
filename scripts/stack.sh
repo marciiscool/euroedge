@@ -30,5 +30,7 @@ case "${1:-start}" in
     ;;
   stop)
     if [ -f "$PIDS" ]; then xargs -r kill < "$PIDS" 2>/dev/null || true; fi
+    # `pnpm exec next start` runs Next in a child process: stop it too, or :3000 stays taken.
+    pkill -f "next start --port 3000" 2>/dev/null || true
     ;;
 esac

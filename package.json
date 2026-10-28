@@ -24,7 +24,8 @@
     "check:guards": "node scripts/check-env-guards.ts",
     "chain:check": "pnpm --filter @euroedge/signer exec node --env-file-if-exists=../../.env scripts/preflight.ts",
     "chain:fund": "scripts/fund-chain-roles.sh",
-    "chain:deploy": "scripts/deploy-base-sepolia.sh"
+    "chain:deploy": "scripts/deploy-base-sepolia.sh",
+    "chain:smoke": "pnpm --filter @euroedge/signer exec node --env-file-if-exists=../../.env scripts/live-smoke.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",

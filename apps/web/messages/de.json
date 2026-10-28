@@ -68,7 +68,7 @@
     },
     "anchor": "Anker {price} ({time})",
     "chartLabel": "Mark-Preis, fairer Wert und Band",
-    "chartDescription": "Liniendiagramm des Mark-Preises mit fairem Wert und Konfidenzband der letzten zwei Stunden.",
+    "chartDescription": "Kerzenchart des Markpreises mit Handelsvolumen und dem Fair-Value-Band als gestrichelte Linien.",
     "orderTicket": "Order",
     "side": "Richtung",
     "buy": "Kaufen",
@@ -155,7 +155,8 @@
     "signInFailed": "Anmeldung fehlgeschlagen. Bitte erneut versuchen.",
     "signedInAs": "Angemeldet als {account}",
     "signOut": "Abmelden",
-    "signInUnavailable": "Die Anmeldung ist gerade nicht verfügbar."
+    "signInUnavailable": "Die Anmeldung ist gerade nicht verfügbar.",
+    "chartIntervals": "Zeitraum des Charts"
   },
   "Funds": {
     "title": "Wallet & Guthaben",
@@ -170,7 +171,7 @@
     "wrongWallet": "Die aktive Adresse deiner Wallet ist nicht die, mit der du angemeldet bist.",
     "nothingToClaim": "Gerade nichts mehr abrufbar (10.000 pro 24 Stunden, 100.000 insgesamt).",
     "enterAmount": "Bitte einen Betrag eingeben.",
-    "notEnough": "So viel ist nicht in deiner Wallet.",
+    "notEnough": "So viel ist nicht in deiner Wallet: Zahle höchstens den Betrag unter „In deiner Wallet“ ein.",
     "claimed": "{amount} Test-USDC in deine Wallet abgerufen.",
     "deposited": "{amount} eingezahlt. Der Betrag erscheint im Handelsguthaben, sobald der Block final ist (wenige Minuten).",
     "withdrawRequested": "Auszahlung angefragt, warte auf Freigabe …",
@@ -182,6 +183,7 @@
     "statusAuthorising": "Wird freigegeben",
     "statusSending": "Wird gesendet",
     "statusPaid": "Ausgezahlt",
-    "statusExpired": "Abgelaufen, zurückgebucht"
+    "statusExpired": "Abgelaufen, zurückgebucht",
+    "claimFirst": "Deine Wallet ist leer: Klicke zuerst auf „Abrufen“, um kostenlose Test-USDC zu bekommen, dann einzahlen."
   }
 }
