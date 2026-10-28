@@ -70,6 +70,7 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
         liquidationPenaltyBps: input.liquidationPenaltyBps,
         windows: input.windows,
         fundingInterestBpsPerYear: input.fundingInterestBpsPerYear,
+        partialLiquidationBufferBps: input.partialLiquidationBufferBps,
         funding: existing?.funding ?? { lastHour: ts / HOUR_MS, index: 0n, lastRate: 0n },
         data: existing?.data,
         house: existing?.house ?? FLAT,

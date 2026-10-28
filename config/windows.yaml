@@ -50,5 +50,8 @@ windows:
     }
 maintenanceMarginBps: { stock: 1000, basket: 500 }
 liquidationPenaltyBps: { stock: 100, basket: 50 }
+# Partial liquidation (M4): close just enough of the triggering position to restore equity to
+# MM × (1 + buffer). Proposed default 25 %, founder to confirm.
+partialLiquidationBufferBps: 2500
 fundingInterestBpsPerYear: 500
 markStepCapBpsPerSecond: 50

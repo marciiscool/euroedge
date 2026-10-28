@@ -25,6 +25,9 @@ export type EngineOutput =
       readonly penalty: Usdc;
       /** Shortfall covered by the insurance fund (negative-balance protection). */
       readonly insuranceCover: Usdc;
+      /** Partial: only `closedLots` of one market were closed; otherwise every position. */
+      readonly partial: boolean;
+      readonly closedLots?: bigint;
     }
   | {
       /** ADR-0009: the band decided the mark. */

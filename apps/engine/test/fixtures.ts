@@ -56,6 +56,7 @@ export const listASML: EngineInput = {
   maintenanceMarginBps: 1000n,
   liquidationPenaltyBps: 100n,
   fundingInterestBpsPerYear: 500n,
+  partialLiquidationBufferBps: 2500n,
   windows: WINDOWS,
 };
 
