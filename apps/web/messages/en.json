@@ -104,7 +104,8 @@
       "house-inventory": "The house position limit is reached: only reducing orders right now.",
       "house-loss-limit": "The house's daily loss limit is reached: only reducing orders until the next day (UTC).",
       "would-take": "Post-only: this limit would trade at once, so it was not placed.",
-      "invalid-order": "This combination of order options is not allowed."
+      "invalid-order": "This combination of order options is not allowed.",
+      "market-frozen": "This market is paused for a corporate action (e.g. a split). Trading resumes shortly."
     },
     "account": "Account",
     "equity": "Equity",

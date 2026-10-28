@@ -46,6 +46,8 @@ export interface MarketState {
   funding: { lastHour: bigint; index: bigint; lastRate: bigint };
   /** House position = exact negative of all user positions (lots and cost). */
   house: Position;
+  /** Corporate action in progress (M4-17): the market is frozen for user orders. */
+  corporateAction: { readonly id: string; readonly adjusted: boolean } | null;
 }
 
 export interface AccountState {
@@ -74,7 +76,8 @@ export type RejectReason =
   | 'house-inventory'
   | 'house-loss-limit'
   | 'would-take'
-  | 'invalid-order';
+  | 'invalid-order'
+  | 'market-frozen';
 
 export interface Fill {
   readonly market: MarketId;

@@ -52,6 +52,7 @@ function stopRejection(
   if (!state.genesis) return 'not-genesis';
   const m = state.markets.get(o.market);
   if (m === undefined) return 'unknown-market';
+  if (m.corporateAction !== null) return 'market-frozen';
   if (m.data === undefined) return 'no-market-data';
   const acc = state.accounts.get(o.account);
   if (acc === undefined) return 'unknown-account';
@@ -132,7 +133,10 @@ const KEEP_RESTING: ReadonlySet<RejectReason> = new Set([
   'house-loss-limit',
 ]);
 
-const cancelled = (r: RestingOrder, reason: RejectReason | 'oco'): EngineOutput[] => [
+const cancelled = (
+  r: RestingOrder,
+  reason: RejectReason | 'oco' | 'corporate-action',
+): EngineOutput[] => [
   {
     type: 'OrderCancelled',
     requestId: r.requestId,
@@ -226,4 +230,15 @@ export function cancelOrder(
     },
     { type: 'AccountChanged', account: c.account },
   ];
+}
+
+/** Cancels every resting order in a market (corporate-action freeze, M4-17). */
+export function cancelMarketOrders(state: EngineState, market: string): EngineOutput[] {
+  const out: EngineOutput[] = [];
+  for (const [key, r] of state.orders) {
+    if (r.market !== market) continue;
+    state.orders.delete(key);
+    out.push(...cancelled(r, 'corporate-action'));
+  }
+  return out;
 }

@@ -26,6 +26,11 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Corporate actions (M4-17), admin-driven:
+  - `CorporateActionFreeze` cancels the market's resting orders and refuses every user order (`market-frozen`); liquidations keep running.
+  - `CorporateActionAdjust` (split num:den) scales positions to ⌊lots × num / den⌋ and keeps the cost basis pro rata. The fraction of a lot that does not fit is cash-settled at the adjusted mark, and stored prices scale by den/num.
+  - `CorporateActionUnfreeze` reopens trading.
+  - The house mirror is rebuilt exactly.
 - Read models (M4-22):
   - The engine projects fills, the order lifecycle, liquidations and cash flows (funding, dividends, withdrawals) into `rm_*` tables (migration 0005).
   - Rows are keyed by (seq, output index), so writes are idempotent; a cursor is committed with them.
@@ -114,6 +119,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Fixed
 
+- An older or unreadable state snapshot now falls back to a full replay instead of stopping the engine at startup (snapshot format 2).
 - State snapshots no longer fail on a market that is listed but not yet priced (M4-19).
 
 ### M3 — Full fv-core (in progress, on `integration/m3`)
