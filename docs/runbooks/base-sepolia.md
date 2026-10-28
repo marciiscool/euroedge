@@ -30,6 +30,14 @@ Fund the three ETH roles with Base Sepolia ETH. 0.05 ETH each is plenty to start
    - Allowed origins: `http://localhost:8080`.
    - Set `NEXT_PUBLIC_PRIVY_APP_ID` to the app id.
 
+## Lean trial (fewest steps)
+
+For a first trial, two things are enough: Base Sepolia ETH on the **deployer** address only, and the Privy app id.
+
+- **Safe and Etherscan key are optional.** Without `ADMIN_SAFE`, the deployer key stays admin; hand over to a Safe later. Without `ETHERSCAN_API_KEY`, the contracts deploy unverified on Basescan.
+- **0.005 ETH is enough to deploy.** The whole deploy costs well under 0.001 ETH.
+- **One funded address.** After funding the deployer, `pnpm chain:fund` passes 0.002 ETH each to the relayer and the root poster.
+
 ## 3. Preflight
 
 ```bash

@@ -22,7 +22,9 @@
     "infra:down": "docker compose down",
     "db:migrate": "pnpm --filter @euroedge/db migrate",
     "check:guards": "node scripts/check-env-guards.ts",
-    "chain:check": "pnpm --filter @euroedge/signer exec node --env-file-if-exists=../../.env scripts/preflight.ts"
+    "chain:check": "pnpm --filter @euroedge/signer exec node --env-file-if-exists=../../.env scripts/preflight.ts",
+    "chain:fund": "scripts/fund-chain-roles.sh",
+    "chain:deploy": "scripts/deploy-base-sepolia.sh"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",

@@ -10,16 +10,18 @@ set -a
 source .env
 set +a
 : "${DEPLOYER_PRIVATE_KEY:?missing}" "${ENGINE_SIGNER_PRIVATE_KEY:?missing}" "${ROOT_POSTER_PRIVATE_KEY:?missing}"
-: "${ADMIN_SAFE:?missing}" "${BASE_SEPOLIA_RPC_URL:?missing}" "${ETHERSCAN_API_KEY:?missing}"
+: "${BASE_SEPOLIA_RPC_URL:?missing}"
 ENGINE_SIGNER_ADDRESS="$("${BIN}cast" wallet address --private-key "$ENGINE_SIGNER_PRIVATE_KEY")"
 ROOT_POSTER_ADDRESS="$("${BIN}cast" wallet address --private-key "$ROOT_POSTER_PRIVATE_KEY")"
 export ENGINE_SIGNER_ADDRESS ROOT_POSTER_ADDRESS
 echo "engine signer: $ENGINE_SIGNER_ADDRESS"
 echo "root poster:   $ROOT_POSTER_ADDRESS"
-echo "admin Safe:    $ADMIN_SAFE"
+echo "admin:         ${ADMIN_SAFE:-deployer key (no ADMIN_SAFE set)}"
+# Basescan verification only with an Etherscan key; without one the contracts deploy unverified.
+VERIFY=()
+if [ -n "${ETHERSCAN_API_KEY:-}" ]; then VERIFY=(--verify --etherscan-api-key "$ETHERSCAN_API_KEY"); fi
 cd contracts
 "${BIN}forge" script script/Deploy.s.sol \
-  --rpc-url "$BASE_SEPOLIA_RPC_URL" --broadcast \
-  --verify --etherscan-api-key "$ETHERSCAN_API_KEY"
+  --rpc-url "$BASE_SEPOLIA_RPC_URL" --broadcast "${VERIFY[@]}"
 echo
 cat deployments/84532.json
