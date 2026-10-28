@@ -106,7 +106,8 @@
       "would-take": "Post-only: this limit would trade at once, so it was not placed.",
       "invalid-order": "This combination of order options is not allowed.",
       "market-frozen": "This market is paused for a corporate action (e.g. a split). Trading resumes shortly.",
-      "oi-cap": "Open interest in this market is at its cap: only reducing orders for now."
+      "oi-cap": "Open interest in this market is at its cap: only reducing orders for now.",
+      "snap-outside-band": "The opening price jumped outside the last band: only reducing orders for 5 minutes."
     },
     "account": "Account",
     "equity": "Equity",

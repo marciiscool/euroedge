@@ -56,6 +56,10 @@ export interface MarketState {
   corporateAction: { readonly id: string; readonly adjusted: boolean } | null;
   /** Earnings leverage steps by id (M4-08). */
   readonly earnings: Map<string, EarningsStep>;
+  /** Snap period after the move into window A (M4-13): running mean of marks since `startTs`. */
+  snap: { readonly startTs: bigint; readonly sum: bigint; readonly n: bigint } | null;
+  /** The snap landed outside the previous band: reduce-only until this time (M4-13). */
+  snapReduceOnlyUntil: bigint | null;
 }
 
 export interface AccountState {
@@ -86,7 +90,8 @@ export type RejectReason =
   | 'would-take'
   | 'invalid-order'
   | 'market-frozen'
-  | 'oi-cap';
+  | 'oi-cap'
+  | 'snap-outside-band';
 
 export interface Fill {
   readonly market: MarketId;

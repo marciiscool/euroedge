@@ -106,7 +106,8 @@
       "would-take": "Post-only: Dieses Limit würde sofort handeln und wurde daher nicht platziert.",
       "invalid-order": "Diese Kombination von Order-Optionen ist nicht erlaubt.",
       "market-frozen": "Dieser Markt ist wegen einer Kapitalmaßnahme (z. B. Aktiensplit) pausiert. Der Handel geht in Kürze weiter.",
-      "oi-cap": "Das offene Interesse in diesem Markt hat seine Obergrenze erreicht: vorerst nur reduzierende Orders."
+      "oi-cap": "Das offene Interesse in diesem Markt hat seine Obergrenze erreicht: vorerst nur reduzierende Orders.",
+      "snap-outside-band": "Der Eröffnungskurs sprang aus dem letzten Band: 5 Minuten lang nur reduzierende Orders."
     },
     "account": "Konto",
     "equity": "Eigenkapital",

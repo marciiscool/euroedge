@@ -101,6 +101,9 @@ export function decide(state: EngineState, o: OrderRequest): OrderOutcome {
   const risk = m.windows[data.window];
   // House risk (M4-14): daily loss limit, then inventory limits; reducing orders always pass.
   if (!reduces && state.houseRisk.halted) return reject('house-loss-limit');
+  // A snap outside the previous band (M4-13): no new exposure for SNAP_REDUCE_ONLY_MS.
+  if (!reduces && m.snapReduceOnlyUntil !== null && state.ts < m.snapReduceOnlyUntil)
+    return reject('snap-outside-band');
   const limited = reduces ? undefined : inventoryRejection(m, risk, qty);
   if (limited !== undefined) return reject(limited);
   // House quote for the full size (ADR-0003): σ, inventory skew, convex impact, flow shift.

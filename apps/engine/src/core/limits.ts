@@ -131,6 +131,7 @@ const KEEP_RESTING: ReadonlySet<RejectReason> = new Set([
   'house-one-sided',
   'house-inventory',
   'house-loss-limit',
+  'snap-outside-band',
 ]);
 
 const cancelled = (

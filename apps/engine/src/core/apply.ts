@@ -10,6 +10,7 @@ import { evaluateHouseLoss, rollHouseDay } from './house-risk.ts';
 import { executeOrder } from './orders.ts';
 import { requestWithdrawal, settleWithdrawal } from './withdrawals.ts';
 import { applyDividend } from './dividends.ts';
+import { trackSnap } from './snap.ts';
 import { adjustMarket, freezeMarket, unfreezeMarket } from './corporate-actions.ts';
 import { HOUR_MS, settleFunding } from './funding.ts';
 import type { EngineOutput } from './outputs.ts';
@@ -95,6 +96,8 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
         house: existing?.house ?? FLAT,
         corporateAction: existing?.corporateAction ?? null,
         earnings: existing?.earnings ?? new Map<string, EarningsStep>(),
+        snap: existing?.snap ?? null,
+        snapReduceOnlyUntil: existing?.snapReduceOnlyUntil ?? null,
       });
       return [{ type: 'MarketChanged', market: input.market }];
     }
@@ -107,6 +110,7 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
       // Invariant 5 at the boundary: a mark outside the band never enters the state.
       if (input.mark < input.bandLo || input.mark > input.bandHi)
         return ignored(input, 'mark outside band');
+      trackSnap(m, input, ts);
       m.data = {
         window: input.window,
         fv: input.fv,
