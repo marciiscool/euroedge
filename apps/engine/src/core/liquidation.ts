@@ -3,6 +3,7 @@ import { SYSTEM, userAccount, type Posting } from '@euroedge/ledger';
 import { applyFill, FLAT, liquidationPenalty, notionalUsdc } from '@euroedge/risk-core';
 import { accountEquity, accountMaintenance } from './accounting.ts';
 import { ADL_POLICY } from './adl.ts';
+import { sparedBySnap } from './snap.ts';
 import type { MarketId } from './events.ts';
 import type { EngineOutput } from './outputs.ts';
 import type { EngineState } from './state.ts';
@@ -12,7 +13,7 @@ import type { EngineState } from './state.ts';
  * partial first (just enough of this market's position to restore equity to MM × (1 + buffer)),
  * full otherwise. The house takes positions at mark; the penalty (ADR-0016) goes to insurance;
  * any shortfall is covered by insurance so no user balance stays negative.
- * The 3-min VWAP liquidation price after a snap (brief §6.4) is still to come.
+ * During the 3 minutes after a snap the trigger uses the mean mark since the snap (M4-13).
  */
 export function liquidateUnderwater(state: EngineState, market: MarketId): EngineOutput[] {
   const out: EngineOutput[] = [];
@@ -20,6 +21,8 @@ export function liquidateUnderwater(state: EngineState, market: MarketId): Engin
     const pos = acc.positions.get(market);
     if (pos === undefined || pos.lots === 0n) continue;
     if (accountEquity(state, acc.id) >= accountMaintenance(state, acc.id)) continue;
+    // Snap period (M4-13): judge by the mean mark since the snap, unless insolvent at spot.
+    if (sparedBySnap(state, acc.id, market)) continue;
     const partial = liquidatePartially(state, acc.id, market);
     if (
       partial !== undefined &&

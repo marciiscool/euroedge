@@ -26,6 +26,10 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Snap period (M4-13), on the move into window A:
+  - If the opening mark lands outside the last band, the market is reduce-only for 5 minutes (`snap-outside-band`; resting orders wait).
+  - For 3 minutes the opening print alone never liquidates a solvent account; from the next print on, the trigger uses the mean mark since the snap. Insolvent accounts are always liquidated.
+  - Snapshot format 4.
 - Margin add-ons (M4-08), both off by default:
   - Gross open-interest cap per window (`oiCapUsdc`): an order adding exposure past it is rejected `oi-cap`.
   - Earnings leverage step (`EarningsWindow` input): inside the window, new orders, initial margin and withdrawals use the lower leverage, and the market snapshot shows it.
