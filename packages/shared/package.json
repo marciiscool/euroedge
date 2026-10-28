@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@euroedge/fixed": "workspace:*",
+    "viem": "catalog:",
     "yaml": "catalog:",
     "zod": "catalog:"
   },

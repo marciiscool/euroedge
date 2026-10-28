@@ -3,6 +3,7 @@ import { createValkey, type Logger, type Redis } from '@euroedge/service-kit';
 import {
   encodeEngineCommand,
   ENGINE_STREAM_MAXLEN,
+  KEYS,
   STREAMS,
   type DataTier,
   type MarketConfig,
@@ -17,6 +18,7 @@ import { EventStore } from './log/store.ts';
 import pg from 'pg';
 import { catchUpProjection, project, writeProjection } from './projections.ts';
 import { publishAll, publishBatch } from './publisher.ts';
+import { balanceSnapshot, HOUR_MS } from './balances.ts';
 import { Sequencer, type BatchResult } from './sequencer.ts';
 
 export interface EngineOptions {
@@ -100,6 +102,21 @@ export async function startEngine(o: EngineOptions): Promise<RunningEngine> {
     o.log.info({ events: boot.events.length }, 'bootstrap inputs applied');
   await publishAll(valkey, state);
 
+  // Hourly balance snapshot for the root poster (M5-12): once per event-time hour.
+  let balancesHour = BigInt((await valkey.get(KEYS.latestBalanceHour)) ?? '0');
+  const maybePublishBalances = async () => {
+    const hour = state.ts / HOUR_MS;
+    if (hour <= balancesHour || !state.genesis) return;
+    const snap = balanceSnapshot(state, hour);
+    await valkey
+      .pipeline()
+      .set(KEYS.balanceSnapshot(snap.hour), JSON.stringify(snap))
+      .set(KEYS.latestBalanceHour, snap.hour)
+      .xadd(STREAMS.balanceRoots, 'MAXLEN', '~', '10000', '*', 'hour', snap.hour)
+      .exec();
+    balancesHour = hour;
+  };
+
   // Read models (M4-22): derived, so a failed write is logged and repaired by catch-up.
   const rm = new pg.Pool({ connectionString: o.databaseUrl, max: 2 });
   let rmBehind = true;
@@ -165,6 +182,7 @@ export async function startEngine(o: EngineOptions): Promise<RunningEngine> {
         cursor = messages.at(-1)?.id ?? cursor;
         await publishBatch(valkey, state, batch);
         await maybeSnapshot();
+        await maybePublishBalances();
         await projectBatch(batch);
       } catch (err) {
         o.log.fatal({ err }, 'engine fail-stop: state may be ahead of the log; exiting to rebuild');

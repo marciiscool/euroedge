@@ -12,6 +12,13 @@ export const configShape = {
     .regex(/^0x[0-9a-fA-F]{40}$/)
     .optional(),
   ENGINE_SIGNER_PRIVATE_KEY: z.string().default(''),
+  /** Root poster (M5-12): its own key; off while empty. */
+  ROOT_POSTER_PRIVATE_KEY: z.string().default(''),
+  BALANCE_ROOT_ADDRESS: z
+    .string()
+    .regex(/^0x[0-9a-fA-F]{40}$/)
+    .optional(),
+  BASE_SEPOLIA_RPC_URL: z.string().default(''),
 } as const;
 
 export const loadConfig = (source?: Record<string, string | undefined>) => {

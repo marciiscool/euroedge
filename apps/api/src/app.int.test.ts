@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 import { migrate } from '@euroedge/db';
 import { ExecutionError, type ExecutionAdapter } from '@euroedge/execution';
 import { createService, createValkey, type Redis, type Service } from '@euroedge/service-kit';
-import { CHANNELS, KEYS, STREAMS } from '@euroedge/shared';
+import { balanceTree, CHANNELS, KEYS, STREAMS, verifyProof } from '@euroedge/shared';
 import { privateKeyToAccount } from 'viem/accounts';
 import { createSiweMessage } from 'viem/siwe';
 import { buildApi, SESSION_COOKIE } from './app.ts';
@@ -219,6 +219,101 @@ describe.skipIf(dbUrl === undefined || vkUrl === undefined)('api (integration)',
     expect(s.account).toBe(wallet.address.toLowerCase());
     const out = await post('/api/auth/logout', {}, cookie);
     expect(out.cookies.find((x) => x.name === SESSION_COOKIE)?.value).toBe('');
+  });
+
+  it('withdrawals: request, list with authorisation; proofs against the posted root (M5)', async () => {
+    const wallet = privateKeyToAccount(`0x${'44'.repeat(32)}`);
+    const n = (await svc.http.inject({ url: '/api/auth/nonce' })).json<{ nonce: string }>();
+    const message = createSiweMessage({
+      domain: 'localhost:8080',
+      address: wallet.address,
+      uri: ORIGIN,
+      version: '1',
+      chainId: 84532,
+      nonce: n.nonce,
+      issuedAt: new Date(),
+    });
+    const login = await post('/api/auth/siwe', {
+      message,
+      signature: await wallet.signMessage({ message }),
+    });
+    const c = login.cookies.find((x) => x.name === SESSION_COOKIE);
+    const cookie = `${SESSION_COOKIE}=${c?.value ?? ''}`;
+    const account = wallet.address.toLowerCase();
+
+    const req = await post(
+      '/api/withdrawals',
+      { amount: '1000000', idempotencyKey: 'wd-00000001' },
+      cookie,
+    );
+    expect(req.statusCode).toBe(202);
+    const id = `${account}:wd-00000001`;
+    expect(req.json()).toEqual({ withdrawalId: id });
+    const inputs = (await valkey.xrange(STREAMS.engineInput, '-', '+')) as [string, string[]][];
+    expect(
+      inputs.some(
+        ([, f]) =>
+          (f[1] ?? '').includes('RequestWithdrawal') &&
+          (f[1] ?? '').includes(id.split(':')[1] ?? ''),
+      ),
+    ).toBe(true);
+
+    // What the engine and the signer would publish.
+    await valkey.set(
+      KEYS.withdrawal(id),
+      JSON.stringify({
+        id,
+        account,
+        amount: '1000000',
+        nonce: '0',
+        deadlineMs: '1900000000000',
+        status: 'pending',
+      }),
+    );
+    await valkey.sadd(KEYS.accountWithdrawals(account), id);
+    await valkey.set(
+      KEYS.withdrawalAuth(id),
+      JSON.stringify({
+        id,
+        vault: '0x00000000000000000000000000000000000000aa',
+        chainId: 84532,
+        deadlineSec: '1900000000',
+        signature: '0x01',
+      }),
+    );
+    const list = (await svc.http.inject({ url: '/api/withdrawals', headers: { cookie } })).json<{
+      withdrawals: { id: string; authorisation: { deadlineSec: string } | null }[];
+    }>();
+    expect(list.withdrawals).toHaveLength(1);
+    expect(list.withdrawals[0]?.authorisation?.deadlineSec).toBe('1900000000');
+
+    expect((await svc.http.inject({ url: `/api/proofs/${account}` })).statusCode).toBe(404);
+    await valkey.set(KEYS.latestBalanceHour, '498000');
+    await valkey.set(
+      KEYS.balanceSnapshot('498000'),
+      JSON.stringify({
+        hour: '498000',
+        seq: '9',
+        leaves: [
+          [account, '5000000'],
+          ['0x00000000000000000000000000000000000000bb', '1'],
+        ],
+      }),
+    );
+    await valkey.set(
+      KEYS.postedRoot('498000'),
+      JSON.stringify({ hour: '498000', root: '0x00', txHash: '0x01' }),
+    );
+    const proof = (await svc.http.inject({ url: `/api/proofs/${account}` })).json<{
+      balance: string;
+      proof: `0x${string}`[];
+    }>();
+    expect(proof.balance).toBe('5000000');
+    const tree = balanceTree([
+      [account as `0x${string}`, 5_000_000n],
+      ['0x00000000000000000000000000000000000000bb', 1n],
+    ]);
+    expect(verifyProof(tree.root, [account as `0x${string}`, 5_000_000n], proof.proof)).toBe(true);
   });
 
   it('guards mutating requests: same origin, JSON, authentication', async () => {

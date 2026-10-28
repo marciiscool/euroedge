@@ -10,9 +10,14 @@ import {
   encodeEngineCommand,
   ENGINE_STREAM_MAXLEN,
   fvSnapshotSchema,
+  balanceSnapshotSchema,
+  balanceTree,
   KEYS,
   marketSnapshotSchema,
+  postedRootSchema,
   STREAMS,
+  withdrawalAuthSchema,
+  withdrawalRecordSchema,
   type DataTier,
 } from '@euroedge/shared';
 import { issueNonce, signatureVerifier, valkeyNonces, verifySiwe } from './siwe.ts';
@@ -77,6 +82,12 @@ const orderBody = z
     path: ['limitPrice'],
   });
 const closeBody = z.object({ idempotencyKey: z.string().min(8).max(64) });
+const withdrawBody = z.object({
+  /** µUSDC as a decimal integer string. */
+  amount: z.string().regex(/^[1-9]\d{0,18}$/),
+  idempotencyKey: z.string().min(8).max(64),
+});
+const WALLET = /^0x[0-9a-f]{40}$/;
 const siweBody = z.object({
   message: z.string().min(1).max(4096),
   signature: z.string().min(4).max(4096),
@@ -311,6 +322,88 @@ export async function buildApi(app: FastifyInstance, deps: ApiDeps): Promise<voi
     return execute(reply, () =>
       adapter.closePosition(account, req.params.market, body.data.idempotencyKey),
     );
+  });
+
+  // Withdrawals (M4-18/M5-08): request one, then list them with the signer's authorisation.
+  app.post('/api/withdrawals', async (req, reply) => {
+    const account = accountOf(req);
+    if (account === undefined) return sendError(reply, 'unauthenticated', 'log in first');
+    if (!WALLET.test(account))
+      return sendError(reply, 'forbidden', 'only wallet accounts can withdraw');
+    const body = withdrawBody.safeParse(req.body);
+    if (!body.success)
+      return sendError(reply, 'bad-request', 'expected { amount, idempotencyKey }');
+    await valkey.xadd(
+      STREAMS.engineInput,
+      'MAXLEN',
+      '~',
+      String(ENGINE_STREAM_MAXLEN),
+      '*',
+      'input',
+      encodeEngineCommand({
+        type: 'RequestWithdrawal',
+        requestId: body.data.idempotencyKey,
+        account,
+        amount: BigInt(body.data.amount),
+      }),
+    );
+    return reply.code(202).send({ withdrawalId: `${account}:${body.data.idempotencyKey}` });
+  });
+
+  app.get('/api/withdrawals', async (req, reply) => {
+    const account = accountOf(req);
+    if (account === undefined) return sendError(reply, 'unauthenticated', 'log in first');
+    const ids = await valkey.smembers(KEYS.accountWithdrawals(account));
+    if (ids.length === 0) return { withdrawals: [] };
+    const records = await valkey.mget(ids.map((id) => KEYS.withdrawal(id)));
+    const auths = await valkey.mget(ids.map((id) => KEYS.withdrawalAuth(id)));
+    const withdrawals = ids.flatMap((_, i) => {
+      const r = records[i];
+      if (r === null || r === undefined) return [];
+      const a = auths[i];
+      return [
+        {
+          ...withdrawalRecordSchema.parse(JSON.parse(r)),
+          authorisation:
+            a === null || a === undefined ? null : withdrawalAuthSchema.parse(JSON.parse(a)),
+        },
+      ];
+    });
+    return { withdrawals: withdrawals.sort((x, y) => Number(BigInt(y.nonce) - BigInt(x.nonce))) };
+  });
+
+  // Merkle proof of an account's settled cash against the latest posted root (M5-12).
+  app.get<{ Params: { account: string } }>('/api/proofs/:account', async (req, reply) => {
+    const account = req.params.account.toLowerCase();
+    if (!WALLET.test(account)) return sendError(reply, 'bad-request', 'not a wallet address');
+    const hour = await valkey.get(KEYS.latestBalanceHour);
+    const [snapRaw, postedRaw] =
+      hour === null
+        ? [null, null]
+        : await valkey.mget(KEYS.balanceSnapshot(hour), KEYS.postedRoot(hour));
+    if (
+      hour === null ||
+      snapRaw === null ||
+      snapRaw === undefined ||
+      postedRaw === null ||
+      postedRaw === undefined
+    )
+      return sendError(reply, 'not-found', 'no posted balance root yet');
+    const snap = balanceSnapshotSchema.parse(JSON.parse(snapRaw));
+    const posted = postedRootSchema.parse(JSON.parse(postedRaw));
+    const leaf = snap.leaves.find(([a]) => a === account);
+    if (leaf === undefined)
+      return sendError(reply, 'not-found', 'no balance for this account in the latest root');
+    const tree = balanceTree(snap.leaves.map(([a, b]) => [a as `0x${string}`, BigInt(b)] as const));
+    return {
+      hour: snap.hour,
+      seq: snap.seq,
+      root: posted.root,
+      txHash: posted.txHash,
+      account,
+      balance: leaf[1],
+      proof: tree.proof([account as `0x${string}`, BigInt(leaf[1])]),
+    };
   });
 
   registerSocket(app, deps, accountOf);

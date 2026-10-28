@@ -1,9 +1,10 @@
 // Engine signer (M5-08): EIP-712 withdrawal authorisations for what the engine reserved.
 import { createValkey, runService } from '@euroedge/service-kit';
-import { KEYS, STREAMS } from '@euroedge/shared';
+import { balanceSnapshotSchema, KEYS, STREAMS } from '@euroedge/shared';
 import { loadConfig } from './config.ts';
 import { parseRecord, signReservation, type SignerStore } from './service.ts';
 import { localSigner } from './signer.ts';
+import { postRoot, viemRootChain, type RootStore } from './poster.ts';
 
 const config = loadConfig();
 
@@ -53,10 +54,58 @@ await runService(
         }
       }
     })();
+    // Hourly balance roots (M5-12), if a poster key and the BalanceRoot address are set.
+    const poster =
+      /^0x[0-9a-fA-F]{64}$/.test(config.ROOT_POSTER_PRIVATE_KEY) &&
+      config.BALANCE_ROOT_ADDRESS !== undefined
+        ? viemRootChain(
+            config.BASE_SEPOLIA_RPC_URL,
+            config.ROOT_POSTER_PRIVATE_KEY as `0x${string}`,
+            config.BALANCE_ROOT_ADDRESS as `0x${string}`,
+          )
+        : undefined;
+    const rootReader = createValkey(config.VALKEY_URL, 'signer-roots');
+    const roots: RootStore = {
+      snapshot: async (hour) => {
+        const raw = await valkey.get(KEYS.balanceSnapshot(hour));
+        return raw === null ? undefined : balanceSnapshotSchema.parse(JSON.parse(raw));
+      },
+      posted: async (hour) => (await valkey.exists(KEYS.postedRoot(hour))) === 1,
+      savePosted: async (p) => {
+        await valkey.set(KEYS.postedRoot(p.hour), JSON.stringify(p));
+      },
+    };
+    const rootLoop = (async () => {
+      if (poster === undefined)
+        return service.log.info('root poster disabled (no ROOT_POSTER_PRIVATE_KEY)');
+      const post = async (hour: string) => {
+        const r = await postRoot(roots, poster, hour);
+        if (r === 'posted') service.log.info({ hour }, 'balance root posted');
+      };
+      const latest = await valkey.get(KEYS.latestBalanceHour);
+      if (latest !== null)
+        await post(latest).catch((err: unknown) => service.log.error({ err }, 'root post failed'));
+      let cursor = '$';
+      while (!stopping) {
+        const res = await rootReader
+          .xread('COUNT', 10, 'BLOCK', 1_000, 'STREAMS', STREAMS.balanceRoots, cursor)
+          .catch(() => null);
+        for (const [entryId, fields] of res?.[0]?.[1] ?? []) {
+          cursor = entryId;
+          const hour = fields[fields.indexOf('hour') + 1];
+          if (hour !== undefined)
+            await post(hour).catch((err: unknown) =>
+              service.log.error({ err, hour }, 'root post failed'),
+            );
+        }
+      }
+    })();
     service.onShutdown(async () => {
       stopping = true;
       reader.disconnect();
+      rootReader.disconnect();
       await loop.catch(() => undefined);
+      await rootLoop.catch(() => undefined);
       valkey.disconnect();
     });
     return Promise.resolve();

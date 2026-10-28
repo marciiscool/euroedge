@@ -1,0 +1,10 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`balance Merkle tree (M5-12) > matches the Solidity vector 1`] = `
+{
+  "proof": [
+    "0x7d7bdd77c22b97f0c657cd360fbcb09b59a9386c0829cb18a148dcc5be067266",
+  ],
+  "root": "0x4f7eee7928c140d86a76f2e9efc4a509945142a0d40605023f0f8afc184f93d0",
+}
+`;
