@@ -156,5 +156,32 @@
     "signedInAs": "Signed in as {account}",
     "signOut": "Sign out",
     "signInUnavailable": "Sign-in is unavailable right now."
+  },
+  "Funds": {
+    "title": "Wallet & funds",
+    "walletBalance": "In your wallet",
+    "claimable": "Free to claim",
+    "amount": "Amount (Test USDC)",
+    "claim": "Claim",
+    "deposit": "Deposit",
+    "withdraw": "Withdraw",
+    "gasless": "No gas needed: our relayer pays it. Test USDC has no value.",
+    "notLive": "Deposits and withdrawals open once the testnet contracts are live.",
+    "wrongWallet": "Your wallet's active address is not the one you signed in with.",
+    "nothingToClaim": "Nothing left to claim right now (10,000 per 24 hours, 100,000 in total).",
+    "enterAmount": "Enter an amount.",
+    "notEnough": "Your wallet holds less than that.",
+    "claimed": "Claimed {amount} Test USDC to your wallet.",
+    "deposited": "Deposited {amount}. It reaches your trading balance once the block is final (a few minutes).",
+    "withdrawRequested": "Withdrawal requested, waiting for authorisation…",
+    "withdrawSent": "Withdrawal of {amount} sent to your wallet.",
+    "withdrawRejected": "The withdrawal was not authorised: is enough of your balance free (not used as margin)?",
+    "failed": "That did not work. Please try again.",
+    "viewTx": "View transaction",
+    "withdrawals": "Recent withdrawals",
+    "statusAuthorising": "Being authorised",
+    "statusSending": "Sending",
+    "statusPaid": "Paid out",
+    "statusExpired": "Expired, returned"
   }
 }

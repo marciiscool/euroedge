@@ -42,6 +42,8 @@ export interface ApiDeps {
     readonly CHAIN_ID?: number;
     readonly SIWE_DOMAIN?: string;
     readonly BASE_SEPOLIA_RPC_URL?: string;
+    readonly TOKEN_ADDRESS?: string;
+    readonly VAULT_ADDRESS?: string;
   };
 }
 
@@ -322,6 +324,16 @@ export async function buildApi(app: FastifyInstance, deps: ApiDeps): Promise<voi
     return execute(reply, () =>
       adapter.closePosition(account, req.params.market, body.data.idempotencyKey),
     );
+  });
+
+  // Chain and contracts for the web funds panel (M5). Disabled until the contracts are deployed.
+  const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
+  app.get('/api/chain', () => {
+    const token = config.TOKEN_ADDRESS ?? '';
+    const vault = config.VAULT_ADDRESS ?? '';
+    return ADDRESS.test(token) && ADDRESS.test(vault)
+      ? { enabled: true, chainId: config.CHAIN_ID ?? 84532, token, vault }
+      : { enabled: false };
   });
 
   // Withdrawals (M4-18/M5-08): request one, then list them with the signer's authorisation.

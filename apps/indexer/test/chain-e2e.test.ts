@@ -1,16 +1,8 @@
 import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
 import { readFileSync, rmSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import {
-  createPublicClient,
-  createWalletClient,
-  http,
-  parseAbi,
-  type Address,
-  type Hex,
-} from 'viem';
+import { createPublicClient, http, parseAbi, type Address, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { foundry } from 'viem/chains';
 import { balanceTree } from '@euroedge/shared';
 import { apply } from '../../engine/src/core/apply.ts';
 import type { EngineInput } from '../../engine/src/core/events.ts';
@@ -250,23 +242,24 @@ describe.skipIf(!RUN)('chain end to end on anvil (M5-13)', () => {
     };
     const w1 = reserve('w1', 5_000n * USDC);
     const a1 = await sign(w1.withdrawalId);
-    const wallet = createWalletClient({ account: user, chain: foundry, transport: http(RPC) });
-    const vaultAbi = parseAbi([
-      'function withdraw(address user, uint256 amount, uint256 nonce, uint256 deadline, bytes signature)',
-      'function nonceUsed(uint256) view returns (bool)',
-    ]);
-    const tx = await wallet.writeContract({
-      address: dep.vault,
-      abi: vaultAbi,
-      functionName: 'withdraw',
-      args: [
-        user.address,
-        5_000n * USDC,
-        w1.nonce,
-        BigInt(a1?.deadlineSec ?? '0'),
-        a1?.signature as Hex,
-      ],
-    });
+    const vaultAbi = parseAbi(['function nonceUsed(uint256) view returns (bool)']);
+    // The relayer submits the engine-signed authorisation: the user needs no ETH (web flow).
+    const sent = await relay(
+      chain,
+      limiter,
+      DEFAULT_LIMITS,
+      'withdraw',
+      {
+        user: user.address,
+        amount: 5_000n * USDC,
+        nonce: w1.nonce,
+        deadline: BigInt(a1?.deadlineSec ?? '0'),
+        signature: a1?.signature as Hex,
+      },
+      'ip',
+    );
+    if (sent.status !== 'sent') throw new Error(`withdraw ${JSON.stringify(sent)}`);
+    const tx = sent.txHash;
     await pub.waitForTransactionReceipt({ hash: tx });
     expect(await tokenBalance(user.address)).toBe(7_000n * USDC);
     await mineSafe();

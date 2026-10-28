@@ -37,6 +37,34 @@ export interface Session {
   readonly tier: 'sim' | 'replay' | 'live-min';
 }
 
+export type ChainInfo =
+  | { readonly enabled: false }
+  | {
+      readonly enabled: true;
+      readonly chainId: number;
+      readonly token: `0x${string}`;
+      readonly vault: `0x${string}`;
+    };
+
+export interface Withdrawal {
+  readonly id: string;
+  readonly amount: string;
+  readonly nonce: string;
+  readonly status: 'pending' | 'executed' | 'expired';
+  readonly authorisation: {
+    readonly deadlineSec: string;
+    readonly signature: `0x${string}`;
+  } | null;
+}
+
+export interface RelayBody {
+  readonly user: string;
+  readonly amount: string;
+  readonly deadline: string;
+  readonly signature: string;
+  readonly nonce?: string;
+}
+
 export interface FvPoint {
   readonly t: number;
   readonly fv: string;
@@ -65,6 +93,19 @@ export const api = {
   fvHistory: (id: string, minutes = 120) =>
     call<{ points: FvPoint[] }>(`/api/markets/${id}/fv?minutes=${minutes}`),
   account: () => call<AccountSnapshot>('/api/account'),
+  chain: () => call<ChainInfo>('/api/chain'),
+  withdrawals: () => call<{ withdrawals: Withdrawal[] }>('/api/withdrawals'),
+  requestWithdrawal: (amount: bigint) =>
+    call<{ withdrawalId: string }>('/api/withdrawals', {
+      method: 'POST',
+      body: JSON.stringify({ amount: amount.toString(), idempotencyKey: crypto.randomUUID() }),
+    }),
+  /** Gasless relays (M5-11): the relayer pays gas, the user (or engine signer) signed. */
+  relay: (kind: 'claim' | 'deposit' | 'withdraw', body: RelayBody) =>
+    call<{ txHash: `0x${string}` }>(`/relay/${kind}`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
   placeOrder: (o: {
     market: string;
     side: 'buy' | 'sell';

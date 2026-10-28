@@ -17,6 +17,9 @@ export const configShape = {
   SIWE_DOMAIN: z.string().default(''),
   /** Enables ERC-1271/6492 smart-wallet sign-in; without it only EOAs verify. */
   BASE_SEPOLIA_RPC_URL: z.string().default(''),
+  /** Deployed contracts (M5-07); the web app reads them from GET /api/chain. Empty = no chain yet. */
+  TOKEN_ADDRESS: z.string().default(''),
+  VAULT_ADDRESS: z.string().default(''),
 } as const;
 
 export type ApiConfig = ReturnType<typeof loadConfig>;

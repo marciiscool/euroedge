@@ -57,6 +57,13 @@ describe('relayer (M5-11)', () => {
     expect(sent).toEqual(['claim', 'deposit']);
   });
 
+  it('relays a withdrawal with its nonce, and refuses one without', async () => {
+    const { post, sent } = app();
+    expect((await post('/relay/withdraw', { ...req(), nonce: '7' })).statusCode).toBe(200);
+    expect((await post('/relay/withdraw', req())).statusCode).toBe(400);
+    expect(sent).toEqual(['withdraw']);
+  });
+
   it('never pays for a transaction that would revert', async () => {
     const { post, sent } = app(false);
     const r = await post('/relay/claim', req());

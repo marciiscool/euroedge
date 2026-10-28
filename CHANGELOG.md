@@ -8,6 +8,14 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Web funds panel (M5), shown after wallet sign-in:
+  - Shows the wallet's Test USDC and how much can still be claimed.
+  - Claim and deposit are one click each: the Privy wallet signs, the relayer pays gas.
+  - Withdraw asks the engine, waits for the signer's authorisation and has it relayed automatically.
+  - Lists the last withdrawals with their status.
+  - Accepts amounts in either decimal convention; de/en copy.
+  - Hidden behind "opens once the contracts are live" until `GET /api/chain` reports deployed contracts (`TOKEN_ADDRESS`, `VAULT_ADDRESS` in the API).
+- The relayer also relays engine-signed withdrawals (`/relay/withdraw`), so users need no ETH at all.
 - Engine signer (M5-08):
   - `apps/signer` signs each pending withdrawal reservation once as the Vault's EIP-712 `Withdrawal`, with the deadline floored to seconds.
   - The key sits behind an interface (local key now, KMS later).
