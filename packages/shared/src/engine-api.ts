@@ -72,7 +72,14 @@ export const accountSnapshotSchema = z.object({
         market: z.string(),
         side: z.enum(['buy', 'sell']),
         size: dec,
-        limitPrice: dec,
+        /** null: a stop-market. */
+        limitPrice: dec.nullable(),
+        /** Pending mark trigger of a stop / take-profit order. */
+        stop: z
+          .object({ price: dec, triggersOn: z.enum(['rise', 'fall']) })
+          .nullable()
+          .default(null),
+        ocoGroup: z.string().nullable().default(null),
       }),
     )
     .default([]),
@@ -95,6 +102,7 @@ export const rejectReasonSchema = z.enum([
   'invalid-price',
   'too-many-orders',
   'unknown-order',
+  'would-trigger',
 ]);
 
 /** Circuit-breaker effect on a market (brief §6.5); carried on each MarketData input. */

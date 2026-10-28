@@ -84,6 +84,14 @@ export type EngineInput =
       readonly reduceOnly: boolean;
       /** Limit price (ticks); absent = market order. Unfilled limits rest (GTC, full fills only). */
       readonly limitPrice?: Ticks;
+      /**
+       * Conditional order (M4-07), triggered on the mark: a stop fires when the mark moves
+       * against the order's side (buy: mark ≥ price, sell: mark ≤ price), a take-profit when
+       * it moves the other way. Without `limitPrice` it executes as a market order.
+       */
+      readonly stop?: { readonly price: Ticks; readonly kind: 'stop' | 'take-profit' };
+      /** Orders of one account sharing a group are one-cancels-other (TP/SL). */
+      readonly ocoGroup?: string;
     }
   | {
       readonly type: 'CancelOrder';

@@ -98,7 +98,8 @@
       "not-marketable": "Der Preis hat dein Limit nicht erreicht.",
       "invalid-price": "Gib einen gültigen Limitpreis ein.",
       "too-many-orders": "Zu viele offene Orders. Storniere zuerst einige.",
-      "unknown-order": "Diese Order existiert nicht mehr."
+      "unknown-order": "Diese Order existiert nicht mehr.",
+      "would-trigger": "Der Auslöser wäre beim aktuellen Mark-Preis schon erreicht."
     },
     "account": "Konto",
     "equity": "Eigenkapital",
@@ -137,6 +138,8 @@
     "orderCancelled": "Order storniert.",
     "cancelFailed": "Die Order konnte nicht storniert werden.",
     "openOrders": "Offene Orders",
-    "cancelOrder": "Stornieren"
+    "cancelOrder": "Stornieren",
+    "trigger": "Auslöser",
+    "atMarket": "Markt"
   }
 }

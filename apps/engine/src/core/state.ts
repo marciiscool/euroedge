@@ -52,7 +52,8 @@ export type RejectReason =
   | 'not-marketable'
   | 'invalid-price'
   | 'too-many-orders'
-  | 'unknown-order';
+  | 'unknown-order'
+  | 'would-trigger';
 
 export interface Fill {
   readonly market: MarketId;
@@ -69,7 +70,16 @@ export type OrderOutcome =
   | { readonly status: 'accepted'; readonly orderId: string }
   | { readonly status: 'rejected'; readonly reason: RejectReason };
 
-/** A resting limit order (GTC, full fills only, against the house quote). */
+/** When a conditional order fires: the mark rising to/above or falling to/below its price. */
+export interface StopTrigger {
+  readonly price: bigint;
+  readonly triggersOn: 'rise' | 'fall';
+}
+
+/**
+ * A resting order (GTC, full fills only, against the house quote): a limit order, or a
+ * conditional (stop / take-profit) order waiting for its mark trigger.
+ */
 export interface RestingOrder {
   readonly orderId: string;
   readonly requestId: string;
@@ -77,8 +87,12 @@ export interface RestingOrder {
   readonly market: MarketId;
   /** Signed lots: + buy, − sell. */
   readonly qty: bigint;
-  readonly limitPrice: bigint;
+  /** null = market once triggered (stop-market). Plain resting orders always have one. */
+  readonly limitPrice: bigint | null;
   readonly reduceOnly: boolean;
+  /** null = no trigger pending (a plain limit, or a stop-limit that has fired). */
+  readonly stop: StopTrigger | null;
+  readonly ocoGroup: string | null;
 }
 
 export interface EngineState {

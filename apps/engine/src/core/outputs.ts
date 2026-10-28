@@ -53,7 +53,7 @@ export type EngineOutput =
       readonly requestId: string;
       readonly account: AccountId;
       readonly orderId: string;
-      readonly reason: RejectReason | 'user';
+      readonly reason: RejectReason | 'user' | 'oco';
     }
   | {
       /** Hourly funding settled: positive rate = longs paid shorts (Rate, 1e18 per hour). */

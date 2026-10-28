@@ -73,7 +73,15 @@ export function accountSnapshot(state: EngineState, account: string): AccountSna
             market: r.market,
             side: r.qty > 0n ? ('buy' as const) : ('sell' as const),
             size: lotsToQty(m.units, lots(r.qty < 0n ? -r.qty : r.qty)),
-            limitPrice: ticksToPrice(m.units, ticks(r.limitPrice)),
+            limitPrice: r.limitPrice === null ? null : ticksToPrice(m.units, ticks(r.limitPrice)),
+            stop:
+              r.stop === null
+                ? null
+                : {
+                    price: ticksToPrice(m.units, ticks(r.stop.price)),
+                    triggersOn: r.stop.triggersOn,
+                  },
+            ocoGroup: r.ocoGroup,
           },
         ];
       }),

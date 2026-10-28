@@ -98,7 +98,8 @@
       "not-marketable": "The price has not reached your limit.",
       "invalid-price": "Enter a valid limit price.",
       "too-many-orders": "Too many open orders. Cancel some first.",
-      "unknown-order": "This order no longer exists."
+      "unknown-order": "This order no longer exists.",
+      "would-trigger": "The trigger would already be reached at the current mark."
     },
     "account": "Account",
     "equity": "Equity",
@@ -137,6 +138,8 @@
     "orderCancelled": "Order cancelled.",
     "cancelFailed": "The order could not be cancelled.",
     "openOrders": "Open orders",
-    "cancelOrder": "Cancel"
+    "cancelOrder": "Cancel",
+    "trigger": "Trigger",
+    "atMarket": "Market"
   }
 }
