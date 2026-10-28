@@ -13,8 +13,8 @@ export const configShape = {
   RELAYER_PRIVATE_KEY: z.string().default(''),
   TOKEN_ADDRESS: address.optional(),
   VAULT_ADDRESS: address.optional(),
-  /** Warn below this much ETH (gas for roughly a few hundred relays on Base Sepolia). */
-  RELAYER_MIN_ETH: z.coerce.number().positive().default(0.05),
+  /** Warn below this much ETH. A relay costs ≈ 0.000001 ETH on Base Sepolia (2026-10-28). */
+  RELAYER_MIN_ETH: z.coerce.number().positive().default(0.00002),
 } as const;
 
 export const loadConfig = (source?: Record<string, string | undefined>) => {

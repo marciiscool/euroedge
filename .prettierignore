@@ -15,3 +15,4 @@ data/sample/manifest.json
 packages/calendar/src/generated/
 contracts/cache
 contracts/broadcast
+contracts/deployments
