@@ -9,7 +9,8 @@
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
     "test": "vitest run",
-    "verify": "node --env-file-if-exists=../../.env src/verify.ts"
+    "verify": "node --env-file-if-exists=../../.env src/verify.ts",
+    "bench": "node --env-file-if-exists=../../.env bench/throughput.ts"
   },
   "dependencies": {
     "@euroedge/fixed": "workspace:*",
