@@ -48,4 +48,15 @@ contract BalanceRootTest is Test {
         br.post(11, bytes32(0), 3);
         vm.stopPrank();
     }
+
+    /// Root and proof built by packages/shared/src/merkle.ts (pinned snapshot there):
+    /// the TypeScript tree and the contract agree.
+    function test_verifiesTypeScriptTree() public {
+        vm.prank(poster);
+        br.post(1, 0x4f7eee7928c140d86a76f2e9efc4a509945142a0d40605023f0f8afc184f93d0, 1);
+        bytes32[] memory proof = new bytes32[](1);
+        proof[0] = 0x7d7bdd77c22b97f0c657cd360fbcb09b59a9386c0829cb18a148dcc5be067266;
+        assertTrue(br.verify(1, address(0xa11ce), 1_000_000_000, proof));
+        assertFalse(br.verify(1, address(0xa11ce), 1_000_000_001, proof));
+    }
 }

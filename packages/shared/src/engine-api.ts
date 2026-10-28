@@ -6,6 +6,8 @@ export const STREAMS = {
   engineInput: 'engine:input',
   /** Withdrawal reservations for the engine signer (M5-08): `{ id }` per entry. */
   withdrawals: 'engine:withdrawals',
+  /** Hourly balance snapshots for the root poster (M5-12): `{ hour }` per entry. */
+  balanceRoots: 'engine:balance-roots',
 } as const;
 
 export const CHANNELS = {
@@ -28,7 +30,27 @@ export const KEYS = {
   pendingWithdrawals: 'state:withdrawals:pending',
   /** Ids of one account's withdrawals. */
   accountWithdrawals: (account: string) => `state:withdrawals:account:${account}`,
+  /** Hourly balance snapshot (M5-12), JSON of `BalanceSnapshot`. */
+  balanceSnapshot: (hour: string) => `state:balances:${hour}`,
+  /** Latest snapshot hour, and the posted root per hour (JSON of `PostedRoot`). */
+  latestBalanceHour: 'state:balances:latest',
+  postedRoot: (hour: string) => `state:balance-root:${hour}`,
 } as const;
+
+/** Settled cash of every wallet account at an hour boundary (µUSDC, decimal strings). */
+export const balanceSnapshotSchema = z.object({
+  hour: z.string().regex(/^\d+$/),
+  seq: z.string().regex(/^\d+$/),
+  leaves: z.array(z.tuple([z.string().regex(/^0x[0-9a-f]{40}$/), z.string().regex(/^\d+$/)])),
+});
+export type BalanceSnapshot = z.infer<typeof balanceSnapshotSchema>;
+
+export const postedRootSchema = z.object({
+  hour: z.string(),
+  root: z.string(),
+  txHash: z.string(),
+});
+export type PostedRoot = z.infer<typeof postedRootSchema>;
 
 /** A withdrawal as the engine reserved it (M4-18), written by the engine on every change. */
 export const withdrawalRecordSchema = z.object({
