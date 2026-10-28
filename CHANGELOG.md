@@ -26,6 +26,11 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Bots (M4-23/24):
+  - `apps/bots` runs N accounts (default 200) of noise, momentum and mean-reversion strategies, seeded and reproducible.
+  - Bots are funded once with play money.
+  - Off unless `BOTS_ENABLED=true`, and only with `DATA_TIER=sim`.
+  - Orders go straight to the engine stream until HMAC API keys (M6-03) exist.
 - `AdlPolicy` (M4-30): the hook that decides who covers a liquidation shortfall. The proposed default is insurance first, then the house as backstop (`houseCover` on `Liquidated`), so an exhausted fund no longer fail-stops the engine on Invariant 9.
 - Corporate actions (M4-17), admin-driven:
   - `CorporateActionFreeze` cancels the market's resting orders and refuses every user order (`market-frozen`); liquidations keep running.

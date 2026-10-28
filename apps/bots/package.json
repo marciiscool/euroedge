@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@euroedge/data-adapters": "workspace:*",
     "@euroedge/service-kit": "workspace:*",
     "@euroedge/shared": "workspace:*",
     "zod": "catalog:"

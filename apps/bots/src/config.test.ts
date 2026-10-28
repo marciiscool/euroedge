@@ -13,4 +13,11 @@ describe('bots config', () => {
   it('rejects an invalid port', () => {
     expect(() => loadConfig({ BOTS_PORT: '70000' })).toThrow(/BOTS_PORT/);
   });
+
+  it('refuses to run bots outside the sim tier', () => {
+    expect(() => loadConfig({ BOTS_ENABLED: 'true', DATA_TIER: 'replay' })).toThrow(
+      /DATA_TIER=sim/,
+    );
+    expect(loadConfig({ BOTS_ENABLED: 'true' }).BOTS_COUNT).toBe(200);
+  });
 });

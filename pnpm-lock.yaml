@@ -444,6 +444,9 @@ importers:
 
   apps/bots:
     dependencies:
+      '@euroedge/data-adapters':
+        specifier: workspace:*
+        version: link:../../packages/data-adapters
       '@euroedge/service-kit':
         specifier: workspace:*
         version: link:../../packages/service-kit
