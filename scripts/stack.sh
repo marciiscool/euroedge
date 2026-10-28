@@ -10,7 +10,8 @@ mkdir -p "$LOGS"
 case "${1:-start}" in
   start)
     : > "$PIDS"
-    for svc in ingest fv-service engine api; do
+    # Chain services idle unless enabled in .env (M5): relayer, indexer, signer.
+    for svc in ingest fv-service engine api relayer indexer signer; do
       # Detach fully (no inherited stdout) so callers piping our output don't hang.
       (cd "apps/$svc" && exec node --env-file-if-exists=../../.env src/main.ts) > "$LOGS/$svc.log" 2>&1 < /dev/null &
       echo $! >> "$PIDS"

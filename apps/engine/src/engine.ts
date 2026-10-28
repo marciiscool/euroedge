@@ -31,6 +31,8 @@ export interface EngineOptions {
   readonly clockTickMs?: number;
   /** Store a state snapshot every N events (M4-19); 0 disables. Default 10 000. */
   readonly snapshotEvery?: number;
+  /** ADR-0013: `chain` waits for the Vault's GenesisFunded instead of injecting dev genesis. */
+  readonly genesisSource?: 'dev' | 'chain';
 }
 
 export interface RunningEngine {
@@ -97,7 +99,9 @@ export async function startEngine(o: EngineOptions): Promise<RunningEngine> {
   const valkey = createValkey(o.valkeyUrl, 'engine');
   const reader = createValkey(o.valkeyUrl, 'engine-reader');
   const sequencer = new Sequencer(state, store);
-  const boot = await sequencer.processInputs(bootstrapInputs(state, o.markets, o.windows, o.tier));
+  const boot = await sequencer.processInputs(
+    bootstrapInputs(state, o.markets, o.windows, o.tier, o.genesisSource),
+  );
   if (boot.events.length > 0)
     o.log.info({ events: boot.events.length }, 'bootstrap inputs applied');
   await publishAll(valkey, state);

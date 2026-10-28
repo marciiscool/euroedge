@@ -19,9 +19,11 @@ export function bootstrapInputs(
   markets: readonly MarketConfig[],
   windows: WindowsFile,
   tier: DataTier,
+  genesisSource: 'dev' | 'chain' = 'dev',
 ): EngineInput[] {
   const inputs: EngineInput[] = [];
-  if (!state.genesis && tier !== 'live-min') {
+  // With a deployed Vault, genesis must be the chain's, so ledger and Vault reconcile (ADR-0013).
+  if (!state.genesis && tier !== 'live-min' && genesisSource === 'dev') {
     inputs.push({
       type: 'GenesisCapital',
       house: usdc(GENESIS.house),

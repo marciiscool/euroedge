@@ -125,6 +125,11 @@ export async function buildApi(app: FastifyInstance, deps: ApiDeps): Promise<voi
     }
   });
 
+  /** A deployed Vault is configured (M5): funds then come only from claim + deposit. */
+  const chainLive =
+    /^0x[0-9a-fA-F]{40}$/.test(config.TOKEN_ADDRESS ?? '') &&
+    /^0x[0-9a-fA-F]{40}$/.test(config.VAULT_ADDRESS ?? '');
+
   /** Credits play money once per account (dev login, or SIWE in sim). */
   const creditPlayMoney = async (account: string) => {
     if ((await valkey.set(`devlogin:${account}`, '1', 'NX')) !== 'OK') return;
@@ -159,7 +164,9 @@ export async function buildApi(app: FastifyInstance, deps: ApiDeps): Promise<voi
   }));
 
   app.post('/api/dev/login', async (req, reply) => {
-    if (!config.DEV_LOGIN) return sendError(reply, 'not-found', 'dev login is disabled');
+    // Dev accounts get unbacked play money: never alongside a deployed Vault.
+    if (!config.DEV_LOGIN || chainLive)
+      return sendError(reply, 'not-found', 'dev login is disabled');
     const body = loginBody.safeParse(req.body ?? {});
     if (!body.success) return sendError(reply, 'bad-request', 'name: 1–24 chars of a-z, 0-9, -');
     const account =
@@ -196,8 +203,9 @@ export async function buildApi(app: FastifyInstance, deps: ApiDeps): Promise<voi
     );
     if (!r.ok) return sendError(reply, 'unauthenticated', r.reason);
     const account = r.address.toLowerCase();
-    // Play money until on-chain deposits exist (M5), sim only (ADR-0020).
-    if (config.DATA_TIER === 'sim') await creditPlayMoney(account);
+    // Play money only while there is no chain (ADR-0020): with a deployed Vault, unbacked
+    // credits could be withdrawn out of house capital, so funds come from claim + deposit.
+    if (config.DATA_TIER === 'sim' && !chainLive) await creditPlayMoney(account);
     startSession(reply, account);
     return { account };
   });

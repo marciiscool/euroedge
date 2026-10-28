@@ -21,7 +21,8 @@
     "infra:up": "docker compose up -d --wait",
     "infra:down": "docker compose down",
     "db:migrate": "pnpm --filter @euroedge/db migrate",
-    "check:guards": "node scripts/check-env-guards.ts"
+    "check:guards": "node scripts/check-env-guards.ts",
+    "chain:check": "pnpm --filter @euroedge/signer exec node --env-file-if-exists=../../.env scripts/preflight.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",
