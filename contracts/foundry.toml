@@ -5,6 +5,7 @@ test = "test"
 script = "script"
 out = "out"
 libs = ["lib"]
+fs_permissions = [{ access = "write", path = "./deployments" }]
 solc_version = "0.8.30"
 evm_version = "cancun"
 optimizer = true
