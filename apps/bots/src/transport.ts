@@ -26,12 +26,12 @@ export function valkeyTransport(valkey: Redis, fundUsdc: number): BotTransport {
       encodeEngineCommand(input),
     );
   return {
-    async mark(market) {
+    async quote(market) {
       const raw = await valkey.get(KEYS.market(market));
       if (raw === null) return undefined;
       const m = marketSnapshotSchema.parse(JSON.parse(raw));
       lotSize.set(market, Number(m.lotSize));
-      return Number(m.mark);
+      return { mark: Number(m.mark), fv: Number(m.fv), bid: Number(m.bid), ask: Number(m.ask) };
     },
     async position(account, market) {
       const raw = await valkey.get(KEYS.account(account));

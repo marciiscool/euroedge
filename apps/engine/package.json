@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "verify": "node --env-file-if-exists=../../.env src/verify.ts",
-    "bench": "node --env-file-if-exists=../../.env bench/throughput.ts"
+    "bench": "node --env-file-if-exists=../../.env bench/throughput.ts",
+    "bench:adversarial": "node bench/adversarial.ts"
   },
   "dependencies": {
     "@euroedge/fixed": "workspace:*",
