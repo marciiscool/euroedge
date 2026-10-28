@@ -26,6 +26,8 @@ export type EngineOutput =
       readonly penalty: Usdc;
       /** Shortfall covered by the insurance fund (negative-balance protection). */
       readonly insuranceCover: Usdc;
+      /** Rest of the shortfall, backstopped by the house when the fund ran dry (AdlPolicy, M4-30). */
+      readonly houseCover?: Usdc;
       /** Partial: only `closedLots` of one market were closed; otherwise every position. */
       readonly partial: boolean;
       readonly closedLots?: bigint;

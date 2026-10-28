@@ -26,6 +26,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- `AdlPolicy` (M4-30): the hook that decides who covers a liquidation shortfall. The proposed default is insurance first, then the house as backstop (`houseCover` on `Liquidated`), so an exhausted fund no longer fail-stops the engine on Invariant 9.
 - Corporate actions (M4-17), admin-driven:
   - `CorporateActionFreeze` cancels the market's resting orders and refuses every user order (`market-frozen`); liquidations keep running.
   - `CorporateActionAdjust` (split num:den) scales positions to ⌊lots × num / den⌋ and keeps the cost basis pro rata. The fraction of a lot that does not fit is cash-settled at the adjusted mark, and stored prices scale by den/num.
