@@ -21,6 +21,10 @@ export interface OrderRequest {
   /** Signed lots (+ buy, − sell); undefined = close the whole position. */
   readonly qty: bigint | undefined;
   readonly reduceOnly: boolean;
+  /** Fill only at this price or better (ticks). */
+  readonly limitPrice?: bigint;
+  /** A resting order filling later pays the maker fee. */
+  readonly maker?: boolean;
 }
 
 /** Market order against the house quote (M1: market and close orders only). */
@@ -35,7 +39,19 @@ export function executeOrder(state: EngineState, o: OrderRequest): EngineOutput[
   return out;
 }
 
-function outcomeOutput(o: OrderRequest, outcome: OrderOutcome, duplicate: boolean): EngineOutput {
+export function outcomeOutput(
+  o: Pick<OrderRequest, 'requestId' | 'account'>,
+  outcome: OrderOutcome,
+  duplicate: boolean,
+): EngineOutput {
+  if (outcome.status === 'accepted')
+    return {
+      type: 'OrderAccepted',
+      requestId: o.requestId,
+      account: o.account,
+      orderId: outcome.orderId,
+      duplicate,
+    };
   return outcome.status === 'filled'
     ? {
         type: 'OrderFilled',
@@ -55,7 +71,8 @@ function outcomeOutput(o: OrderRequest, outcome: OrderOutcome, duplicate: boolea
 
 const reject = (reason: RejectReason): OrderOutcome => ({ status: 'rejected', reason });
 
-function decide(state: EngineState, o: OrderRequest): OrderOutcome {
+/** All checks and, if they pass, the fill. Nothing is mutated unless the outcome is 'filled'. */
+export function decide(state: EngineState, o: OrderRequest): OrderOutcome {
   if (!state.genesis) return reject('not-genesis');
   const m = state.markets.get(o.market);
   if (m === undefined) return reject('unknown-market');
@@ -80,11 +97,13 @@ function decide(state: EngineState, o: OrderRequest): OrderOutcome {
   const quote = houseQuote(data.fv, halfSpread);
   const side: Side = qty > 0n ? 'buy' : 'sell';
   const price = side === 'buy' ? quote.ask : quote.bid;
+  if (o.limitPrice !== undefined && (side === 'buy' ? price > o.limitPrice : price < o.limitPrice))
+    return reject('not-marketable');
   if (!withinPriceLimit(price, data.index, risk.priceLimitBps)) return reject('price-limit');
 
   const notional = notionalUsdc(qty, price, m.units.tickValue);
   if (!reduces && notional < m.minNotional) return reject('min-notional');
-  const fee = feeBps(notional, bps(risk.takerFeeBps));
+  const fee = feeBps(notional, bps(o.maker === true ? risk.makerFeeBps : risk.takerFeeBps));
   const r = applyFill(pos, qty, price);
   const realized = r.realized * m.units.tickValue;
 

@@ -15,6 +15,7 @@ export function marketListedInput(
     return {
       maxLeverage: BigInt(m.kind === 'stock' ? p.stockMaxLeverage : p.basketMaxLeverage),
       takerFeeBps: BigInt(p.takerFeeBps),
+      makerFeeBps: BigInt(p.makerFeeBps),
       houseHalfSpreadBps: BigInt(p.houseHalfSpreadBps),
       priceLimitBps: BigInt(p.priceLimitBps),
       fundingCapPpmPerHour: p.fundingCapPpmPerHour === null ? null : BigInt(p.fundingCapPpmPerHour),

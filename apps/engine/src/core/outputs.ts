@@ -38,6 +38,21 @@ export type EngineOutput =
   | { readonly type: 'AccountChanged'; readonly account: AccountId }
   | { readonly type: 'MarketChanged'; readonly market: MarketId }
   | {
+      readonly type: 'OrderAccepted';
+      readonly requestId: string;
+      readonly account: AccountId;
+      readonly orderId: string;
+      readonly duplicate: boolean;
+    }
+  | {
+      /** A resting order left the book: cancelled by the user, or failed its checks at trigger. */
+      readonly type: 'OrderCancelled';
+      readonly requestId: string;
+      readonly account: AccountId;
+      readonly orderId: string;
+      readonly reason: RejectReason | 'user';
+    }
+  | {
       /** Hourly funding settled: positive rate = longs paid shorts (Rate, 1e18 per hour). */
       readonly type: 'FundingSettled';
       readonly market: MarketId;

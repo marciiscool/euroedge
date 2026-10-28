@@ -62,6 +62,21 @@ export function accountSnapshot(state: EngineState, account: string): AccountSna
     equity: usdcStr(accountEquity(state, account)),
     maintenance: usdcStr(usdc(accountMaintenance(state, account))),
     positions,
+    orders: [...state.orders.values()]
+      .filter((r) => r.account === account)
+      .flatMap((r) => {
+        const m = state.markets.get(r.market);
+        if (m === undefined) return [];
+        return [
+          {
+            orderId: r.orderId,
+            market: r.market,
+            side: r.qty > 0n ? ('buy' as const) : ('sell' as const),
+            size: lotsToQty(m.units, lots(r.qty < 0n ? -r.qty : r.qty)),
+            limitPrice: ticksToPrice(m.units, ticks(r.limitPrice)),
+          },
+        ];
+      }),
   };
 }
 
@@ -80,6 +95,23 @@ export function orderResult(
       reason: o.reason,
     };
   }
+  if (o.type === 'OrderAccepted')
+    return {
+      requestId: o.requestId,
+      seq: seq.toString(),
+      status: 'accepted',
+      duplicate: o.duplicate,
+      orderId: o.orderId,
+    };
+  if (o.type === 'OrderCancelled')
+    return {
+      requestId: o.requestId,
+      seq: seq.toString(),
+      status: 'cancelled',
+      duplicate: false,
+      orderId: o.orderId,
+      reason: o.reason,
+    };
   if (o.type !== 'OrderFilled') return undefined;
   const m = state.markets.get(o.fill.market);
   if (m === undefined) return undefined;

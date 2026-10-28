@@ -16,6 +16,14 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - New windows parameter `fundingOiCapUsdc` (proposed values).
   - `MarketListed` v2, with v1 logs decoding as interest-free.
   - Golden vectors in `funding.json`.
+- Limit orders:
+  - A marketable limit fills at once as a taker; otherwise it rests GTC and fills, full fills only, when the house quote reaches it.
+  - Resting orders are matched oldest first on every market-data update and pay the maker fee.
+  - A resting order that fails its checks at trigger time is cancelled with the reason.
+  - Cancel by order id; at most 50 resting orders per account.
+  - `PlaceOrder` v2 and a new `CancelOrder` input; open orders appear in the account snapshot.
+  - API: `type`/`limitPrice` on `POST /api/orders`, and `DELETE /api/orders/:id`.
+  - Terminal: a market/limit switch, a limit price field and an open-orders table with cancel.
 
 ### M3 — Full fv-core (in progress, on `integration/m3`)
 

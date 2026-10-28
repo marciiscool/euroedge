@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { qtyToLots } from '@euroedge/fixed';
+import { priceToTicks, qtyToLots } from '@euroedge/fixed';
 import type { Redis } from '@euroedge/service-kit';
 import {
   accountSnapshotSchema,
@@ -73,6 +73,22 @@ export class SimAdapter implements ExecutionAdapter {
       );
     }
     if (qty <= 0n) throw new ExecutionError('invalid-size', 'size must be positive');
+    let limitPrice: bigint | undefined;
+    if (o.type === 'limit') {
+      try {
+        limitPrice = priceToTicks(
+          { tickSize: market.tickSize, lotSize: market.lotSize },
+          o.limitPrice ?? '',
+        );
+      } catch {
+        throw new ExecutionError(
+          'invalid-price',
+          `limit price must be a multiple of ${market.tickSize}`,
+        );
+      }
+      if (limitPrice <= 0n)
+        throw new ExecutionError('invalid-price', 'limit price must be positive');
+    }
     return this.submit((requestId) => ({
       type: 'PlaceOrder',
       requestId,
@@ -82,6 +98,7 @@ export class SimAdapter implements ExecutionAdapter {
       side: o.side,
       qty,
       reduceOnly: o.reduceOnly,
+      ...(limitPrice === undefined ? {} : { limitPrice }),
     }));
   }
 
@@ -95,9 +112,8 @@ export class SimAdapter implements ExecutionAdapter {
     }));
   }
 
-  /** Market orders only in M1; resting orders (and cancels) arrive in M4. */
-  cancelOrder(_id: string): Promise<void> {
-    return Promise.reject(new ExecutionError('not-supported', 'no resting orders before M4'));
+  cancelOrder(account: string, orderId: string): Promise<OrderAck> {
+    return this.submit((requestId) => ({ type: 'CancelOrder', requestId, account, orderId }));
   }
 
   streamFills(cb: (f: Fill) => void): Unsubscribe {

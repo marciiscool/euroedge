@@ -10,7 +10,8 @@ export const EVENT_VERSIONS: Readonly<Record<EngineInput['type'], number>> = {
   MarketListed: 2,
   MarketData: 2,
   DevDeposit: 1,
-  PlaceOrder: 1,
+  PlaceOrder: 2,
+  CancelOrder: 1,
   ClosePosition: 1,
 };
 
@@ -26,6 +27,7 @@ const window = z.enum(['A', 'B', 'C', 'D']);
 const windowRisk = z.object({
   maxLeverage: nonNeg,
   takerFeeBps: nonNeg,
+  makerFeeBps: nonNeg.default(0n),
   houseHalfSpreadBps: nonNeg,
   priceLimitBps: nonNeg,
   // v1 logs predate funding: no cap → interest only, which v1 logs also carry as 0.
@@ -77,7 +79,9 @@ export const inputSchema = z.discriminatedUnion('type', [
     side: z.enum(['buy', 'sell']),
     qty: pos,
     reduceOnly: z.boolean(),
+    limitPrice: pos.optional(),
   }),
+  z.object({ type: z.literal('CancelOrder'), requestId: id, account: id, orderId: id }),
   z.object({
     type: z.literal('ClosePosition'),
     requestId: id,

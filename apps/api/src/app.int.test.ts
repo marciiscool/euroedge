@@ -67,7 +67,15 @@ describe.skipIf(dbUrl === undefined || vkUrl === undefined)('api (integration)',
         duplicate: false,
         reason: 'no-position',
       }),
-    cancelOrder: () => Promise.resolve(),
+    cancelOrder: (_a, id) =>
+      Promise.resolve({
+        requestId: 'r',
+        seq: '4',
+        status: 'cancelled',
+        duplicate: false,
+        orderId: id,
+        reason: 'user',
+      }),
     streamFills: () => () => undefined,
     positions: () => Promise.resolve([]),
     account: (a) =>
@@ -78,6 +86,7 @@ describe.skipIf(dbUrl === undefined || vkUrl === undefined)('api (integration)',
         equity: '10000.000000',
         maintenance: '0.000000',
         positions: [],
+        orders: [],
       }),
   };
 
@@ -230,6 +239,41 @@ describe.skipIf(dbUrl === undefined || vkUrl === undefined)('api (integration)',
         )
       ).statusCode,
     ).toBe(504);
+    expect(
+      (
+        await post(
+          '/api/orders',
+          {
+            market: 'ASML-PERP',
+            side: 'buy',
+            size: '1',
+            type: 'limit',
+            idempotencyKey: 'order-0004',
+          },
+          cookie,
+        )
+      ).statusCode,
+    ).toBe(400);
+    await post(
+      '/api/orders',
+      {
+        market: 'ASML-PERP',
+        side: 'buy',
+        size: '1',
+        type: 'limit',
+        limitPrice: '690.00',
+        idempotencyKey: 'order-0005',
+      },
+      cookie,
+    );
+    expect(placed.at(-1)).toMatchObject({ type: 'limit', limitPrice: '690.00' });
+    const del = await svc.http.inject({
+      method: 'DELETE',
+      url: '/api/orders/order-0005',
+      payload: {},
+      headers: { origin: ORIGIN, 'content-type': 'application/json', cookie },
+    });
+    expect(del.json()).toMatchObject({ status: 'cancelled', orderId: 'order-0005' });
     const close = await post(
       '/api/positions/ASML-PERP/close',
       { idempotencyKey: 'close-0001' },

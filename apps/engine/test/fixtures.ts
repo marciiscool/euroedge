@@ -9,6 +9,7 @@ export const WINDOWS: Record<WindowId, WindowRisk> = {
   A: {
     maxLeverage: 5n,
     takerFeeBps: 5n,
+    makerFeeBps: 1n,
     houseHalfSpreadBps: 5n,
     priceLimitBps: 1000n,
     fundingCapPpmPerHour: 300n,
@@ -17,6 +18,7 @@ export const WINDOWS: Record<WindowId, WindowRisk> = {
   B: {
     maxLeverage: 4n,
     takerFeeBps: 8n,
+    makerFeeBps: 2n,
     houseHalfSpreadBps: 10n,
     priceLimitBps: 500n,
     fundingCapPpmPerHour: 200n,
@@ -25,6 +27,7 @@ export const WINDOWS: Record<WindowId, WindowRisk> = {
   C: {
     maxLeverage: 3n,
     takerFeeBps: 12n,
+    makerFeeBps: 3n,
     houseHalfSpreadBps: 20n,
     priceLimitBps: 400n,
     fundingCapPpmPerHour: 100n,
@@ -33,6 +36,7 @@ export const WINDOWS: Record<WindowId, WindowRisk> = {
   D: {
     maxLeverage: 2n,
     takerFeeBps: 20n,
+    makerFeeBps: 5n,
     houseHalfSpreadBps: 35n,
     priceLimitBps: 300n,
     fundingCapPpmPerHour: null,

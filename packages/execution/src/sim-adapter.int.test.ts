@@ -125,7 +125,15 @@ describe.skipIf(vkUrl === undefined)('SimAdapter (integration with Valkey)', () 
     await expect(a.placeOrder({ ...req, market: 'NOPE-PERP', size: '1' })).rejects.toBeInstanceOf(
       ExecutionError,
     );
-    await expect(a.cancelOrder('o1')).rejects.toMatchObject({ code: 'not-supported' });
+    await expect(
+      a.placeOrder({
+        ...req,
+        market: 'ASML-PERP',
+        size: '1',
+        type: 'limit',
+        limitPrice: '700.005',
+      }),
+    ).rejects.toMatchObject({ code: 'invalid-price' });
     expect(await a.positions('nobody')).toEqual([]);
   });
 

@@ -20,6 +20,7 @@ export function stateSnapshot(state: EngineState): unknown {
     accounts: byKey(state.accounts).map(([id, a]) => ({ id, positions: byKey(a.positions) })),
     ledger: state.ledger.entries(),
     idempotency: byKey(state.idempotency),
+    orders: byKey(state.orders),
   };
 }
 

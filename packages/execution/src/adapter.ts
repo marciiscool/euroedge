@@ -9,7 +9,9 @@ export interface OrderRequest {
   readonly side: 'buy' | 'sell';
   /** Size in contracts, decimal string (e.g. "1.50"). */
   readonly size: string;
-  readonly type: 'market';
+  readonly type: 'market' | 'limit';
+  /** Limit price, decimal string (required for limit orders). */
+  readonly limitPrice?: string;
   readonly reduceOnly: boolean;
   /** Client-chosen key; a retry with the same key never fills twice. */
   readonly idempotencyKey: string;
@@ -25,14 +27,21 @@ export type Fill = Extract<OrderResult, { status: 'filled' }>;
 export interface ExecutionAdapter {
   placeOrder(o: OrderRequest): Promise<OrderAck>;
   closePosition(account: string, market: string, idempotencyKey: string): Promise<OrderAck>;
-  cancelOrder(id: string): Promise<void>;
+  /** Cancels a resting order by the idempotency key it was placed with. */
+  cancelOrder(account: string, orderId: string): Promise<OrderAck>;
   streamFills(cb: (f: Fill) => void): Unsubscribe;
   positions(account: string): Promise<PositionView[]>;
   account(account: string): Promise<AccountSnapshot | undefined>;
 }
 
 export class ExecutionError extends Error {
-  readonly code: 'timeout' | 'invalid-size' | 'unknown-market' | 'not-supported' | 'unavailable';
+  readonly code:
+    | 'timeout'
+    | 'invalid-size'
+    | 'invalid-price'
+    | 'unknown-market'
+    | 'not-supported'
+    | 'unavailable';
 
   constructor(code: ExecutionError['code'], message: string) {
     super(message);

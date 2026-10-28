@@ -94,7 +94,11 @@
       "min-notional": "Below the minimum order value of 10 USDC.",
       "insufficient-margin": "Not enough margin for this size at the current leverage cap.",
       "no-position": "There is no position to close.",
-      "circuit-breaker": "A circuit breaker is active: only reducing orders are allowed right now."
+      "circuit-breaker": "A circuit breaker is active: only reducing orders are allowed right now.",
+      "not-marketable": "The price has not reached your limit.",
+      "invalid-price": "Enter a valid limit price.",
+      "too-many-orders": "Too many open orders. Cancel some first.",
+      "unknown-order": "This order no longer exists."
     },
     "account": "Account",
     "equity": "Equity",
@@ -122,6 +126,17 @@
       "no-opens": "No new positions",
       "degraded": "Degraded: no new positions, wider spreads",
       "reduce-only": "Reduce-only"
-    }
+    },
+    "orderType": "Order type",
+    "type": {
+      "market": "Market",
+      "limit": "Limit"
+    },
+    "limitPrice": "Limit price",
+    "limitAccepted": "Limit order placed at {price}. It fills when the price reaches it.",
+    "orderCancelled": "Order cancelled.",
+    "cancelFailed": "The order could not be cancelled.",
+    "openOrders": "Open orders",
+    "cancelOrder": "Cancel"
   }
 }

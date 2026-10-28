@@ -44,3 +44,19 @@ test('switches between markets', async ({ page }) => {
     'page',
   );
 });
+
+test('places a resting limit order and cancels it', async ({ page }) => {
+  await page.goto('/en/trade');
+  await page.getByRole('button', { name: 'Start with play money' }).click();
+  await expect(page.getByText('Equity')).toBeVisible({ timeout: 15_000 });
+  await page.getByRole('radio', { name: 'Limit' }).click();
+  await page.getByLabel('Limit price').fill('1.00'); // far below the market: rests
+  await page.getByLabel('Size (contracts)').fill('0.10');
+  await page.getByRole('button', { name: /^Buy 0\.10 contracts$/ }).click();
+  await expect(page.locator('form [role=status]')).toContainText(/Limit order placed/);
+  const row = page.getByRole('row', { name: /ASML-PERP.*1\.00/ });
+  await expect(row).toBeVisible();
+  await row.getByRole('button', { name: 'Cancel' }).click();
+  await expect(page.getByText('Order cancelled.')).toBeVisible();
+  await expect(row).toHaveCount(0);
+});
