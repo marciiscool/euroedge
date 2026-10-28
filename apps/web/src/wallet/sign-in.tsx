@@ -7,6 +7,7 @@ import { Component, useEffect, useRef, useState, type ReactNode } from 'react';
 import { getAddress } from 'viem';
 import { api } from '@/lib/api';
 import { shortAccount } from '@/lib/format';
+import { Funds } from './funds';
 import { signInMessage } from './siwe-message';
 import { WalletProvider } from './wallet-provider';
 
@@ -88,13 +89,16 @@ function SignIn({ account, onChange }: Props) {
 
   if (account !== null)
     return (
-      <div className="flex items-center justify-between gap-2 text-xs">
-        <span className="font-mono text-muted-foreground" title={account}>
-          {t('signedInAs', { account: shortAccount(account) })}
-        </span>
-        <Button variant="ghost" size="sm" onClick={() => void signOut()}>
-          {t('signOut')}
-        </Button>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-2 text-xs">
+          <span className="font-mono text-muted-foreground" title={account}>
+            {t('signedInAs', { account: shortAccount(account) })}
+          </span>
+          <Button variant="ghost" size="sm" onClick={() => void signOut()}>
+            {t('signOut')}
+          </Button>
+        </div>
+        {/^0x[0-9a-f]{40}$/i.test(account) && <Funds account={account} />}
       </div>
     );
 

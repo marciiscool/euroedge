@@ -156,5 +156,32 @@
     "signedInAs": "Angemeldet als {account}",
     "signOut": "Abmelden",
     "signInUnavailable": "Die Anmeldung ist gerade nicht verfügbar."
+  },
+  "Funds": {
+    "title": "Wallet & Guthaben",
+    "walletBalance": "In deiner Wallet",
+    "claimable": "Frei abrufbar",
+    "amount": "Betrag (Test-USDC)",
+    "claim": "Abrufen",
+    "deposit": "Einzahlen",
+    "withdraw": "Auszahlen",
+    "gasless": "Keine Gasgebühren: Unser Relayer zahlt sie. Test-USDC haben keinen Wert.",
+    "notLive": "Ein- und Auszahlungen öffnen, sobald die Testnet-Verträge live sind.",
+    "wrongWallet": "Die aktive Adresse deiner Wallet ist nicht die, mit der du angemeldet bist.",
+    "nothingToClaim": "Gerade nichts mehr abrufbar (10.000 pro 24 Stunden, 100.000 insgesamt).",
+    "enterAmount": "Bitte einen Betrag eingeben.",
+    "notEnough": "So viel ist nicht in deiner Wallet.",
+    "claimed": "{amount} Test-USDC in deine Wallet abgerufen.",
+    "deposited": "{amount} eingezahlt. Der Betrag erscheint im Handelsguthaben, sobald der Block final ist (wenige Minuten).",
+    "withdrawRequested": "Auszahlung angefragt, warte auf Freigabe …",
+    "withdrawSent": "Auszahlung von {amount} an deine Wallet gesendet.",
+    "withdrawRejected": "Die Auszahlung wurde nicht freigegeben: Ist genug Guthaben frei (nicht als Margin gebunden)?",
+    "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
+    "viewTx": "Transaktion ansehen",
+    "withdrawals": "Letzte Auszahlungen",
+    "statusAuthorising": "Wird freigegeben",
+    "statusSending": "Wird gesendet",
+    "statusPaid": "Ausgezahlt",
+    "statusExpired": "Abgelaufen, zurückgebucht"
   }
 }

@@ -42,8 +42,20 @@ export function viemRelayChain(c: ChainConfig) {
       args: args(r),
       account,
     }) as const;
+  const withdraw = (r: RelayRequest) =>
+    ({
+      address: c.vault,
+      abi: VAULT_ABI,
+      functionName: 'withdraw',
+      args: [r.user, r.amount, r.nonce ?? 0n, r.deadline, r.signature],
+      account,
+    }) as const;
   const simulateCall = (kind: RelayKind, r: RelayRequest) =>
-    kind === 'claim' ? pub.simulateContract(claim(r)) : pub.simulateContract(deposit(r));
+    kind === 'claim'
+      ? pub.simulateContract(claim(r))
+      : kind === 'deposit'
+        ? pub.simulateContract(deposit(r))
+        : pub.simulateContract(withdraw(r));
 
   const chain: RelayChain = {
     async simulate(kind, r) {
@@ -66,7 +78,11 @@ export function viemRelayChain(c: ChainConfig) {
         const { request } = await pub.simulateContract(claim(r));
         return wallet.writeContract(request);
       }
-      const { request } = await pub.simulateContract(deposit(r));
+      if (kind === 'deposit') {
+        const { request } = await pub.simulateContract(deposit(r));
+        return wallet.writeContract(request);
+      }
+      const { request } = await pub.simulateContract(withdraw(r));
       return wallet.writeContract(request);
     },
   };

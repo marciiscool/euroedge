@@ -9,6 +9,10 @@ const ERRORS = [
   'error ZeroAmount()',
   'error InsufficientAllowance()',
   'error EnforcedPause()',
+  'error ExpiredAuthorisation(uint256 deadline)',
+  'error NonceUsed(uint256 nonce)',
+  'error InvalidAuthorisation()',
+  'error DailyLimitExceeded(uint256 requested, uint256 remaining)',
 ] as const;
 
 export const TOKEN_ABI = parseAbi([
@@ -17,5 +21,6 @@ export const TOKEN_ABI = parseAbi([
 ]);
 export const VAULT_ABI = parseAbi([
   'function depositWithPermit(address user, uint256 amount, uint256 deadline, bytes signature)',
+  'function withdraw(address user, uint256 amount, uint256 nonce, uint256 deadline, bytes signature)',
   ...ERRORS,
 ]);

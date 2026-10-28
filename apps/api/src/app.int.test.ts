@@ -221,6 +221,10 @@ describe.skipIf(dbUrl === undefined || vkUrl === undefined)('api (integration)',
     expect(out.cookies.find((x) => x.name === SESSION_COOKIE)?.value).toBe('');
   });
 
+  it('reports the chain as disabled until contracts are configured', async () => {
+    expect((await svc.http.inject({ url: '/api/chain' })).json()).toEqual({ enabled: false });
+  });
+
   it('withdrawals: request, list with authorisation; proofs against the posted root (M5)', async () => {
     const wallet = privateKeyToAccount(`0x${'44'.repeat(32)}`);
     const n = (await svc.http.inject({ url: '/api/auth/nonce' })).json<{ nonce: string }>();

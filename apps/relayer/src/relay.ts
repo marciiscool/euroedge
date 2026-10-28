@@ -8,9 +8,12 @@ export interface RelayRequest {
   /** Unix seconds. */
   readonly deadline: bigint;
   readonly signature: Hex;
+  /** Withdrawals only: the Vault nonce the engine signer authorised. */
+  readonly nonce?: bigint;
 }
 
-export type RelayKind = 'claim' | 'deposit';
+/** claim / deposit carry the user's signature; withdraw carries the engine signer's (M5-08). */
+export type RelayKind = 'claim' | 'deposit' | 'withdraw';
 
 export interface RelayChain {
   /** Simulates first and returns the revert reason instead of paying for a failing tx. */
