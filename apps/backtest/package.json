@@ -15,6 +15,15 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@types/luxon": "catalog:"
+  },
+  "dependencies": {
+    "@euroedge/calendar": "workspace:*",
+    "@euroedge/data-adapters": "workspace:*",
+    "@euroedge/fv-core": "workspace:*",
+    "@euroedge/shared": "workspace:*",
+    "luxon": "catalog:",
+    "zod": "catalog:"
   }
 }
