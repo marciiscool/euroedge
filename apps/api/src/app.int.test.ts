@@ -5,6 +5,8 @@ import { migrate } from '@euroedge/db';
 import { ExecutionError, type ExecutionAdapter } from '@euroedge/execution';
 import { createService, createValkey, type Redis, type Service } from '@euroedge/service-kit';
 import { CHANNELS, KEYS, STREAMS } from '@euroedge/shared';
+import { privateKeyToAccount } from 'viem/accounts';
+import { createSiweMessage } from 'viem/siwe';
 import { buildApi, SESSION_COOKIE } from './app.ts';
 
 const dbUrl = process.env['DATABASE_URL'];
@@ -179,6 +181,44 @@ describe.skipIf(dbUrl === undefined || vkUrl === undefined)('api (integration)',
       })
     ).json<{ account: null }>();
     expect(forged.account).toBeNull();
+  });
+
+  it('signs in with SIWE: single-use nonce, lower-case address account, play money once', async () => {
+    const wallet = privateKeyToAccount(`0x${'33'.repeat(32)}`);
+    const signIn = async () => {
+      const n = (await svc.http.inject({ url: '/api/auth/nonce' })).json<{
+        nonce: string;
+        domain: string;
+        chainId: number;
+      }>();
+      expect(n).toMatchObject({ domain: 'localhost:8080', chainId: 84532 });
+      const message = createSiweMessage({
+        domain: n.domain,
+        address: wallet.address,
+        uri: ORIGIN,
+        version: '1',
+        chainId: n.chainId,
+        nonce: n.nonce,
+        issuedAt: new Date(),
+      });
+      const body = { message, signature: await wallet.signMessage({ message }) };
+      return { body, res: await post('/api/auth/siwe', body) };
+    };
+    const first = await signIn();
+    expect(first.res.json()).toEqual({ account: wallet.address.toLowerCase() });
+    expect((await post('/api/auth/siwe', first.body)).statusCode).toBe(401); // nonce used
+    await signIn();
+    const deposits = (await valkey.xrange(STREAMS.engineInput, '-', '+')) as [string, string[]][];
+    const mine = deposits.filter(([, f]) => (f[1] ?? '').includes(wallet.address.toLowerCase()));
+    expect(mine).toHaveLength(1);
+    const c = first.res.cookies.find((x) => x.name === SESSION_COOKIE);
+    const cookie = `${SESSION_COOKIE}=${c?.value ?? ''}`;
+    const s = (await svc.http.inject({ url: '/api/session', headers: { cookie } })).json<{
+      account: string;
+    }>();
+    expect(s.account).toBe(wallet.address.toLowerCase());
+    const out = await post('/api/auth/logout', {}, cookie);
+    expect(out.cookies.find((x) => x.name === SESSION_COOKIE)?.value).toBe('');
   });
 
   it('guards mutating requests: same origin, JSON, authentication', async () => {

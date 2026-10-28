@@ -15,6 +15,7 @@ import {
   STREAMS,
   type DataTier,
 } from '@euroedge/shared';
+import { issueNonce, signatureVerifier, valkeyNonces, verifySiwe } from './siwe.ts';
 import { registerSocket } from './ws.ts';
 
 export interface ApiDeps {
@@ -33,6 +34,9 @@ export interface ApiDeps {
     readonly DATA_TIER: DataTier;
     readonly DEPLOY_ENV: string;
     readonly DEV_FAUCET_USDC: number;
+    readonly CHAIN_ID?: number;
+    readonly SIWE_DOMAIN?: string;
+    readonly BASE_SEPOLIA_RPC_URL?: string;
   };
 }
 
@@ -73,6 +77,10 @@ const orderBody = z
     path: ['limitPrice'],
   });
 const closeBody = z.object({ idempotencyKey: z.string().min(8).max(64) });
+const siweBody = z.object({
+  message: z.string().min(1).max(4096),
+  signature: z.string().min(4).max(4096),
+});
 const loginBody = z.object({
   name: z
     .string()
@@ -104,6 +112,33 @@ export async function buildApi(app: FastifyInstance, deps: ApiDeps): Promise<voi
     }
   });
 
+  /** Credits play money once per account (dev login, or SIWE in sim). */
+  const creditPlayMoney = async (account: string) => {
+    if ((await valkey.set(`devlogin:${account}`, '1', 'NX')) !== 'OK') return;
+    await valkey.xadd(
+      STREAMS.engineInput,
+      'MAXLEN',
+      '~',
+      String(ENGINE_STREAM_MAXLEN),
+      '*',
+      'input',
+      encodeEngineCommand({
+        type: 'DevDeposit',
+        account,
+        amount: BigInt(config.DEV_FAUCET_USDC) * 1_000_000n,
+      }),
+    );
+  };
+  const startSession = (reply: FastifyReply, account: string) =>
+    reply.setCookie(SESSION_COOKIE, account, {
+      path: '/',
+      httpOnly: true,
+      sameSite: 'lax',
+      secure,
+      signed: true,
+      maxAge: 30 * 86_400,
+    });
+
   app.get('/api/session', (req) => ({
     account: accountOf(req) ?? null,
     devLogin: config.DEV_LOGIN,
@@ -116,37 +151,50 @@ export async function buildApi(app: FastifyInstance, deps: ApiDeps): Promise<voi
     if (!body.success) return sendError(reply, 'bad-request', 'name: 1–24 chars of a-z, 0-9, -');
     const account =
       accountOf(req) ?? `dev-${body.data.name ?? 'trader'}-${randomBytes(3).toString('hex')}`;
-    // Credit play money once per dev account.
-    if ((await valkey.set(`devlogin:${account}`, '1', 'NX')) === 'OK') {
-      await valkey.xadd(
-        STREAMS.engineInput,
-        'MAXLEN',
-        '~',
-        String(ENGINE_STREAM_MAXLEN),
-        '*',
-        'input',
-        encodeEngineCommand({
-          type: 'DevDeposit',
-          account,
-          amount: BigInt(config.DEV_FAUCET_USDC) * 1_000_000n,
-        }),
-      );
-    }
-    reply.setCookie(SESSION_COOKIE, account, {
-      path: '/',
-      httpOnly: true,
-      sameSite: 'lax',
-      secure,
-      signed: true,
-      maxAge: 30 * 86_400,
-    });
+    await creditPlayMoney(account);
+    startSession(reply, account);
     return { account };
   });
 
-  app.post('/api/dev/logout', (_req, reply) => {
+  const siwe = {
+    domain: config.SIWE_DOMAIN || new URL(config.PUBLIC_ORIGIN).host,
+    origin: new URL(config.PUBLIC_ORIGIN).origin,
+    chainId: config.CHAIN_ID ?? 84532,
+    rpcUrl: config.BASE_SEPOLIA_RPC_URL,
+  };
+  const nonces = valkeyNonces(valkey);
+  const verify = signatureVerifier(siwe);
+
+  app.get('/api/auth/nonce', async (_req, reply) => {
+    reply.header('cache-control', 'no-store');
+    return { nonce: await issueNonce(nonces), domain: siwe.domain, chainId: siwe.chainId };
+  });
+
+  app.post('/api/auth/siwe', async (req, reply) => {
+    const body = siweBody.safeParse(req.body);
+    if (!body.success) return sendError(reply, 'bad-request', 'expected { message, signature }');
+    const r = await verifySiwe(
+      siwe,
+      nonces,
+      verify,
+      body.data.message,
+      body.data.signature,
+      new Date(),
+    );
+    if (!r.ok) return sendError(reply, 'unauthenticated', r.reason);
+    const account = r.address.toLowerCase();
+    // Play money until on-chain deposits exist (M5), sim only (ADR-0020).
+    if (config.DATA_TIER === 'sim') await creditPlayMoney(account);
+    startSession(reply, account);
+    return { account };
+  });
+
+  const logout = (_req: FastifyRequest, reply: FastifyReply) => {
     reply.clearCookie(SESSION_COOKIE, { path: '/' });
     return { account: null };
-  });
+  };
+  app.post('/api/auth/logout', logout);
+  app.post('/api/dev/logout', logout);
 
   const marketList = (deps.markets ?? []).map(({ id, displayName, kind }) => ({
     id,

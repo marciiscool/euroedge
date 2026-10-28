@@ -12,6 +12,11 @@ export const configShape = {
   SESSION_SECRET: z.string().default(''),
   /** Play money credited once per dev account. */
   DEV_FAUCET_USDC: z.coerce.number().int().positive().default(10_000),
+  /** SIWE binding (M6-01): chain, and the domain; empty = the host of PUBLIC_ORIGIN. */
+  CHAIN_ID: z.coerce.number().int().positive().default(84532),
+  SIWE_DOMAIN: z.string().default(''),
+  /** Enables ERC-1271/6492 smart-wallet sign-in; without it only EOAs verify. */
+  BASE_SEPOLIA_RPC_URL: z.string().default(''),
 } as const;
 
 export type ApiConfig = ReturnType<typeof loadConfig>;

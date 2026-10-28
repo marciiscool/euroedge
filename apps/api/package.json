@@ -17,6 +17,7 @@
     "@fastify/cookie": "catalog:",
     "@fastify/websocket": "catalog:",
     "pg": "catalog:",
+    "viem": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
