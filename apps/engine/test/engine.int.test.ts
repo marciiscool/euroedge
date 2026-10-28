@@ -68,10 +68,12 @@ describe.skipIf(dbUrl === undefined || vkUrl === undefined)('engine service (int
     });
     for (let i = 0; i < 50 && results.length === 0; i++)
       await new Promise((r) => setTimeout(r, 100));
+    // windows.yaml, Window A (ADR-0019 proposals): h = 5 bp + ⌈σ 500 ppm × 10 %⌉ = 550 ppm, plus
+    // ⌈impact⌉ 1 ppm for 700 USDC → ask ⌈70 000 × 1.000551⌉ = 700.39.
     expect(results[0]).toMatchObject({
       requestId: 'req-1',
       status: 'filled',
-      fill: { price: '700.35', size: '1.00' },
+      fill: { price: '700.39', size: '1.00' },
     });
     const snap = JSON.parse((await client.get(KEYS.account('it'))) ?? '{}') as {
       positions: { size: string }[];
