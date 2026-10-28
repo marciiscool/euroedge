@@ -8,7 +8,8 @@
     "start": "node --env-file-if-exists=../../.env src/main.ts",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:chain": "ANVIL_E2E=1 vitest run test/chain-e2e.test.ts"
   },
   "dependencies": {
     "@euroedge/service-kit": "workspace:*",
