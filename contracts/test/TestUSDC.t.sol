@@ -57,12 +57,12 @@ contract TestUSDCTest is Test {
         vm.stopPrank();
         // A new 24 h window opens; the lifetime cap still binds after 100 000.
         for (uint256 i = 0; i < 9; i++) {
-            vm.warp(block.timestamp + 24 hours);
+            vm.warp(vm.getBlockTimestamp() + 24 hours);
             vm.prank(alice);
             token.claim(10_000e6);
         }
         assertEq(token.balanceOf(alice), 100_000e6);
-        vm.warp(block.timestamp + 24 hours);
+        vm.warp(vm.getBlockTimestamp() + 24 hours);
         assertEq(token.claimable(alice), 0);
     }
 
@@ -82,7 +82,7 @@ contract TestUSDCTest is Test {
     }
 
     function test_claimForWithEoaSignature() public {
-        uint256 deadline = block.timestamp + 1 hours;
+        uint256 deadline = vm.getBlockTimestamp() + 1 hours;
         bytes memory sig = _sign(
             alicePk, _digest(keccak256(abi.encode(CLAIM_TYPEHASH, alice, 500e6, 0, deadline)))
         );
@@ -94,7 +94,7 @@ contract TestUSDCTest is Test {
     }
 
     function test_claimForRejectsWrongSignerAndExpiry() public {
-        uint256 deadline = block.timestamp + 1 hours;
+        uint256 deadline = vm.getBlockTimestamp() + 1 hours;
         bytes memory sig =
             _sign(0xB0B, _digest(keccak256(abi.encode(CLAIM_TYPEHASH, alice, 500e6, 0, deadline))));
         vm.expectRevert(TestUSDC.InvalidSignature.selector);
@@ -105,7 +105,7 @@ contract TestUSDCTest is Test {
     }
 
     function test_permitWithEoaBothOverloads() public {
-        uint256 deadline = block.timestamp + 1 hours;
+        uint256 deadline = vm.getBlockTimestamp() + 1 hours;
         bytes32 d = _digest(keccak256(abi.encode(PERMIT_TYPEHASH, alice, vault, 7e6, 0, deadline)));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(alicePk, d);
         token.permit(alice, vault, 7e6, deadline, v, r, s);
@@ -119,7 +119,7 @@ contract TestUSDCTest is Test {
     function test_permitAndClaimForWithSmartWallet() public {
         MockSmartWallet wallet = new MockSmartWallet(alice);
         address w = address(wallet);
-        uint256 deadline = block.timestamp + 1 hours;
+        uint256 deadline = vm.getBlockTimestamp() + 1 hours;
         token.claimFor(
             w,
             50e6,
@@ -148,7 +148,7 @@ contract TestUSDCTest is Test {
         b = bound(b, 1, 10_000e6);
         vm.prank(alice);
         token.claim(a);
-        vm.warp(block.timestamp + gap);
+        vm.warp(vm.getBlockTimestamp() + gap);
         uint256 room = token.claimable(alice);
         vm.prank(alice);
         if (b > room) vm.expectRevert();
