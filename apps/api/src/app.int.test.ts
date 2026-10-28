@@ -221,6 +221,19 @@ describe.skipIf(dbUrl === undefined || vkUrl === undefined)('api (integration)',
     expect(out.cookies.find((x) => x.name === SESSION_COOKIE)?.value).toBe('');
   });
 
+  it('serves candles of the mark with volume from fills', async () => {
+    const r = await svc.http.inject({ url: '/api/markets/ASML-PERP/candles?interval=1m' });
+    expect(r.statusCode).toBe(200);
+    const body = r.json<{
+      candles: { open: string; high: string; low: string; close: string; volumeLots: string }[];
+    }>();
+    expect(body.candles.length).toBeGreaterThan(0);
+    expect(body.candles[0]).toMatchObject({ open: '700', close: '700', volumeLots: '0' });
+    expect(
+      (await svc.http.inject({ url: '/api/markets/ASML-PERP/candles?interval=2m' })).statusCode,
+    ).toBe(400);
+  });
+
   it('reports the chain as disabled until contracts are configured', async () => {
     expect((await svc.http.inject({ url: '/api/chain' })).json()).toEqual({ enabled: false });
   });

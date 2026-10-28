@@ -68,7 +68,7 @@
     },
     "anchor": "Anchor {price} ({time})",
     "chartLabel": "Mark price, fair value and fair-value band",
-    "chartDescription": "Line chart of the mark price with the fair value and its confidence band over the last two hours.",
+    "chartDescription": "Candlestick chart of the mark price with traded volume, and the fair-value band as dashed lines.",
     "orderTicket": "Order ticket",
     "side": "Side",
     "buy": "Buy",
@@ -155,7 +155,8 @@
     "signInFailed": "Sign-in failed. Please try again.",
     "signedInAs": "Signed in as {account}",
     "signOut": "Sign out",
-    "signInUnavailable": "Sign-in is unavailable right now."
+    "signInUnavailable": "Sign-in is unavailable right now.",
+    "chartIntervals": "Chart timeframe"
   },
   "Funds": {
     "title": "Wallet & funds",
@@ -170,7 +171,7 @@
     "wrongWallet": "Your wallet's active address is not the one you signed in with.",
     "nothingToClaim": "Nothing left to claim right now (10,000 per 24 hours, 100,000 in total).",
     "enterAmount": "Enter an amount.",
-    "notEnough": "Your wallet holds less than that.",
+    "notEnough": "Your wallet holds less than that: deposit at most what is shown under “In your wallet”.",
     "claimed": "Claimed {amount} Test USDC to your wallet.",
     "deposited": "Deposited {amount}. It reaches your trading balance once the block is final (a few minutes).",
     "withdrawRequested": "Withdrawal requested, waiting for authorisation…",
@@ -182,6 +183,7 @@
     "statusAuthorising": "Being authorised",
     "statusSending": "Sending",
     "statusPaid": "Paid out",
-    "statusExpired": "Expired, returned"
+    "statusExpired": "Expired, returned",
+    "claimFirst": "Your wallet is empty: click Claim first to get free Test USDC, then deposit."
   }
 }

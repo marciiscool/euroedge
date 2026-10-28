@@ -83,7 +83,7 @@ export function Terminal() {
       />
       <div className="grid flex-1 grid-cols-1 lg:grid-cols-[1fr_320px]">
         <div className="flex min-w-0 flex-col">
-          <PriceChart key={MARKET} market={MARKET} fv={fv} />
+          <PriceChart key={MARKET} market={MARKET} fv={fv} lotSize={market?.lotSize} />
           <Provenance fv={fv} />
           <Positions account={shown} onClosed={refreshAccount} />
         </div>
