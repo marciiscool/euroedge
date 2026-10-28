@@ -13,3 +13,5 @@ data/sample/manifest.json
 # Vendored third-party skills stay byte-identical to their pinned upstream.
 .claude/skills/*/
 packages/calendar/src/generated/
+contracts/cache
+contracts/broadcast
