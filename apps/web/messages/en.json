@@ -102,7 +102,9 @@
       "would-trigger": "The trigger would already be reached at the current mark.",
       "house-one-sided": "The house is not taking new positions on this side right now. The other side and reducing orders work.",
       "house-inventory": "The house position limit is reached: only reducing orders right now.",
-      "house-loss-limit": "The house's daily loss limit is reached: only reducing orders until the next day (UTC)."
+      "house-loss-limit": "The house's daily loss limit is reached: only reducing orders until the next day (UTC).",
+      "would-take": "Post-only: this limit would trade at once, so it was not placed.",
+      "invalid-order": "This combination of order options is not allowed."
     },
     "account": "Account",
     "equity": "Equity",

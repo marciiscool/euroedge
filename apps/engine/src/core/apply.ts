@@ -145,7 +145,12 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
     }
 
     case 'PlaceOrder':
-      if (input.limitPrice !== undefined || input.stop !== undefined)
+      if (
+        input.limitPrice !== undefined ||
+        input.stop !== undefined ||
+        input.timeInForce !== undefined ||
+        input.postOnly !== undefined
+      )
         return placeRestingOrder(state, {
           requestId: input.requestId,
           idempotencyKey: input.idempotencyKey,
@@ -156,6 +161,8 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
           limitPrice: input.limitPrice ?? null,
           stop: input.stop ?? null,
           ocoGroup: input.ocoGroup ?? null,
+          timeInForce: input.timeInForce ?? 'gtc',
+          postOnly: input.postOnly ?? false,
         });
       return executeOrder(state, {
         requestId: input.requestId,

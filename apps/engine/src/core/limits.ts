@@ -1,6 +1,7 @@
 import { abs } from '@euroedge/fixed';
 import type { EngineOutput } from './outputs.ts';
 import { decide, outcomeOutput, type OrderRequest } from './orders.ts';
+import { executablePrice } from './quote.ts';
 import type {
   EngineState,
   OrderOutcome,
@@ -19,6 +20,8 @@ export interface RestingRequest extends Omit<OrderRequest, 'qty' | 'limitPrice' 
   readonly limitPrice: bigint | null;
   readonly stop: { readonly price: bigint; readonly kind: 'stop' | 'take-profit' } | null;
   readonly ocoGroup: string | null;
+  readonly timeInForce: 'gtc' | 'ioc' | 'fok';
+  readonly postOnly: boolean;
 }
 
 /**
@@ -28,6 +31,13 @@ export interface RestingRequest extends Omit<OrderRequest, 'qty' | 'limitPrice' 
 export function stopTrigger(qty: bigint, stop: NonNullable<RestingRequest['stop']>): StopTrigger {
   const buy = qty > 0n;
   return { price: stop.price, triggersOn: buy === (stop.kind === 'stop') ? 'rise' : 'fall' };
+}
+
+/** Would a limit at `limit` take the house quote now? (Post-only check, M4-06.) */
+function crosses(state: EngineState, o: RestingRequest, limit: bigint): boolean {
+  const m = state.markets.get(o.market);
+  const price = m === undefined ? undefined : executablePrice(m, o.qty, state.ts);
+  return price !== undefined && (o.qty > 0n ? price <= limit : price >= limit);
 }
 
 const fired = (t: StopTrigger, mark: bigint): boolean =>
@@ -65,8 +75,16 @@ export function placeRestingOrder(state: EngineState, o: RestingRequest): Engine
   if (seen !== undefined) return [outcomeOutput(o, seen, true)];
   let outcome: OrderOutcome;
   let stop: StopTrigger | null = null;
+  const immediate = o.timeInForce !== 'gtc';
   if ((o.limitPrice !== null && o.limitPrice <= 0n) || (o.stop !== null && o.stop.price <= 0n)) {
     outcome = reject('invalid-price');
+  } else if (o.limitPrice === null ? immediate || o.postOnly : o.postOnly && immediate) {
+    // IOC/FOK and post-only need a limit price; post-only cannot also be immediate.
+    outcome = reject('invalid-order');
+  } else if (o.stop !== null && immediate) {
+    outcome = reject('invalid-order');
+  } else if (o.postOnly && o.limitPrice !== null && crosses(state, o, o.limitPrice)) {
+    outcome = reject('would-take');
   } else if (o.stop !== null) {
     stop = stopTrigger(o.qty, o.stop);
     const why = stopRejection(state, o, stop);
@@ -76,7 +94,7 @@ export function placeRestingOrder(state: EngineState, o: RestingRequest): Engine
   } else {
     outcome = reject('invalid-price');
   }
-  if (outcome.status === 'rejected' && outcome.reason === 'not-marketable') {
+  if (outcome.status === 'rejected' && outcome.reason === 'not-marketable' && !immediate) {
     const open = [...state.orders.values()].filter((x) => x.account === o.account).length;
     if (open >= MAX_RESTING_PER_ACCOUNT) outcome = reject('too-many-orders');
     else {

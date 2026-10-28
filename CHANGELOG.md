@@ -26,6 +26,11 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Time in force and post-only for limit orders (M4-05/06):
+  - `timeInForce: ioc | fok` fills at once or is rejected and never rests; with full fills only, FOK behaves like IOC.
+  - `postOnly` rejects a limit that would take at placement (`would-take`), otherwise it rests as a maker.
+  - Invalid combinations are rejected as `invalid-order`.
+  - `PlaceOrder` v4; older logs decode as GTC.
 - Withdrawal reservation (M4-18, logic only):
   - `RequestWithdrawal` moves free collateral (equity − initial margin, at most cash) from the user to `vault-pending`, with a sequential EIP-712 nonce and a 1-hour deadline (proposal).
   - `WithdrawalExecuted` (vault-pending → external, net deposits fall) or `WithdrawalExpired` (after the deadline, back to the user) settles it exactly once.
@@ -92,6 +97,10 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - Formula: `k = ⌈(T·MM·10⁴ − E·10⁸) / (mark·tv·(T·mm − pen·10⁴))⌉` with `T = 10⁴ + buffer`.
   - It falls back to full liquidation if that is impossible or would leave less than the minimum notional.
   - New `partialLiquidationBufferBps: 2500` in `windows.yaml` (proposed); v1 logs keep full liquidation.
+
+#### Fixed
+
+- State snapshots no longer fail on a market that is listed but not yet priced (M4-19).
 
 ### M3 — Full fv-core (in progress, on `integration/m3`)
 

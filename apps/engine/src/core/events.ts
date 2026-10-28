@@ -118,6 +118,13 @@ export type EngineInput =
       readonly stop?: { readonly price: Ticks; readonly kind: 'stop' | 'take-profit' };
       /** Orders of one account sharing a group are one-cancels-other (TP/SL). */
       readonly ocoGroup?: string;
+      /**
+       * Limit orders (M4-05/06): `gtc` rests (default); `ioc` / `fok` fill at once or are
+       * rejected, never rest. With full fills only, FOK and IOC behave the same.
+       */
+      readonly timeInForce?: 'gtc' | 'ioc' | 'fok';
+      /** Limit orders: rejected instead of taking if marketable at placement (maker only). */
+      readonly postOnly?: boolean;
     }
   | {
       readonly type: 'CancelOrder';
