@@ -61,6 +61,32 @@ describe('limit orders (M4)', () => {
     });
   });
 
+  it('keeps resting orders through a circuit breaker and fills them once it clears', () => {
+    const h = Harness.booted();
+    h.run(limit('alice', 'buy', 100n, 69_500n, 'OPEN'));
+    // Degraded: ask = ceil(694.00 × 1.001) = 694.70 ≤ 695.00 would cross, but no new exposure.
+    for (const breaker of ['degraded', 'no-opens', 'reduce-only'] as const) {
+      const out = h.run({ ...data(69_400n), breaker } as EngineInput);
+      expect(kinds(out), breaker).toEqual([]);
+      expect(h.state.orders.size).toBe(1);
+    }
+    const fill = h.run(data(69_400n)).find((o) => o.type === 'OrderFilled');
+    expect(fill).toMatchObject({ fill: { price: 69_435n, fee: 69_435n } }); // maker 1 bp
+    expect(h.state.orders.size).toBe(0);
+  });
+
+  it('fills a reducing resting order even while a breaker is active', () => {
+    const h = Harness.booted();
+    h.run(order('alice', 'buy', 100n));
+    h.run({ ...limit('alice', 'sell', 100n, 70_500n, 'TP'), reduceOnly: true } as EngineInput);
+    // bid = floor(706.00 × 0.9995) = 705.64 ≥ 705.00
+    const out = h.run({ ...data(70_600n), breaker: 'reduce-only' } as EngineInput);
+    expect(out.find((o) => o.type === 'OrderFilled')).toMatchObject({
+      fill: { side: 'sell', price: 70_564n },
+    });
+    expect(h.state.accounts.get('alice')?.positions.get('ASML-PERP')?.lots).toBe(0n);
+  });
+
   it('cancels a resting order that fails its checks at trigger time', () => {
     const h = Harness.booted();
     // 10 000 USDC equity, 5x: 70 contracts at 695 ≈ 48 650 USDC fits at placement-time limits…

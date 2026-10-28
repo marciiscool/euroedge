@@ -20,6 +20,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - A marketable limit fills at once as a taker; otherwise it rests GTC and fills, full fills only, when the house quote reaches it.
   - Resting orders are matched oldest first on every market-data update and pay the maker fee.
   - A resting order that fails its checks at trigger time is cancelled with the reason.
+  - A circuit breaker does not cancel resting orders: those adding exposure wait until it clears, and reducing ones still fill.
   - Cancel by order id; at most 50 resting orders per account.
   - `PlaceOrder` v2 and a new `CancelOrder` input; open orders appear in the account snapshot.
   - API: `type`/`limitPrice` on `POST /api/orders`, and `DELETE /api/orders/:id`.
