@@ -78,15 +78,19 @@ describe('bootstrapInputs', () => {
     const state = createState();
     const seq = new Sequencer(state, log, () => 1);
     const first = bootstrapInputs(state, markets, windows, 'sim');
-    expect(first.map((i) => i.type)).toEqual(['GenesisCapital', 'MarketListed']);
+    expect(first.map((i) => i.type)).toEqual(['GenesisCapital', 'HouseRiskParams', 'MarketListed']);
     await seq.processInputs(first);
     expect(bootstrapInputs(state, markets, windows, 'sim')).toEqual([]);
     const changed = { ...windows, maintenanceMarginBps: { stock: 1200, basket: 500 } };
     expect(bootstrapInputs(state, markets, changed, 'sim').map((i) => i.type)).toEqual([
       'MarketListed',
     ]);
+    const limit = { ...windows, houseDailyLossLimitUsdc: 1_000_000 };
+    expect(bootstrapInputs(state, markets, limit, 'sim')).toEqual([
+      { type: 'HouseRiskParams', dailyLossLimit: 1_000_000n * USDC },
+    ]);
     expect(bootstrapInputs(createState(), markets, windows, 'live-min').map((i) => i.type)).toEqual(
-      ['MarketListed'],
+      ['HouseRiskParams', 'MarketListed'],
     );
   });
 });

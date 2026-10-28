@@ -36,6 +36,8 @@ export interface WindowRisk {
   readonly impactRef: Usdc;
   /** α in halves: 3 = 1.5, 4 = 2. */
   readonly impactAlphaHalves: bigint;
+  /** House inventory (µUSDC at FV) past which the market is reduce-only; null = none (M4-14). */
+  readonly inventoryHardCap: Usdc | null;
 }
 
 export interface FlowParams {
@@ -123,6 +125,12 @@ export type EngineInput =
       readonly account: AccountId;
       /** The idempotency key the order was placed with. */
       readonly orderId: string;
+    }
+  | {
+      /** Global house risk parameters (M4-14, ADR-0019), from windows.yaml at startup. */
+      readonly type: 'HouseRiskParams';
+      /** Max house loss (µUSDC) per UTC day before global reduce-only; null = none. */
+      readonly dailyLossLimit: Usdc | null;
     }
   | {
       readonly type: 'ClosePosition';

@@ -105,7 +105,14 @@ export function placeRestingOrder(state: EngineState, o: RestingRequest): Engine
  * circuit breaker blocking new exposure for now (brief §6.5). Breakers are temporary, so
  * the order survives and can fill once the breaker clears.
  */
-const KEEP_RESTING: ReadonlySet<RejectReason> = new Set(['not-marketable', 'circuit-breaker']);
+const KEEP_RESTING: ReadonlySet<RejectReason> = new Set([
+  'not-marketable',
+  'circuit-breaker',
+  // House risk limits are temporary too (M4-14).
+  'house-one-sided',
+  'house-inventory',
+  'house-loss-limit',
+]);
 
 const cancelled = (r: RestingOrder, reason: RejectReason | 'oco'): EngineOutput[] => [
   {

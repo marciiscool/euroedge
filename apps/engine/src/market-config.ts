@@ -2,6 +2,8 @@ import { parseDecimal, usdc } from '@euroedge/fixed';
 import type { MarketConfig, WindowsFile } from '@euroedge/shared';
 import type { EngineInput, WindowId, WindowRisk } from './core/events.ts';
 
+const USDC_UNITS = 1_000_000n;
+
 /**
  * Config enters the engine only as logged input events (ADR-0001): markets.yaml +
  * windows.yaml → MarketListed.
@@ -27,6 +29,8 @@ export function marketListedInput(
       impactBps: BigInt(p.impactBps),
       impactRef: usdc(BigInt(p.impactRefUsdc) * 1_000_000n),
       impactAlphaHalves: p.impactAlpha === '2' ? 4n : 3n,
+      inventoryHardCap:
+        p.inventoryHardCapUsdc === null ? null : usdc(BigInt(p.inventoryHardCapUsdc) * USDC_UNITS),
     };
   };
   return {

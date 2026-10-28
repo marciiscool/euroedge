@@ -69,7 +69,10 @@ export type RejectReason =
   | 'invalid-price'
   | 'too-many-orders'
   | 'unknown-order'
-  | 'would-trigger';
+  | 'would-trigger'
+  | 'house-one-sided'
+  | 'house-inventory'
+  | 'house-loss-limit';
 
 export interface Fill {
   readonly market: MarketId;
@@ -119,6 +122,13 @@ export interface EngineState {
   genesisCapital: { readonly house: bigint; readonly insurance: bigint } | null;
   /** CB7 active: global reduce-only (no new exposure in any market). */
   capitalFloor: boolean;
+  /** Daily house loss limit (M4-14): reference equity of the current UTC day, and the halt. */
+  readonly houseRisk: {
+    dailyLossLimit: bigint | null;
+    day: bigint;
+    dayStartEquity: bigint;
+    halted: boolean;
+  };
   /** Genesis + deposits − executed withdrawals, tracked independently of the ledger (Invariant 1). */
   netDeposits: bigint;
   readonly markets: Map<MarketId, MarketState>;
@@ -137,6 +147,7 @@ export function createState(): EngineState {
     genesis: false,
     genesisCapital: null,
     capitalFloor: false,
+    houseRisk: { dailyLossLimit: null, day: 0n, dayStartEquity: 0n, halted: false },
     netDeposits: 0n,
     markets: new Map(),
     accounts: new Map(),

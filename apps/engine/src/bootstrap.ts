@@ -29,6 +29,12 @@ export function bootstrapInputs(
       source: 'dev',
     });
   }
+  const limit =
+    windows.houseDailyLossLimitUsdc === null
+      ? null
+      : usdc(BigInt(windows.houseDailyLossLimitUsdc) * 1_000_000n);
+  if (state.houseRisk.dailyLossLimit !== limit)
+    inputs.push({ type: 'HouseRiskParams', dailyLossLimit: limit });
   for (const m of markets.filter((x) => x.enabled)) {
     const desired = marketListedInput(m, windows);
     const cur = state.markets.get(m.id);

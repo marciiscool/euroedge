@@ -186,6 +186,8 @@ export const windowParamsSchema = z.object({
   impactBps: bps,
   /** x_ref, whole USDC. */
   impactRefUsdc: z.number().int().min(1),
+  /** House inventory (whole USDC at FV) past which the market is reduce-only (M4-14); null = none. */
+  inventoryHardCapUsdc: z.number().int().min(1).nullable(),
   /** α of the convex impact (ADR-0003: 1.5–2; integer maths supports these two). */
   impactAlpha: z.enum(['1.5', '2']),
   fundingOiCapUsdc: z.number().int().min(0),
@@ -205,6 +207,8 @@ export const windowsFileSchema = z.object({
   liquidationPenaltyBps: z.object({ stock: bps, basket: bps }),
   /** Partial liquidation restores equity to MM × (1 + buffer) (M4). */
   partialLiquidationBufferBps: bps,
+  /** Max house loss (whole USDC) per UTC day before global reduce-only (M4-14); null = none. PROPOSED, ADR-0019. */
+  houseDailyLossLimitUsdc: z.number().int().min(1).nullable(),
   /** Flow shift (ADR-0003 step 4). PROPOSED values, ADR-0019. */
   flow: z.object({
     /** κ: quote shift in ppm per 1 000 000 USDC of decayed net user flow. */

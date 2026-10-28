@@ -3,6 +3,7 @@ import { averageEntry, liquidationPrice } from '@euroedge/risk-core';
 import type { AccountSnapshot, MarketSnapshot, OrderResult } from '@euroedge/shared';
 import { accountEquity, accountMaintenance, positionUpnl } from './core/accounting.ts';
 import type { EngineOutput } from './core/outputs.ts';
+import { inventoryLimit } from './core/house-risk.ts';
 import { marketQuote } from './core/quote.ts';
 import type { EngineState } from './core/state.ts';
 
@@ -36,6 +37,8 @@ export function marketSnapshot(state: EngineState, id: string): MarketSnapshot |
     lotSize: m.units.lotSize,
     minNotional: usdcStr(m.minNotional),
     capitalFloor: state.capitalFloor,
+    houseLossLimit: state.houseRisk.halted,
+    inventoryLimit: inventoryLimit(m),
     ladder: q.ladder.map((r) => ({
       notional: usdcStr(r.notional),
       bid: px(r.bid),

@@ -23,6 +23,7 @@ windows:
       impactBps: 5,
       impactRefUsdc: 100000,
       impactAlpha: '1.5',
+      inventoryHardCapUsdc: 4000000,
     }
   B:
     {
@@ -40,6 +41,7 @@ windows:
       impactBps: 10,
       impactRefUsdc: 100000,
       impactAlpha: '1.5',
+      inventoryHardCapUsdc: 2000000,
     }
   C:
     {
@@ -57,6 +59,7 @@ windows:
       impactBps: 20,
       impactRefUsdc: 100000,
       impactAlpha: '1.5',
+      inventoryHardCapUsdc: 1000000,
     }
   # D: ±min(3 %, 1/maxLev); skew add-on on fees arrives in M4.
   D:
@@ -75,6 +78,7 @@ windows:
       impactBps: 30,
       impactRefUsdc: 100000,
       impactAlpha: '1.5',
+      inventoryHardCapUsdc: 1000000,
     }
 maintenanceMarginBps: { stock: 1000, basket: 500 }
 liquidationPenaltyBps: { stock: 100, basket: 50 }
@@ -82,6 +86,10 @@ liquidationPenaltyBps: { stock: 100, basket: 50 }
 # MM × (1 + buffer). Proposed default 25 %, founder to confirm.
 partialLiquidationBufferBps: 2500
 fundingInterestBpsPerYear: 500
+# House risk (ADR-0003 §7, M4-14). Past inventoryCapUsdc the house quotes one side only; past
+# inventoryHardCapUsdc the market is reduce-only. A house loss above the daily limit (UTC day)
+# makes every market reduce-only until the next day. PROPOSED values (ADR-0019).
+houseDailyLossLimitUsdc: 2500000
 # Flow shift (ADR-0003 step 4): quotes (never FV, index or mark) shift with decayed net user
 # flow, capped at ±h/2. PROPOSED values (ADR-0019), founder to confirm.
 flow: { kappaPpmPerMUsdc: 100, tauSec: 300, walletCapUsdc: 250000, walletWindowSec: 60 }
