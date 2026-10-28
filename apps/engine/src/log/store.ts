@@ -1,6 +1,7 @@
 import pg from 'pg';
 import type { EngineEvent } from '../core/events.ts';
 import { chainHash, encodeEvent, GENESIS_HASH, type ChainedRecord } from './codec.ts';
+import type { Snapshot } from './restore.ts';
 
 // Session-level advisory lock: exactly one engine writer per database (ADR-0001).
 const WRITER_LOCK_KEY = 7_340_100;
@@ -120,6 +121,34 @@ export class EventStore {
     }
     this.headSeq = seq;
     this.headHash = hash;
+  }
+
+  /** Stores a state snapshot taken right after event `s.seq` was committed (writer only). */
+  async writeSnapshot(s: Snapshot): Promise<void> {
+    const client = this.lockClient;
+    if (client === undefined) throw new Error('snapshot without the writer lock');
+    await client.query(
+      'INSERT INTO engine_snapshots (seq, chain_hash, digest, body) VALUES ($1, $2, $3, $4) ON CONFLICT (seq) DO NOTHING',
+      [s.seq.toString(), Buffer.from(s.chainHash, 'hex'), s.digest, s.body],
+    );
+  }
+
+  /** The newest snapshot, or all of them (for the verifier). */
+  async snapshots(latestOnly = false): Promise<Snapshot[]> {
+    const { rows } = await this.pool.query<{
+      seq: string;
+      chain_hash: Buffer;
+      digest: string;
+      body: Buffer;
+    }>(
+      `SELECT seq, chain_hash, digest, body FROM engine_snapshots ORDER BY seq ${latestOnly ? 'DESC LIMIT 1' : 'ASC'}`,
+    );
+    return rows.map((r) => ({
+      seq: BigInt(r.seq),
+      chainHash: r.chain_hash.toString('hex'),
+      digest: r.digest,
+      body: r.body,
+    }));
   }
 
   async cursor(): Promise<string | undefined> {

@@ -82,4 +82,14 @@ describe('Ledger edge cases', () => {
     l.post([{ from: userAccount('a'), to: userAccount('c'), amount: usdc(1n), reason: 'fee' }]);
     expect(l.entries().map(([a]) => a)).toEqual(['user:a', 'user:b', 'user:c', 'user:z']);
   });
+
+  it('rebuilds an identical ledger from its entries (state snapshots)', () => {
+    const l = new Ledger();
+    l.post([{ from: SYSTEM.external, to: userAccount('a'), amount: usdc(7n), reason: 'deposit' }]);
+    l.post([{ from: userAccount('a'), to: SYSTEM.fees, amount: usdc(2n), reason: 'fee' }]);
+    const r = Ledger.fromEntries(l.entries());
+    expect(r.entries()).toEqual(l.entries());
+    expect(r.internalTotal()).toBe(7n);
+    expect(r.netExternalInflow()).toBe(7n);
+  });
 });

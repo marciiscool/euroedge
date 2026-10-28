@@ -75,4 +75,41 @@ describe.skipIf(url === undefined)('EventStore (integration)', () => {
     await c.end();
     await a.close();
   });
+
+  it('stores snapshots for the writer and returns the newest', async () => {
+    const store = new EventStore(testUrl);
+    for await (const _ of store.readAll()) void _;
+    await expect(
+      store.writeSnapshot({
+        seq: 1n,
+        chainHash: store.head.hash,
+        digest: 'd1',
+        body: Buffer.from('{}'),
+      }),
+    ).rejects.toThrow(/writer lock/);
+    await store.acquireWriterLock();
+    await store.writeSnapshot({
+      seq: 2n,
+      chainHash: 'ab',
+      digest: 'd2',
+      body: Buffer.from('{"a":1}'),
+    });
+    await store.writeSnapshot({
+      seq: 4n,
+      chainHash: 'cd',
+      digest: 'd4',
+      body: Buffer.from('{"a":2}'),
+    });
+    await store.writeSnapshot({
+      seq: 4n,
+      chainHash: 'ef',
+      digest: 'other',
+      body: Buffer.from('x'),
+    });
+    expect((await store.snapshots(true)).map((s) => [s.seq, s.chainHash, s.digest])).toEqual([
+      [4n, 'cd', 'd4'],
+    ]);
+    expect((await store.snapshots()).map((s) => s.seq)).toEqual([2n, 4n]);
+    await store.close();
+  });
 });

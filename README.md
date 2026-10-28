@@ -61,6 +61,8 @@ pnpm db:migrate
 pnpm dev                    # all services + web
 ```
 
+To check the event log end to end (hash chain from genesis, full replay with invariants, every stored state snapshot), run `pnpm --filter @euroedge/engine verify`. It exits 1 on any mismatch.
+
 Open **http://localhost:8080**. Caddy is the single origin: `/api/*` and `/ws` go to the api service, everything else to the web app (ADR-0012). Service health is at `http://localhost:<port>/health`, with ports 4000–4060 (see `.env.example`).
 
 ## Try the M1 terminal

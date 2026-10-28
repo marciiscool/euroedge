@@ -24,6 +24,7 @@ await runService(
       markets: await loadMarkets(),
       windows: await loadWindows(),
       log: service.log,
+      snapshotEvery: config.ENGINE_SNAPSHOT_EVERY,
     });
     healthy = true;
     service.onShutdown(() => engine.stop());

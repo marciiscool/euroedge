@@ -67,6 +67,13 @@ export class Ledger {
     return usdc(-(this.balances.get(SYSTEM.external) ?? 0n));
   }
 
+  /** Rebuilds a ledger from `entries()` (state snapshots, M4-19). */
+  static fromEntries(entries: Iterable<readonly [string, bigint]>): Ledger {
+    const l = new Ledger();
+    for (const [account, b] of entries) l.balances.set(account, b);
+    return l;
+  }
+
   /** Deterministic snapshot (sorted by account) for hashing and replay comparison. */
   entries(): [string, bigint][] {
     return [...this.balances.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));

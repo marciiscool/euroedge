@@ -8,7 +8,8 @@
     "start": "node --env-file-if-exists=../../.env src/main.ts",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "verify": "node --env-file-if-exists=../../.env src/verify.ts"
   },
   "dependencies": {
     "@euroedge/fixed": "workspace:*",
