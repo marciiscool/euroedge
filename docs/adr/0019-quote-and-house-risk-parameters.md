@@ -64,6 +64,12 @@ Proposed values (same in all windows): `κ` 100 ppm per 1,000,000 USDC of net fl
   - If the loss exceeds the limit, the whole engine is reduce-only until the next UTC day.
   - Proposed limit: 2,500,000 USDC (5 % of house genesis). `null` disables it.
   - It is evaluated after every event, like CB7.
+  - The day's reference equity is taken before the day's first input is applied. Mark changes only arrive as inputs, so that equals the equity at midnight.
+- **Orders:**
+  - A new order that a limit blocks is rejected, as during a circuit breaker.
+  - An order that is already resting waits and fills once the limit lifts.
+  - Reducing one's own position always works.
+- **Snapshots:** market snapshots show `inventoryLimit` (`none`, `no-buys`, `no-sells` or `reduce-only`) and `houseLossLimit`.
 
 ## Consequences
 

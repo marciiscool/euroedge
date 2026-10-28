@@ -7,11 +7,12 @@ import { canonicalBytes } from './canonical.ts';
 export const EVENT_VERSIONS: Readonly<Record<EngineInput['type'], number>> = {
   ClockTick: 1,
   GenesisCapital: 1,
-  MarketListed: 4,
+  MarketListed: 5,
   MarketData: 2,
   DevDeposit: 1,
   PlaceOrder: 3,
   CancelOrder: 1,
+  HouseRiskParams: 1,
   ClosePosition: 1,
 };
 
@@ -40,6 +41,8 @@ const windowRisk = z.object({
   impactBps: nonNeg.default(0n),
   impactRef: pos.default(1n),
   impactAlphaHalves: z.enum(['3', '4']).transform(BigInt).default(3n),
+  // v1–v4 logs predate the inventory hard cap.
+  inventoryHardCap: pos.nullable().default(null),
 });
 
 /** Decoders: canonical JSON (bigints as strings) → typed inputs. */
@@ -95,6 +98,7 @@ export const inputSchema = z.discriminatedUnion('type', [
     stop: z.object({ price: pos, kind: z.enum(['stop', 'take-profit']) }).optional(),
     ocoGroup: id.optional(),
   }),
+  z.object({ type: z.literal('HouseRiskParams'), dailyLossLimit: pos.nullable() }),
   z.object({ type: z.literal('CancelOrder'), requestId: id, account: id, orderId: id }),
   z.object({
     type: z.literal('ClosePosition'),

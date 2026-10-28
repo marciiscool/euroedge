@@ -9,6 +9,7 @@ import {
 } from '@euroedge/risk-core';
 import { accountEquity, initialRequirement } from './accounting.ts';
 import { recordFlow } from './flow.ts';
+import { inventoryRejection } from './house-risk.ts';
 import { executablePrice } from './quote.ts';
 import type { AccountId, MarketId, Side } from './events.ts';
 import type { EngineOutput } from './outputs.ts';
@@ -92,6 +93,10 @@ export function decide(state: EngineState, o: OrderRequest): OrderOutcome {
   // Circuit breakers (brief §6.5): every non-none effect, and CB7 globally, blocks new exposure.
   if (!reduces && (data.breaker !== 'none' || state.capitalFloor)) return reject('circuit-breaker');
   const risk = m.windows[data.window];
+  // House risk (M4-14): daily loss limit, then inventory limits; reducing orders always pass.
+  if (!reduces && state.houseRisk.halted) return reject('house-loss-limit');
+  const limited = reduces ? undefined : inventoryRejection(m, risk, qty);
+  if (limited !== undefined) return reject(limited);
   // House quote for the full size (ADR-0003): σ, inventory skew, convex impact, flow shift.
   const price = executablePrice(m, qty, state.ts);
   if (price === undefined) return reject('no-market-data');

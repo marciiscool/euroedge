@@ -44,6 +44,10 @@ export const marketSnapshotSchema = z.object({
   minNotional: dec,
   /** CB7 (ADR-0013): global reduce-only while house or insurance capital is below its floor. */
   capitalFloor: z.boolean().default(false),
+  /** Daily house loss limit hit (M4-14): global reduce-only until the next UTC day. */
+  houseLossLimit: z.boolean().default(false),
+  /** House inventory limits (M4-14): which user orders adding exposure the house refuses. */
+  inventoryLimit: z.enum(['none', 'no-buys', 'no-sells', 'reduce-only']).default('none'),
   /** Executable prices for €1k / €5k / €25k / €100k (ADR-0003 step 8), same function as fills. */
   ladder: z.array(z.object({ notional: dec, bid: dec, ask: dec })).default([]),
 });
@@ -107,6 +111,9 @@ export const rejectReasonSchema = z.enum([
   'too-many-orders',
   'unknown-order',
   'would-trigger',
+  'house-one-sided',
+  'house-inventory',
+  'house-loss-limit',
 ]);
 
 /** Circuit-breaker effect on a market (brief §6.5); carried on each MarketData input. */

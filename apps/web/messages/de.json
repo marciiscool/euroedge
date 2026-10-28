@@ -99,7 +99,10 @@
       "invalid-price": "Gib einen gültigen Limitpreis ein.",
       "too-many-orders": "Zu viele offene Orders. Storniere zuerst einige.",
       "unknown-order": "Diese Order existiert nicht mehr.",
-      "would-trigger": "Der Auslöser wäre beim aktuellen Mark-Preis schon erreicht."
+      "would-trigger": "Der Auslöser wäre beim aktuellen Mark-Preis schon erreicht.",
+      "house-one-sided": "Das House nimmt auf dieser Seite gerade keine neuen Positionen an. Die Gegenrichtung und reduzierende Orders gehen.",
+      "house-inventory": "Das Positionslimit des Houses ist erreicht: Gerade sind nur reduzierende Orders möglich.",
+      "house-loss-limit": "Das Tagesverlustlimit des Houses ist erreicht: Bis zum nächsten Tag (UTC) sind nur reduzierende Orders möglich."
     },
     "account": "Konto",
     "equity": "Eigenkapital",

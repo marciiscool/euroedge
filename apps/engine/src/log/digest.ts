@@ -13,6 +13,7 @@ export function stateSnapshot(state: EngineState): unknown {
     genesis: state.genesis,
     genesisCapital: state.genesisCapital,
     capitalFloor: state.capitalFloor,
+    houseRisk: state.houseRisk,
     netDeposits: state.netDeposits,
     markets: byKey(state.markets).map(([, m]) => ({
       ...m,

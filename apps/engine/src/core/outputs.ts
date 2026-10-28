@@ -44,6 +44,13 @@ export type EngineOutput =
       readonly houseEquity: bigint;
       readonly insurance: bigint;
     }
+  | {
+      /** Daily house loss limit (M4-14) tripped or released (next UTC day). */
+      readonly type: 'HouseLossLimitChanged';
+      readonly active: boolean;
+      /** Today's house loss when tripped, µUSDC. */
+      readonly loss: bigint;
+    }
   | { readonly type: 'InputIgnored'; readonly input: string; readonly reason: string }
   | { readonly type: 'AccountChanged'; readonly account: AccountId }
   | { readonly type: 'MarketChanged'; readonly market: MarketId }

@@ -99,7 +99,10 @@
       "invalid-price": "Enter a valid limit price.",
       "too-many-orders": "Too many open orders. Cancel some first.",
       "unknown-order": "This order no longer exists.",
-      "would-trigger": "The trigger would already be reached at the current mark."
+      "would-trigger": "The trigger would already be reached at the current mark.",
+      "house-one-sided": "The house is not taking new positions on this side right now. The other side and reducing orders work.",
+      "house-inventory": "The house position limit is reached: only reducing orders right now.",
+      "house-loss-limit": "The house's daily loss limit is reached: only reducing orders until the next day (UTC)."
     },
     "account": "Account",
     "equity": "Equity",

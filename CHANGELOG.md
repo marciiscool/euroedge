@@ -25,6 +25,12 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - `PlaceOrder` v2 and a new `CancelOrder` input; open orders appear in the account snapshot.
   - API: `type`/`limitPrice` on `POST /api/orders`, and `DELETE /api/orders/:id`.
   - Terminal: a market/limit switch, a limit price field and an open-orders table with cancel.
+- House risk limits (M4-14, ADR-0003 §7; parameters proposed in ADR-0019):
+  - Past `inventoryCapUsdc` the house quotes one side only (`house-one-sided`).
+  - Past `inventoryHardCapUsdc` the market is reduce-only, and no order may take the house beyond it (`house-inventory`).
+  - A house loss above `houseDailyLossLimitUsdc` in a UTC day makes every market reduce-only until the next day (`house-loss-limit`). The limit arrives via the new `HouseRiskParams` input.
+  - Resting orders wait out these limits. Market snapshots carry `inventoryLimit` and `houseLossLimit`, and the terminal explains the new rejections.
+  - `MarketListed` v5.
 - Flow shift (M4-03, ADR-0003 step 4; parameters proposed in ADR-0019):
   - Voluntary user fills feed an exponentially decayed net flow per market: a factor of `1 − 1/τ` per second, in fixed point.
   - Each wallet counts for at most `walletCap` per window. Liquidations do not count.
