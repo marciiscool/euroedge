@@ -26,6 +26,9 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Engine benchmark (M4-28): `pnpm --filter @euroedge/engine bench`.
+  - Measures core apply latency (200 accounts, invariants on every event) and, with `DATABASE_URL`, acknowledged-order latency including the hash-chained Postgres commit at 50 orders/s.
+  - It writes a GitHub job summary when run in CI; the non-blocking CI step is pending a token with `workflow` scope (snippet in `docs/milestones/m4.md`).
 - Bots (M4-23/24):
   - `apps/bots` runs N accounts (default 200) of noise, momentum and mean-reversion strategies, seeded and reproducible.
   - Bots are funded once with play money.
