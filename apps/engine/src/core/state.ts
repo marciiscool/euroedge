@@ -157,6 +157,8 @@ export interface EngineState {
   readonly withdrawals: Map<string, Withdrawal>;
   /** Next withdrawal nonce. */
   withdrawalNonce: bigint;
+  /** Applied dividends, `${market}:${exDate}` → event time (M4-16). */
+  readonly dividends: Map<string, bigint>;
 }
 
 export function createState(): EngineState {
@@ -175,5 +177,6 @@ export function createState(): EngineState {
     orders: new Map(),
     withdrawals: new Map(),
     withdrawalNonce: 0n,
+    dividends: new Map(),
   };
 }

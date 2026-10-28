@@ -15,6 +15,7 @@ export const EVENT_VERSIONS: Readonly<Record<EngineInput['type'], number>> = {
   HouseRiskParams: 1,
   ClosePosition: 1,
   RequestWithdrawal: 1,
+  DividendExDate: 1,
   WithdrawalExecuted: 1,
   WithdrawalExpired: 1,
 };
@@ -105,6 +106,13 @@ export const inputSchema = z.discriminatedUnion('type', [
   }),
   z.object({ type: z.literal('HouseRiskParams'), dailyLossLimit: pos.nullable() }),
   z.object({ type: z.literal('CancelOrder'), requestId: id, account: id, orderId: id }),
+  z.object({
+    type: z.literal('DividendExDate'),
+    market: id,
+    exDate: z.iso.date(),
+    grossPerShare: pos,
+    withholdingBps: nonNeg.refine((b) => b <= 10_000n, 'at most 10 000 bps'),
+  }),
   z.object({ type: z.literal('RequestWithdrawal'), requestId: id, account: id, amount: pos }),
   z.object({ type: z.literal('WithdrawalExecuted'), withdrawalId: z.string().min(1).max(160) }),
   z.object({ type: z.literal('WithdrawalExpired'), withdrawalId: z.string().min(1).max(160) }),

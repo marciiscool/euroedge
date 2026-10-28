@@ -140,6 +140,20 @@ export type EngineInput =
       readonly dailyLossLimit: Usdc | null;
     }
   | {
+      /**
+       * A dividend goes ex (M4-16), at the local ex-date of the primary line. Longs receive
+       * it net of withholding, shorts pay it gross; the house takes the other side.
+       */
+      readonly type: 'DividendExDate';
+      readonly market: MarketId;
+      /** ISO date; with the market, the idempotency key. */
+      readonly exDate: string;
+      /** Gross dividend per share, in price ticks. */
+      readonly grossPerShare: Ticks;
+      /** Withholding on what longs receive, bps (config per market; proposal 1 500). */
+      readonly withholdingBps: bigint;
+    }
+  | {
       /** Reserve collateral for an on-chain withdrawal to the account's address (M4-18). */
       readonly type: 'RequestWithdrawal';
       readonly requestId: string;

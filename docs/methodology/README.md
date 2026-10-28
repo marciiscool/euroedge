@@ -100,6 +100,21 @@ The house is the counterparty to every trade. It quotes around FV and never move
 - Larger orders pay a convex size impact. The quote ladder shows the executable price for €1k, €5k, €25k and €100k, from the same calculation that fills.
 - Prices are rounded to the tick in the house's favour.
 
+## 7a. Dividends
+
+On a dividend's local ex-date the fair value drops by the dividend (§3), and the engine moves cash so that holders are treated like holders of the share:
+
+- **Longs receive the dividend net of withholding tax.** The withholding rate is configured per market; the proposed default is 15 %.
+- **Shorts pay the full (gross) dividend.**
+- The house is the other side of every payment; the withheld part stays with the house.
+
+**Example.** A dividend of €1.50 per share with 15 % withholding:
+
+- 10 shares long receive 10 × 1.50 × 0.85 = **12.75**.
+- 5 shares short pay 5 × 1.50 = **7.50**.
+
+Amounts longs receive are rounded down to the smallest unit.
+
 ## 8. Accuracy
 
 The backtest (`docs/backtest/`) replays recorded or simulated ticks through the same code. It scores the FV against the next official open:

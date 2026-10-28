@@ -9,6 +9,7 @@ import { evaluateCapitalFloor } from './capital.ts';
 import { evaluateHouseLoss, rollHouseDay } from './house-risk.ts';
 import { executeOrder } from './orders.ts';
 import { requestWithdrawal, settleWithdrawal } from './withdrawals.ts';
+import { applyDividend } from './dividends.ts';
 import { HOUR_MS, settleFunding } from './funding.ts';
 import type { EngineOutput } from './outputs.ts';
 import type { EngineState } from './state.ts';
@@ -175,6 +176,9 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
 
     case 'CancelOrder':
       return cancelOrder(state, input);
+
+    case 'DividendExDate':
+      return applyDividend(state, input);
 
     case 'RequestWithdrawal':
       return requestWithdrawal(state, input);

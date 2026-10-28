@@ -41,6 +41,7 @@ type Step =
   | { kind: 'cancel'; account: string; key: number }
   | { kind: 'withdraw'; account: string; amount: bigint; key: number }
   | { kind: 'settle'; account: string; key: number; executed: boolean }
+  | { kind: 'dividend'; gross: bigint; withholdingBps: bigint }
   | { kind: 'tick' };
 
 const step: fc.Arbitrary<Step> = fc.oneof(
@@ -110,6 +111,14 @@ const step: fc.Arbitrary<Step> = fc.oneof(
     }),
   },
   { weight: 1, arbitrary: fc.constant({ kind: 'tick' as const }) },
+  {
+    weight: 1,
+    arbitrary: fc.record({
+      kind: fc.constant('dividend' as const),
+      gross: fc.bigInt({ min: 1n, max: 1_500n }),
+      withholdingBps: fc.bigInt({ min: 0n, max: 3_500n }),
+    }),
+  },
   {
     weight: 1,
     arbitrary: fc.record({
@@ -226,6 +235,15 @@ function toInputs(steps: Step[]): EngineInput[] {
           requestId: `x${n}`,
           account: s.account,
           orderId: `k${s.key}`,
+        });
+        break;
+      case 'dividend':
+        inputs.push({
+          type: 'DividendExDate',
+          market: 'ASML-PERP',
+          exDate: new Date(Date.UTC(2027, 0, 1 + n)).toISOString().slice(0, 10),
+          grossPerShare: ticks(s.gross),
+          withholdingBps: s.withholdingBps,
         });
         break;
       case 'withdraw':
