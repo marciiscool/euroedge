@@ -15,6 +15,25 @@ export interface MarketData {
   readonly ts: bigint;
 }
 
+/**
+ * Exact funding owed by one holder since its last settlement, in index units (µUSDC·Rate·ms):
+ * `pending + lots × (index − snap)`. Rolled forward before every change of its lots.
+ */
+export interface FundingAccrual {
+  readonly snap: bigint;
+  readonly pending: bigint;
+}
+
+export interface MarketFunding {
+  /** Cumulative funding per lot, µUSDC·Rate·ms (risk-core FUNDING_INDEX_SCALE). */
+  index: bigint;
+  /** Event time the index was last advanced to. */
+  lastTs: bigint;
+  /** Stored, 0 in v1 (ADR-0016). */
+  readonly quantoDrift: bigint;
+  house: FundingAccrual;
+}
+
 export interface MarketState {
   readonly id: MarketId;
   readonly kind: 'stock' | 'basket';
@@ -22,8 +41,10 @@ export interface MarketState {
   readonly minNotional: Usdc;
   readonly maintenanceMarginBps: bigint;
   readonly liquidationPenaltyBps: bigint;
+  readonly fundingInterestBpsPerYear: bigint;
   readonly windows: Readonly<Record<WindowId, WindowRisk>>;
   data: MarketData | undefined;
+  readonly funding: MarketFunding;
   /** House position = exact negative of all user positions (lots and cost). */
   house: Position;
 }
@@ -31,6 +52,8 @@ export interface MarketState {
 export interface AccountState {
   readonly id: AccountId;
   readonly positions: Map<MarketId, Position>;
+  /** Unsettled funding per market; present while the holder has accrued since settlement. */
+  readonly funding: Map<MarketId, FundingAccrual>;
 }
 
 export type RejectReason =
@@ -66,6 +89,8 @@ export interface EngineState {
   genesis: boolean;
   /** Genesis + deposits − executed withdrawals, tracked independently of the ledger (Invariant 1). */
   netDeposits: bigint;
+  /** Next hourly funding settlement (UTC ms); 0 until the first event. */
+  fundingNextTs: bigint;
   readonly markets: Map<MarketId, MarketState>;
   readonly accounts: Map<AccountId, AccountState>;
   readonly ledger: Ledger;
@@ -79,6 +104,7 @@ export function createState(): EngineState {
     ts: 0n,
     genesis: false,
     netDeposits: 0n,
+    fundingNextTs: 0n,
     markets: new Map(),
     accounts: new Map(),
     ledger: new Ledger(),

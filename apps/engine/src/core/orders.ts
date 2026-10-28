@@ -9,6 +9,7 @@ import {
   type Position,
 } from '@euroedge/risk-core';
 import { accountEquity, initialRequirement } from './accounting.ts';
+import { checkpointFunding } from './funding.ts';
 import type { AccountId, MarketId, Side } from './events.ts';
 import type { EngineOutput } from './outputs.ts';
 import type { EngineState, OrderOutcome, RejectReason } from './state.ts';
@@ -101,6 +102,7 @@ function decide(state: EngineState, o: OrderRequest): OrderOutcome {
 
   // Apply: user position, mirrored house position, cash postings.
   const deltaCost = r.position.cost - pos.cost;
+  checkpointFunding(m, acc);
   acc.positions.set(o.market, r.position);
   m.house = { lots: m.house.lots - qty, cost: m.house.cost - deltaCost };
   const postings: Posting[] = [];

@@ -3,6 +3,7 @@ import { SYSTEM, userAccount, type Posting } from '@euroedge/ledger';
 import { applyFill, FLAT, liquidationPenalty, notionalUsdc } from '@euroedge/risk-core';
 import { accountEquity, accountMaintenance } from './accounting.ts';
 import type { MarketId } from './events.ts';
+import { checkpointFunding } from './funding.ts';
 import type { EngineOutput } from './outputs.ts';
 import type { EngineState } from './state.ts';
 
@@ -44,6 +45,7 @@ export function liquidateUnderwater(state: EngineState, market: MarketId): Engin
           amount: usdc(-realized),
           reason: 'realized-pnl',
         });
+      checkpointFunding(m, acc);
       m.house = { lots: m.house.lots + p.lots, cost: m.house.cost + p.cost };
       acc.positions.set(id, FLAT);
       penalty += liquidationPenalty(

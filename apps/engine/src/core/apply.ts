@@ -2,6 +2,7 @@ import { resolveUnits } from '@euroedge/fixed';
 import { SYSTEM, userAccount } from '@euroedge/ledger';
 import { FLAT } from '@euroedge/risk-core';
 import type { EngineEvent, EngineInput } from './events.ts';
+import { advanceFunding } from './funding.ts';
 import { assertInvariants } from './invariants.ts';
 import { liquidateUnderwater } from './liquidation.ts';
 import { executeOrder } from './orders.ts';
@@ -19,7 +20,8 @@ export function apply(state: EngineState, e: EngineEvent): EngineOutput[] {
   if (e.ts < state.ts) throw new Error(`time went backwards at seq ${e.seq}`);
   state.seq = e.seq;
   state.ts = e.ts;
-  const out = dispatch(state, e.input, e.ts);
+  // Funding first: the index accrues at the state in force before this input.
+  const out = [...advanceFunding(state, e.ts), ...dispatch(state, e.input, e.ts)];
   assertInvariants(state);
   return out;
 }
@@ -65,8 +67,15 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
         minNotional: input.minNotional,
         maintenanceMarginBps: input.maintenanceMarginBps,
         liquidationPenaltyBps: input.liquidationPenaltyBps,
+        fundingInterestBpsPerYear: input.fundingInterestBpsPerYear,
         windows: input.windows,
         data: existing?.data,
+        funding: existing?.funding ?? {
+          index: 0n,
+          lastTs: ts,
+          quantoDrift: 0n,
+          house: { snap: 0n, pending: 0n },
+        },
         house: existing?.house ?? FLAT,
       });
       return [{ type: 'MarketChanged', market: input.market }];
@@ -108,7 +117,11 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
     case 'DevDeposit': {
       if (!state.genesis) return ignored(input, 'before genesis');
       if (!state.accounts.has(input.account))
-        state.accounts.set(input.account, { id: input.account, positions: new Map() });
+        state.accounts.set(input.account, {
+          id: input.account,
+          positions: new Map(),
+          funding: new Map(),
+        });
       state.ledger.post([
         {
           from: SYSTEM.external,

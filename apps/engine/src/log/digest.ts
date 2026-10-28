@@ -12,12 +12,18 @@ export function stateSnapshot(state: EngineState): unknown {
     ts: state.ts,
     genesis: state.genesis,
     netDeposits: state.netDeposits,
+    fundingNextTs: state.fundingNextTs,
     markets: byKey(state.markets).map(([, m]) => ({
       ...m,
       data: m.data ?? null,
       units: { ...m.units },
+      funding: { ...m.funding },
     })),
-    accounts: byKey(state.accounts).map(([id, a]) => ({ id, positions: byKey(a.positions) })),
+    accounts: byKey(state.accounts).map(([id, a]) => ({
+      id,
+      positions: byKey(a.positions),
+      funding: byKey(a.funding),
+    })),
     ledger: state.ledger.entries(),
     idempotency: byKey(state.idempotency),
   };

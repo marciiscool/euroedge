@@ -1,15 +1,34 @@
 import { lots, ticks, usdc } from '@euroedge/fixed';
 import { apply } from '../src/core/apply.ts';
-import type { EngineInput, WindowId, WindowRisk } from '../src/core/events.ts';
+import type { EngineEvent, EngineInput, WindowId, WindowRisk } from '../src/core/events.ts';
 import type { EngineOutput } from '../src/core/outputs.ts';
 import { createState, type EngineState } from '../src/core/state.ts';
 
 /** windows.yaml values as engine params. */
+const w = (
+  maxLeverage: bigint,
+  takerFeeBps: bigint,
+  makerFeeBps: bigint,
+  houseHalfSpreadBps: bigint,
+  priceLimitBps: bigint,
+  fundingCapPpmPerHour: bigint | null,
+  oiCapUsdc: bigint | null,
+): WindowRisk => ({
+  maxLeverage,
+  takerFeeBps,
+  makerFeeBps,
+  houseHalfSpreadBps,
+  priceLimitBps,
+  fundingCapPpmPerHour,
+  fundingOiCap: oiCapUsdc === null ? null : usdc(oiCapUsdc * 1_000_000n),
+});
+
+/** windows.yaml values as engine params. */
 export const WINDOWS: Record<WindowId, WindowRisk> = {
-  A: { maxLeverage: 5n, takerFeeBps: 5n, houseHalfSpreadBps: 5n, priceLimitBps: 1000n },
-  B: { maxLeverage: 4n, takerFeeBps: 8n, houseHalfSpreadBps: 10n, priceLimitBps: 500n },
-  C: { maxLeverage: 3n, takerFeeBps: 12n, houseHalfSpreadBps: 20n, priceLimitBps: 400n },
-  D: { maxLeverage: 2n, takerFeeBps: 20n, houseHalfSpreadBps: 35n, priceLimitBps: 300n },
+  A: w(5n, 5n, 1n, 5n, 1000n, 300n, 2_000_000n),
+  B: w(4n, 8n, 2n, 10n, 500n, 200n, 1_000_000n),
+  C: w(3n, 12n, 3n, 20n, 400n, 100n, 500_000n),
+  D: w(2n, 20n, 5n, 35n, 300n, null, null),
 };
 
 export const USDC = 1_000_000n;
@@ -23,6 +42,7 @@ export const listASML: EngineInput = {
   minNotional: usdc(10n * USDC),
   maintenanceMarginBps: 1000n,
   liquidationPenaltyBps: 100n,
+  fundingInterestBpsPerYear: 500n,
   windows: WINDOWS,
 };
 
@@ -72,18 +92,24 @@ export const order = (
 /** Small harness: applies inputs with consecutive seqs and 1 s spacing. */
 export class Harness {
   readonly state: EngineState = createState();
-  readonly log: EngineInput[] = [];
+  readonly log: EngineEvent[] = [];
+  /** Event time of the next input (UTC ms); each input advances it by 1 s. */
+  now = 1_793_000_000_000n;
 
   run(...inputs: EngineInput[]): EngineOutput[] {
     return inputs.flatMap((input) => {
-      this.log.push(input);
-      return apply(this.state, {
-        seq: this.state.seq + 1n,
-        ts: 1_793_000_000_000n + this.state.seq * 1000n,
-        v: 1,
-        input,
-      });
+      const e: EngineEvent = { seq: this.state.seq + 1n, ts: this.now, v: 1, input };
+      this.log.push(e);
+      this.now += 1000n;
+      return apply(this.state, e);
     });
+  }
+
+  /** Moves event time to `ts` (never backwards). */
+  at(ts: bigint): this {
+    if (ts < this.now) throw new Error('time goes forward only');
+    this.now = ts;
+    return this;
   }
 
   static booted(): Harness {

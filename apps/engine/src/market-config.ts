@@ -2,6 +2,8 @@ import { parseDecimal, usdc } from '@euroedge/fixed';
 import type { MarketConfig, WindowsFile } from '@euroedge/shared';
 import type { EngineInput, WindowId, WindowRisk } from './core/events.ts';
 
+const USDC = 1_000_000n;
+
 /**
  * Config enters the engine only as logged input events (ADR-0001): markets.yaml +
  * windows.yaml → MarketListed.
@@ -15,8 +17,11 @@ export function marketListedInput(
     return {
       maxLeverage: BigInt(m.kind === 'stock' ? p.stockMaxLeverage : p.basketMaxLeverage),
       takerFeeBps: BigInt(p.takerFeeBps),
+      makerFeeBps: BigInt(p.makerFeeBps),
       houseHalfSpreadBps: BigInt(p.houseHalfSpreadBps),
       priceLimitBps: BigInt(p.priceLimitBps),
+      fundingCapPpmPerHour: p.fundingCapPpmPerHour === null ? null : BigInt(p.fundingCapPpmPerHour),
+      fundingOiCap: p.fundingOiCapUsdc === null ? null : usdc(BigInt(p.fundingOiCapUsdc) * USDC),
     };
   };
   return {
@@ -29,6 +34,7 @@ export function marketListedInput(
     minNotional: usdc(parseDecimal(m.minNotional, 6)),
     maintenanceMarginBps: BigInt(w.maintenanceMarginBps[m.kind]),
     liquidationPenaltyBps: BigInt(w.liquidationPenaltyBps[m.kind]),
+    fundingInterestBpsPerYear: BigInt(w.fundingInterestBpsPerYear),
     windows: { A: risk('A'), B: risk('B'), C: risk('C'), D: risk('D') },
   };
 }

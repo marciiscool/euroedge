@@ -4,6 +4,20 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### M4 — Full engine (in progress, on `integration/m4`, maths review pending)
+
+#### Added
+
+- Funding per ADR-0016, with the open points proposed in ADR-0018 (M4-10/11):
+  - The hourly rate is interest (5 % p.a.) plus a linear skew term, clamped to the window cap on the total. Window D is interest only.
+  - Funding accrues on an exact per-market index in event time and settles every UTC hour for all holders, the house included.
+  - Payers round up and receivers down. The residue (≥ 0) goes to `fees`.
+  - Payments beyond a payer's equity are covered by insurance.
+  - New Invariant 3: funding is zero-sum on every event, and `funding-clearing` is 0.
+  - Golden vectors are in `docs/methodology/examples/funding.json`.
+- `MarketListed` v2 carries maker fees and the funding parameters. v1 logs upcast with funding off.
+- `windows.yaml`: `fundingOiCapUsdc` per window (proposed values, ADR-0018).
+
 ### M3 — Full fv-core (in progress, on `integration/m3`)
 
 #### Added

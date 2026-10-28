@@ -89,6 +89,38 @@ describe('event codec', () => {
     );
   });
 
+  it('upcasts MarketListed v1 (no funding, no maker fee) with funding off', () => {
+    const risk = {
+      maxLeverage: '5',
+      takerFeeBps: '5',
+      houseHalfSpreadBps: '5',
+      priceLimitBps: '1000',
+    };
+    const v1 = JSON.stringify({
+      seq: '1',
+      ts: '1',
+      v: 1,
+      input: {
+        type: 'MarketListed',
+        market: 'ASML-PERP',
+        kind: 'stock',
+        tickSize: '0.01',
+        lotSize: '0.01',
+        minNotional: '10000000',
+        maintenanceMarginBps: '1000',
+        liquidationPenaltyBps: '100',
+        windows: { A: risk, B: risk, C: risk, D: risk },
+      },
+    });
+    const e = decodeEvent(v1);
+    expect(e.input).toMatchObject({
+      fundingInterestBpsPerYear: 0n,
+      windows: {
+        A: { makerFeeBps: 5n, takerFeeBps: 5n, fundingCapPpmPerHour: null, fundingOiCap: null },
+      },
+    });
+  });
+
   it('verifies the hash chain and detects tampering and gaps', () => {
     let prev = GENESIS_HASH;
     const records = events.map((e) => {

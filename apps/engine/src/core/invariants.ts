@@ -36,12 +36,28 @@ export function assertInvariants(state: EngineState): void {
     }
     if (lots !== 0n || cost !== 0n)
       throw new InvariantViolation(2, `${m.id}: Σ lots ${lots}, Σ cost ${cost}`);
+    // 3. Funding is zero-sum: the exact amounts owed by all holders (users + house) cancel.
+    let owed = m.funding.house.pending + m.house.lots * (m.funding.index - m.funding.house.snap);
+    for (const acc of state.accounts.values()) {
+      const a = acc.funding.get(m.id);
+      const l = acc.positions.get(m.id)?.lots ?? 0n;
+      if (a === undefined) {
+        if (l !== 0n)
+          throw new InvariantViolation(3, `${m.id}: ${acc.id} holds lots without accrual`);
+        continue;
+      }
+      owed += a.pending + l * (m.funding.index - a.snap);
+    }
+    if (owed !== 0n) throw new InvariantViolation(3, `${m.id}: Σ funding owed ${owed}`);
     // 5. Mark within fvBand (no SNAP in M1).
     const d = m.data;
     if (d !== undefined && (d.mark < d.bandLo || d.mark > d.bandHi)) {
       throw new InvariantViolation(5, `${m.id}: mark ${d.mark} outside [${d.bandLo}, ${d.bandHi}]`);
     }
   }
+  // 3. Every settlement clears in full (residue to fees).
+  const clearing = ledger.balance(SYSTEM.fundingClearing);
+  if (clearing !== 0n) throw new InvariantViolation(3, `funding clearing ${clearing}`);
   // 4. No user equity < 0; 7. Σ max(0, user equity) + max(0, house equity) + insurance ≤ vault.
   let userSum = 0n;
   for (const acc of state.accounts.values()) {

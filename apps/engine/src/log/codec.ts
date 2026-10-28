@@ -7,7 +7,7 @@ import { canonicalBytes } from './canonical.ts';
 export const EVENT_VERSIONS: Readonly<Record<EngineInput['type'], number>> = {
   ClockTick: 1,
   GenesisCapital: 1,
-  MarketListed: 1,
+  MarketListed: 2,
   MarketData: 2,
   DevDeposit: 1,
   PlaceOrder: 1,
@@ -26,8 +26,11 @@ const window = z.enum(['A', 'B', 'C', 'D']);
 const windowRisk = z.object({
   maxLeverage: nonNeg,
   takerFeeBps: nonNeg,
+  makerFeeBps: nonNeg,
   houseHalfSpreadBps: nonNeg,
   priceLimitBps: nonNeg,
+  fundingCapPpmPerHour: nonNeg.nullable(),
+  fundingOiCap: pos.nullable(),
 });
 
 /** Decoders: canonical JSON (bigints as strings) → typed inputs. */
@@ -48,6 +51,7 @@ export const inputSchema = z.discriminatedUnion('type', [
     minNotional: nonNeg,
     maintenanceMarginBps: pos,
     liquidationPenaltyBps: nonNeg,
+    fundingInterestBpsPerYear: nonNeg,
     windows: z.object({ A: windowRisk, B: windowRisk, C: windowRisk, D: windowRisk }),
   }),
   z.object({
@@ -103,9 +107,32 @@ export function decodeEvent(bytes: Buffer | string): EngineEvent {
   return { seq: env.seq, ts: env.ts, v: env.v, input };
 }
 
-/** Upcasters for old payload versions (none yet: every type is at v1). */
-function upcast(_v: number, input: unknown): unknown {
-  return input;
+interface RawListing {
+  readonly type?: unknown;
+  readonly windows?: Record<string, { readonly takerFeeBps?: unknown }> | null;
+}
+
+/**
+ * Upcasters for old payload versions. MarketListed v1 predates funding and maker fees: it
+ * decodes with funding off (interest 0, no cap, no skew) and maker fee = taker fee, which
+ * is what such a log meant. Fields already present are kept.
+ */
+function upcast(v: number, input: unknown): unknown {
+  const i = input as RawListing;
+  if (v >= 2 || i.type !== 'MarketListed' || typeof i.windows !== 'object' || i.windows === null)
+    return input;
+  const windows = Object.fromEntries(
+    Object.entries(i.windows).map(([w, r]) => [
+      w,
+      {
+        makerFeeBps: r.takerFeeBps,
+        fundingCapPpmPerHour: null,
+        fundingOiCap: null,
+        ...r,
+      },
+    ]),
+  );
+  return { fundingInterestBpsPerYear: '0', ...i, windows };
 }
 
 /** hash_n = sha256(hash_{n−1} ‖ body_n), hex. */

@@ -27,6 +27,21 @@ export type EngineOutput =
       readonly insuranceCover: Usdc;
     }
   | {
+      /** Hourly funding settlement of one market (ADR-0016, ADR-0018). */
+      readonly type: 'FundingSettled';
+      readonly market: MarketId;
+      /** The UTC hour boundary settled. */
+      readonly hourTs: bigint;
+      /** Rate in force after settlement, Rate (1e-18) per hour; > 0 longs pay. */
+      readonly ratePerHour: bigint;
+      readonly paid: Usdc;
+      readonly received: Usdc;
+      /** Rounding residue to fees (≥ 0). */
+      readonly residue: Usdc;
+      /** Payments beyond a payer's equity, covered by insurance. */
+      readonly insuranceCover: Usdc;
+    }
+  | {
       /** ADR-0009: the band decided the mark. */
       readonly type: 'MarkClamped';
       readonly market: MarketId;

@@ -23,3 +23,4 @@ Format: lightweight MADR (`0000-template.md`). One decision per file, numbered, 
 | [0015](0015-fx-set.md)                     | FX set & DKK peg fallback                                 | Accepted         | math |
 | [0016](0016-risk-parameter-defaults.md)    | Risk parameter defaults                                   | Accepted         | math |
 | [0017](0017-override-line-markets.md)      | Override-line markets (NOVO, SHEL)                        | Accepted         | math |
+| [0018](0018-funding-settlement.md)         | Funding settlement: rounding, OI cap, accrual             | Proposed         | math |

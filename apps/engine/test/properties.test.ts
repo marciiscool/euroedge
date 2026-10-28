@@ -137,11 +137,12 @@ function toInputs(steps: Step[]): EngineInput[] {
 function runLive(inputs: EngineInput[]) {
   const state = createState();
   const events: EngineEvent[] = [];
-  const counts = { fills: 0, liquidations: 0, rejections: 0 };
+  const counts = { fills: 0, liquidations: 0, rejections: 0, fundings: 0 };
   inputs.forEach((input, i) => {
     const e: EngineEvent = {
       seq: BigInt(i + 1),
-      ts: 1_793_000_000_000n + BigInt(i) * 1000n,
+      // 37 s apart: a run spans several funding hours.
+      ts: 1_793_000_000_000n + BigInt(i) * 37_000n,
       v: 1,
       input,
     };
@@ -150,14 +151,15 @@ function runLive(inputs: EngineInput[]) {
       if (o.type === 'OrderFilled' && !o.duplicate) counts.fills += 1;
       if (o.type === 'Liquidated') counts.liquidations += 1;
       if (o.type === 'OrderRejected') counts.rejections += 1;
+      if (o.type === 'FundingSettled') counts.fundings += 1;
     }
   });
   return { state, events, counts };
 }
 
 describe('engine invariants under random inputs (fast-check, 15 000+ steps)', () => {
-  it('holds invariants 1, 2, 4, 5, 7, 8, 9 after every event, and replay(log) == live state', () => {
-    let totals = { steps: 0, fills: 0, liquidations: 0 };
+  it('holds invariants 1–5, 7, 8, 9 after every event, and replay(log) == live state', () => {
+    let totals = { steps: 0, fills: 0, liquidations: 0, fundings: 0 };
     fc.assert(
       fc.property(
         fc.array(fc.oneof({ weight: 30, arbitrary: step }, { weight: 1, arbitrary: gapStep }), {
@@ -172,6 +174,7 @@ describe('engine invariants under random inputs (fast-check, 15 000+ steps)', ()
             steps: totals.steps + events.length,
             fills: totals.fills + counts.fills,
             liquidations: totals.liquidations + counts.liquidations,
+            fundings: totals.fundings + counts.fundings,
           };
         },
       ),
@@ -181,5 +184,6 @@ describe('engine invariants under random inputs (fast-check, 15 000+ steps)', ()
     expect(totals.steps).toBeGreaterThan(15_000);
     expect(totals.fills).toBeGreaterThan(1_000);
     expect(totals.liquidations).toBeGreaterThan(0);
+    expect(totals.fundings).toBeGreaterThan(100);
   }, 120_000);
 });

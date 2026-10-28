@@ -16,8 +16,13 @@ export interface WindowRisk {
   /** Max leverage on new exposure; 0 = reduce-only. */
   readonly maxLeverage: bigint;
   readonly takerFeeBps: bigint;
+  readonly makerFeeBps: bigint;
   readonly houseHalfSpreadBps: bigint;
   readonly priceLimitBps: bigint;
+  /** Hourly cap on the total funding rate, ppm; null = interest only (Window D, ADR-0016). */
+  readonly fundingCapPpmPerHour: bigint | null;
+  /** |netOIskew| (µUSDC) at which the skew term reaches the cap; null = no skew term (ADR-0018). */
+  readonly fundingOiCap: Usdc | null;
 }
 
 export type EngineInput =
@@ -39,6 +44,8 @@ export type EngineInput =
       readonly minNotional: Usdc;
       readonly maintenanceMarginBps: bigint;
       readonly liquidationPenaltyBps: bigint;
+      /** Funding interest component, longs pay shorts (ADR-0016). */
+      readonly fundingInterestBpsPerYear: bigint;
       readonly windows: Readonly<Record<WindowId, WindowRisk>>;
     }
   | {

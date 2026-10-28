@@ -46,3 +46,4 @@ All values live in `config/windows.yaml` / `config/markets.yaml` and change only
 ## Consequences
 
 - Golden vectors (M3-17) pin these numbers once the founder's spreadsheet is available.
+- Settlement rounding, `OIcap_w` and accrual mechanics are proposed in ADR-0018 (pending review).

@@ -1,5 +1,104 @@
 {
-  "description": "Funding (ADR-0016): rate = clamp(premium + interest, ±cap) on the total, hourly. Vectors are added with the M4 funding engine.",
-  "status": "pending — funding is implemented in M4",
-  "cases": []
+  "description": "Funding (ADR-0016, ADR-0018). Rate per hour in Rate (1e-18), > 0 longs pay: interest = bps/yr / 8760 (trunc); skew = cap × clamp(netSkew/OIcap, −1, 1) (trunc); total = clamp(interest + skew, ±cap); Window D (cap null) = interest only. Settlement: owed = lots × mark × tickValue × rate × dtMs / (1e18 × 3 600 000); payers round up, receivers toward zero, residue (≥ 0) to fees.",
+  "status": "hand-derived by the build; awaiting a check against the founder spreadsheet. OIcap values are proposals (ADR-0018).",
+  "rateCases": [
+    {
+      "name": "Window D: interest only, no cap, skew ignored",
+      "interestBpsPerYear": 500,
+      "capPpmPerHour": null,
+      "oiCapMicroUsdc": null,
+      "netSkewMicroUsdc": "5000000000000",
+      "ratePerHour": "5707762557077",
+      "working": "interest = trunc(500 × 1e18 / (10 000 × 8 760)) = trunc(5 707 762 557 077.6) = 5707762557077 (≈ 0.000571 %/h); D has no cap and no skew term"
+    },
+    {
+      "name": "Window A, no skew: interest only",
+      "interestBpsPerYear": 500,
+      "capPpmPerHour": 300,
+      "oiCapMicroUsdc": "2000000000000",
+      "netSkewMicroUsdc": "0",
+      "ratePerHour": "5707762557077",
+      "working": "skew = 0; total = 5707762557077, inside ±3e14"
+    },
+    {
+      "name": "Window A, net long = OIcap/2",
+      "interestBpsPerYear": 500,
+      "capPpmPerHour": 300,
+      "oiCapMicroUsdc": "2000000000000",
+      "netSkewMicroUsdc": "1000000000000",
+      "ratePerHour": "155707762557077",
+      "working": "skew = 3e14 × 0.5 = 1.5e14; total = 1.5e14 + 5707762557077 = 155707762557077"
+    },
+    {
+      "name": "Window A, net long = OIcap: interest + skew clamped on the total",
+      "interestBpsPerYear": 500,
+      "capPpmPerHour": 300,
+      "oiCapMicroUsdc": "2000000000000",
+      "netSkewMicroUsdc": "2000000000000",
+      "ratePerHour": "300000000000000",
+      "working": "skew = 3e14; 3e14 + 5707762557077 = 305707762557077 > cap → 3e14"
+    },
+    {
+      "name": "Window A, net short = OIcap: −cap + interest stays inside the cap",
+      "interestBpsPerYear": 500,
+      "capPpmPerHour": 300,
+      "oiCapMicroUsdc": "2000000000000",
+      "netSkewMicroUsdc": "-2000000000000",
+      "ratePerHour": "-294292237442923",
+      "working": "skew = −3e14; −3e14 + 5707762557077 = -294292237442923, inside ±3e14 (cap on the sum, not on the skew)"
+    },
+    {
+      "name": "Window A, net short = 2 × OIcap: skew clamped at −1",
+      "interestBpsPerYear": 500,
+      "capPpmPerHour": 300,
+      "oiCapMicroUsdc": "2000000000000",
+      "netSkewMicroUsdc": "-4000000000000",
+      "ratePerHour": "-294292237442923",
+      "working": "clamp(−4e12/2e12, −1, 1) = −1 → same as net short = OIcap"
+    },
+    {
+      "name": "Window C, synthetic OIcap 300 000 USDC: skew truncated toward zero",
+      "interestBpsPerYear": 500,
+      "capPpmPerHour": 100,
+      "oiCapMicroUsdc": "300000000000",
+      "netSkewMicroUsdc": "100000000001",
+      "ratePerHour": "39041095890743",
+      "working": "skew = trunc(1e14 × 100 000 000 001 / 300 000 000 000) = trunc(33 333 333 333 666.67) = 33333333333666; + 5707762557077 = 39041095890743"
+    }
+  ],
+  "settlementCases": [
+    {
+      "name": "ASML long 1.00 vs house, 1 h of interest at 700.00",
+      "lots": ["100", "-100"],
+      "markTicks": "70000",
+      "tickValueMicroUsdc": "100",
+      "ratePerHour": "5707762557077",
+      "dtMs": "3600000",
+      "paymentsMicroUsdc": ["3996", "-3995"],
+      "residueMicroUsdc": "1",
+      "working": "owed = 100 × 70 000 × 100 × 5707762557077 / 1e18 = 700 000 000 × 5.707762557077e-6 = 3 995.43 µUSDC; payer ceil 3 996, receiver trunc 3 995; residue 1 → fees"
+    },
+    {
+      "name": "rounding: two payers at 0.5, one receiver at 1.0 (synthetic 50 %/h)",
+      "lots": ["1", "1", "-2"],
+      "markTicks": "1",
+      "tickValueMicroUsdc": "1",
+      "ratePerHour": "500000000000000000",
+      "dtMs": "3600000",
+      "paymentsMicroUsdc": ["1", "1", "-1"],
+      "residueMicroUsdc": "1",
+      "working": "owed 0.5, 0.5, −1.0 µUSDC; payers ceil → 1, 1; receiver trunc → −1; residue +1. Rounding everyone toward zero (ADR-0016 text) gives 0, 0, −1 = −1, which fees would have to fund (ADR-0018)"
+    },
+    {
+      "name": "shorts pay when the rate is negative: −cap for 30 min",
+      "lots": ["300", "-100", "-200"],
+      "markTicks": "70000",
+      "tickValueMicroUsdc": "100",
+      "ratePerHour": "-300000000000000",
+      "dtMs": "1800000",
+      "paymentsMicroUsdc": ["-315000", "105000", "210000"],
+      "residueMicroUsdc": "0",
+      "working": "per lot: 7 000 000 µUSDC × −3e-4 × 0.5 h = −1 050 µUSDC; long 300 receives 315 000, shorts pay 105 000 and 210 000; exact, residue 0"
+    }
+  ]
 }

@@ -91,7 +91,16 @@ where `L₀ = 1 000` and `Bᵢ` are the constituents' base prices. In the live t
 
 Breakers are evaluated each second on event time, logged with the market data the engine consumes, and shown in the terminal.
 
-## 7. Accuracy
+## 7. Funding
+
+- Funding settles every UTC hour. A positive rate means longs pay shorts; the house takes the other side of every user position.
+- **Rate per hour:** interest (5 % p.a.) plus a skew term, clamped to the window's cap on the total.
+  - The skew term grows linearly with net user exposure and reaches the cap at the window's OI cap.
+  - Window D charges interest only.
+- **Accrual:** funding accrues continuously in event time at the current mark, so a position held for half an hour pays half an hour.
+- **Rounding:** payers round up and receivers down to the µUSDC. The residue goes to the fee account.
+
+## 8. Accuracy
 
 The backtest (`docs/backtest/`) replays recorded or simulated ticks through the same code. It scores the FV against the next official open:
 
@@ -102,6 +111,6 @@ The backtest (`docs/backtest/`) replays recorded or simulated ticks through the 
 
 Public accuracy figures are published only from real `live-min` data.
 
-## 8. Worked examples
+## 9. Worked examples
 
-`docs/methodology/examples/` holds hand-derived examples (fees, liquidation price, FV) that CI checks against the production code.
+`docs/methodology/examples/` holds hand-derived examples (fees, liquidation price, FV, funding) that CI checks against the production code.
