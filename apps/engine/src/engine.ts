@@ -14,8 +14,10 @@ import { stateDigest } from './log/digest.ts';
 import { restoreFromLog, SnapshotMismatch } from './log/restore.ts';
 import { encodeState } from './log/state-codec.ts';
 import { EventStore } from './log/store.ts';
+import pg from 'pg';
+import { catchUpProjection, project, writeProjection } from './projections.ts';
 import { publishAll, publishBatch } from './publisher.ts';
-import { Sequencer } from './sequencer.ts';
+import { Sequencer, type BatchResult } from './sequencer.ts';
 
 export interface EngineOptions {
   readonly databaseUrl: string;
@@ -98,6 +100,33 @@ export async function startEngine(o: EngineOptions): Promise<RunningEngine> {
     o.log.info({ events: boot.events.length }, 'bootstrap inputs applied');
   await publishAll(valkey, state);
 
+  // Read models (M4-22): derived, so a failed write is logged and repaired by catch-up.
+  const rm = new pg.Pool({ connectionString: o.databaseUrl, max: 2 });
+  let rmBehind = true;
+  const catchUp = async () => {
+    try {
+      const n = await catchUpProjection(store.readAll(), rm);
+      if (n > 0n) o.log.info({ events: n.toString() }, 'read models caught up');
+      rmBehind = false;
+    } catch (err) {
+      o.log.warn({ err }, 'read-model catch-up failed; retrying with the next batch');
+    }
+  };
+  await catchUp();
+  const projectBatch = async (batch: BatchResult) => {
+    if (rmBehind) return catchUp();
+    const ts = new Map(batch.events.map((e) => [e.seq, e.ts]));
+    const last = batch.events.at(-1)?.seq;
+    if (last === undefined) return;
+    try {
+      const outputs = batch.outputs.map((x) => ({ ...x, ts: ts.get(x.seq) ?? 0n }));
+      await writeProjection(rm, project(outputs), last);
+    } catch (err) {
+      rmBehind = true;
+      o.log.warn({ err }, 'read-model write failed; will catch up');
+    }
+  };
+
   let stopping = false;
   let cursor = (await store.cursor()) ?? '0-0';
   const clock = setInterval(
@@ -136,6 +165,7 @@ export async function startEngine(o: EngineOptions): Promise<RunningEngine> {
         cursor = messages.at(-1)?.id ?? cursor;
         await publishBatch(valkey, state, batch);
         await maybeSnapshot();
+        await projectBatch(batch);
       } catch (err) {
         o.log.fatal({ err }, 'engine fail-stop: state may be ahead of the log; exiting to rebuild');
         process.exit(1);
@@ -152,6 +182,7 @@ export async function startEngine(o: EngineOptions): Promise<RunningEngine> {
       reader.disconnect();
       await loop.catch(() => undefined);
       valkey.disconnect();
+      await rm.end();
       await store.close();
     },
   };

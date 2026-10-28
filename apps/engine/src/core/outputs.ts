@@ -84,6 +84,14 @@ export type EngineOutput =
       /** Σ gross amounts debited from short accounts, µUSDC. */
       readonly paidByShorts: bigint;
     }
+  | {
+      /** A per-account cash flow outside trading (read models, M4-22). + = credited to the user. */
+      readonly type: 'CashFlow';
+      readonly account: AccountId;
+      readonly market: MarketId;
+      readonly kind: 'funding' | 'dividend';
+      readonly amount: bigint;
+    }
   | { readonly type: 'InputIgnored'; readonly input: string; readonly reason: string }
   | { readonly type: 'AccountChanged'; readonly account: AccountId }
   | { readonly type: 'MarketChanged'; readonly market: MarketId }

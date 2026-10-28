@@ -40,11 +40,25 @@ export function applyDividend(state: EngineState, d: DividendInput): EngineOutpu
       if (net === 0n) continue;
       state.ledger.post([{ from: SYSTEM.house, to: user, amount: usdc(net), reason: 'dividend' }]);
       paidToLongs += net;
+      out.push({
+        type: 'CashFlow',
+        account: acc.id,
+        market: d.market,
+        kind: 'dividend',
+        amount: net,
+      });
     } else {
       state.ledger.post([
         { from: user, to: SYSTEM.house, amount: usdc(gross), reason: 'dividend' },
       ]);
       paidByShorts += gross;
+      out.push({
+        type: 'CashFlow',
+        account: acc.id,
+        market: d.market,
+        kind: 'dividend',
+        amount: -gross,
+      });
     }
     out.push({ type: 'AccountChanged', account: acc.id });
   }

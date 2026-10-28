@@ -70,7 +70,10 @@ function settleHour(state: EngineState, m: MarketState, hour: bigint): EngineOut
         ? { from: user, to: SYSTEM.house, amount: usdc(pay), reason: 'funding' }
         : { from: SYSTEM.house, to: user, amount: usdc(-pay), reason: 'funding' },
     ]);
-    out.push({ type: 'AccountChanged', account: acc.id });
+    out.push(
+      { type: 'CashFlow', account: acc.id, market: m.id, kind: 'funding', amount: -pay },
+      { type: 'AccountChanged', account: acc.id },
+    );
   }
   return out;
 }
