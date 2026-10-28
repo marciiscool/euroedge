@@ -1,6 +1,6 @@
 # EuroEdge — PLAN.md (v2)
 
-> Status: **approved by founder 2026-10-27 ("go"). M0 complete; M1 complete on `integration/m1` (maths review pending, see `docs/milestones/m1.md`); M2 complete on `integration/m2` (see `docs/milestones/m2.md`); M3 next.** v1 was the proposal; v2 records the founder's decisions (§0).
+> Status: **approved by founder 2026-10-27 ("go"). M0 complete; M1 complete on `integration/m1` (maths review pending, see `docs/milestones/m1.md`); M2 complete on `integration/m2`; M3 complete on `integration/m3` (maths review pending, see `docs/milestones/m3.md`); M4 next.** v1 was the proposal; v2 records the founder's decisions (§0).
 > Structure: §0 decision log · §1 understanding · §2 brief review · §3 architecture & data flows · §4 verified stack versions · §5 task breakdown M0–M9 (+ LR track) · §6 risks & unknowns · §7 ADR index · §8 open questions.
 
 ---
