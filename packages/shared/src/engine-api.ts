@@ -117,6 +117,7 @@ export const rejectReasonSchema = z.enum([
   'would-take',
   'invalid-order',
   'market-frozen',
+  'oi-cap',
 ]);
 
 /** Circuit-breaker effect on a market (brief §6.5); carried on each MarketData input. */

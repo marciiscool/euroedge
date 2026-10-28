@@ -1,7 +1,12 @@
 import { formatDecimal, lots, lotsToQty, ticks, ticksToPrice, usdc } from '@euroedge/fixed';
 import { averageEntry, liquidationPrice } from '@euroedge/risk-core';
 import type { AccountSnapshot, MarketSnapshot, OrderResult } from '@euroedge/shared';
-import { accountEquity, accountMaintenance, positionUpnl } from './core/accounting.ts';
+import {
+  accountEquity,
+  accountMaintenance,
+  effectiveLeverage,
+  positionUpnl,
+} from './core/accounting.ts';
 import type { EngineOutput } from './core/outputs.ts';
 import { inventoryLimit } from './core/house-risk.ts';
 import { marketQuote } from './core/quote.ts';
@@ -31,7 +36,8 @@ export function marketSnapshot(state: EngineState, id: string): MarketSnapshot |
     bid: px(q.bid),
     ask: px(q.ask),
     sigmaBp: Number(d.sigmaPpm) / 100,
-    maxLeverage: Number(risk.maxLeverage),
+    // Effective: the window cap, stepped down during an earnings window (M4-08).
+    maxLeverage: Number(effectiveLeverage(m, state.ts)),
     takerFeeBps: Number(risk.takerFeeBps),
     tickSize: m.units.tickSize,
     lotSize: m.units.lotSize,

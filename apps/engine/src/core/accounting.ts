@@ -58,6 +58,33 @@ export function accountMaintenance(state: EngineState, account: AccountId): Usdc
 }
 
 /**
+ * Max leverage now: the window cap, stepped down by any earnings window covering `ts` (M4-08).
+ * 0 = reduce-only. Requires market data.
+ */
+export function effectiveLeverage(m: MarketState, ts: bigint): bigint {
+  let lev = m.data === undefined ? 0n : m.windows[m.data.window].maxLeverage;
+  for (const e of m.earnings.values())
+    if (ts >= e.startTs && ts < e.endTs && e.maxLeverage < lev) lev = e.maxLeverage;
+  return lev;
+}
+
+/** Gross user open interest in a market at mark, µUSDC, with `account` at `lots` instead. */
+export function grossOpenInterest(
+  state: EngineState,
+  m: MarketState,
+  account: AccountId,
+  lots: bigint,
+): bigint {
+  if (m.data === undefined) return 0n;
+  let total = 0n;
+  for (const acc of state.accounts.values()) {
+    const l = acc.id === account ? lots : (acc.positions.get(m.id)?.lots ?? 0n);
+    total += l < 0n ? -l : l;
+  }
+  return total * m.data.mark * m.units.tickValue;
+}
+
+/**
  * Σ initial margin at mark under each market's current window cap, for a hypothetical set
  * of positions. Returns undefined if any non-flat position sits in a reduce-only window.
  */
@@ -70,7 +97,7 @@ export function initialRequirement(
     if (pos.lots === 0n) continue;
     const m = marketOf(state, id);
     if (m.data === undefined) return undefined;
-    const lev = m.windows[m.data.window].maxLeverage;
+    const lev = effectiveLeverage(m, state.ts);
     if (lev === 0n) return undefined;
     im += initialMargin(notionalUsdc(pos.lots, m.data.mark, m.units.tickValue), lev);
   }

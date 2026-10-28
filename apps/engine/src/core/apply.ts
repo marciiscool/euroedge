@@ -13,7 +13,7 @@ import { applyDividend } from './dividends.ts';
 import { adjustMarket, freezeMarket, unfreezeMarket } from './corporate-actions.ts';
 import { HOUR_MS, settleFunding } from './funding.ts';
 import type { EngineOutput } from './outputs.ts';
-import type { EngineState } from './state.ts';
+import type { EarningsStep, EngineState } from './state.ts';
 
 /**
  * The deterministic reducer (ADR-0001): applies one logged input to the state and returns
@@ -94,6 +94,7 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
         data: existing?.data,
         house: existing?.house ?? FLAT,
         corporateAction: existing?.corporateAction ?? null,
+        earnings: existing?.earnings ?? new Map<string, EarningsStep>(),
       });
       return [{ type: 'MarketChanged', market: input.market }];
     }
@@ -178,6 +179,18 @@ function dispatch(state: EngineState, input: EngineInput, ts: bigint): EngineOut
 
     case 'CancelOrder':
       return cancelOrder(state, input);
+
+    case 'EarningsWindow': {
+      const m = state.markets.get(input.market);
+      if (m === undefined) return ignored(input, 'unknown market');
+      if (input.endTs <= input.startTs) return ignored(input, 'empty window');
+      m.earnings.set(input.id, {
+        startTs: input.startTs,
+        endTs: input.endTs,
+        maxLeverage: input.maxLeverage,
+      });
+      return [{ type: 'MarketChanged', market: m.id }];
+    }
 
     case 'CorporateActionFreeze':
       return freezeMarket(state, input, (market) => cancelMarketOrders(state, market));

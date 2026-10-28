@@ -31,6 +31,7 @@ export function marketListedInput(
       impactAlphaHalves: p.impactAlpha === '2' ? 4n : 3n,
       inventoryHardCap:
         p.inventoryHardCapUsdc === null ? null : usdc(BigInt(p.inventoryHardCapUsdc) * USDC_UNITS),
+      oiCap: p.oiCapUsdc === null ? null : usdc(BigInt(p.oiCapUsdc) * USDC_UNITS),
     };
   };
   return {

@@ -79,7 +79,7 @@ describe('snapshot restore and log verifier (M4-19)', () => {
   it('treats an older snapshot format or an unreadable body as a mismatch, not a crash', async () => {
     const { events, records } = session();
     const good = snapshotAt(events, records, 5);
-    const old = Buffer.from(good.body.toString('utf8').replace('"format":2', '"format":1'));
+    const old = Buffer.from(good.body.toString('utf8').replace('"format":3', '"format":2'));
     await expect(restoreFromLog(records, { ...good, body: old })).rejects.toThrow(SnapshotMismatch);
     await expect(
       restoreFromLog(records, { ...good, body: Buffer.from('not json') }),

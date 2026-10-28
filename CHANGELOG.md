@@ -26,6 +26,10 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Margin add-ons (M4-08), both off by default:
+  - Gross open-interest cap per window (`oiCapUsdc`): an order adding exposure past it is rejected `oi-cap`.
+  - Earnings leverage step (`EarningsWindow` input): inside the window, new orders, initial margin and withdrawals use the lower leverage, and the market snapshot shows it.
+  - `MarketListed` v6; snapshot format 3.
 - Engine benchmark (M4-28): `pnpm --filter @euroedge/engine bench`.
   - Measures core apply latency (200 accounts, invariants on every event) and, with `DATABASE_URL`, acknowledged-order latency including the hash-chained Postgres commit at 50 orders/s.
   - It writes a GitHub job summary when run in CI; the non-blocking CI step is pending a token with `workflow` scope (snippet in `docs/milestones/m4.md`).

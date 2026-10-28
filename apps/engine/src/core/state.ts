@@ -23,6 +23,12 @@ export interface MarketData {
   readonly ts: bigint;
 }
 
+export interface EarningsStep {
+  readonly startTs: bigint;
+  readonly endTs: bigint;
+  readonly maxLeverage: bigint;
+}
+
 export interface MarketState {
   readonly id: MarketId;
   readonly kind: 'stock' | 'basket';
@@ -48,6 +54,8 @@ export interface MarketState {
   house: Position;
   /** Corporate action in progress (M4-17): the market is frozen for user orders. */
   corporateAction: { readonly id: string; readonly adjusted: boolean } | null;
+  /** Earnings leverage steps by id (M4-08). */
+  readonly earnings: Map<string, EarningsStep>;
 }
 
 export interface AccountState {
@@ -77,7 +85,8 @@ export type RejectReason =
   | 'house-loss-limit'
   | 'would-take'
   | 'invalid-order'
-  | 'market-frozen';
+  | 'market-frozen'
+  | 'oi-cap';
 
 export interface Fill {
   readonly market: MarketId;
