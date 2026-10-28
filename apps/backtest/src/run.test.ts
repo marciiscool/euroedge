@@ -56,3 +56,31 @@ describe('runBacktest on the committed sample', () => {
     expect(report.markets['NOVO-PERP']?.opens).toBe(5); // DKK line converted via EURDKK
   }, 120_000);
 });
+
+describe('fitSigmaFloors (M3-16)', () => {
+  it('recommends floors that reach the target coverage out of sample', async () => {
+    const { fitSigmaFloors } = await import('./fit.ts');
+    const { scoreTicks } = await import('./run.ts');
+    const file = fileURLToPath(
+      new URL('../../../data/sample/sim-2027-03-15_2027-03-31.csv.gz', import.meta.url),
+    );
+    const ticks = await loadTickFile(file);
+    const params = await loadFvParams();
+    const markets = (await loadMarkets()).filter(
+      (m) => m.id === 'SAP-PERP' || m.id === 'ASML-PERP',
+    );
+    const { samples } = scoreTicks(ticks, {
+      markets,
+      params,
+      stepCapBpsPerSecond: 50,
+      data: [file],
+    });
+    const fit = fitSigmaFloors(samples, params);
+    expect(fit.sigmaFloorBp.B.recommendedFloorBp).toBeGreaterThan(params.sigmaFloorBp.B);
+    expect(fit.sigmaFloorBp.B.testCoverageRecommended).toBeGreaterThan(
+      fit.sigmaFloorBp.B.testCoverageCurrent,
+    );
+    for (const w of ['A', 'B', 'C', 'D'] as const)
+      expect(fit.sigmaFloorBp[w].recommendedFloorBp).toBeGreaterThanOrEqual(params.sigmaFloorBp[w]);
+  }, 180_000);
+});

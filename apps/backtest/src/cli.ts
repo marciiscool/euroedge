@@ -10,6 +10,7 @@ Options:
   --from <date>  First UTC date (YYYY-MM-DD)
   --to <date>    Last UTC date (YYYY-MM-DD)
   --out <file>   Report JSON path (default: stdout)
+  --fit          Output a σ-floor fit proposal instead of the report (M3-16)
   -h, --help     Show this help`;
 
 export interface BacktestArgs {
@@ -18,6 +19,7 @@ export interface BacktestArgs {
   readonly from?: string;
   readonly to?: string;
   readonly out?: string;
+  readonly fit?: boolean;
 }
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -32,6 +34,7 @@ export function parseCliArgs(argv: readonly string[]): BacktestArgs {
       from: { type: 'string' },
       to: { type: 'string' },
       out: { type: 'string' },
+      fit: { type: 'boolean', default: false },
     },
   });
   for (const key of ['from', 'to'] as const) {
@@ -44,5 +47,6 @@ export function parseCliArgs(argv: readonly string[]): BacktestArgs {
     ...(values.from === undefined ? {} : { from: values.from }),
     ...(values.to === undefined ? {} : { to: values.to }),
     ...(values.out === undefined ? {} : { out: values.out }),
+    ...(values.fit ? { fit: true } : {}),
   };
 }
