@@ -42,6 +42,13 @@ export function placeLimitOrder(
   return out;
 }
 
+/**
+ * Reasons a resting order waits instead of being cancelled: not marketable yet, or a
+ * circuit breaker blocking new exposure for now (brief §6.5). Breakers are temporary, so
+ * the order survives and can fill once the breaker clears.
+ */
+const KEEP_RESTING: ReadonlySet<RejectReason> = new Set(['not-marketable', 'circuit-breaker']);
+
 /** Matches resting orders of one market against the current quote, oldest first. */
 export function matchResting(state: EngineState, market: string): EngineOutput[] {
   const out: EngineOutput[] = [];
@@ -57,7 +64,7 @@ export function matchResting(state: EngineState, market: string): EngineOutput[]
       limitPrice: r.limitPrice,
       maker: true,
     });
-    if (outcome.status === 'rejected' && outcome.reason === 'not-marketable') continue;
+    if (outcome.status === 'rejected' && KEEP_RESTING.has(outcome.reason)) continue;
     state.orders.delete(key);
     out.push(
       outcome.status === 'filled'
