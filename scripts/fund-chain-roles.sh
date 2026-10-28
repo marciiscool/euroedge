@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Passes Base Sepolia ETH from the deployer to the relayer and the root poster (M5-14), so only
-# one address has to be funded from a faucet. Usage: pnpm chain:fund [amount, default 0.002]
+# one address has to be funded from a faucet. Usage: pnpm chain:fund [amount, default 0.0001]
 set -euo pipefail
 cd "$(dirname "$0")/.."
 BIN="${FOUNDRY_BIN:+$FOUNDRY_BIN/}"
-AMOUNT="${1:-0.002}"
+AMOUNT="${1:-0.0001}"
 set -a
 # shellcheck disable=SC1091
 source .env

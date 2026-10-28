@@ -53,21 +53,21 @@ check(
   'all four keys are different',
   'keys must be four different keys (brief §12)',
 );
-// Base Sepolia gas is tiny: the whole deploy costs well under 0.001 ETH. Fund only the
+// Base Sepolia gas is tiny: the whole deploy costs ≈ 0.0001 ETH (2026-10-28). Fund only the
 // deployer; `pnpm chain:fund` passes some on to the relayer and the root poster.
 if (client !== undefined) {
   const balance = async (a: Address | undefined) =>
     a === undefined ? 0 : Number(formatEther(await client.getBalance({ address: a })));
   const dep = await balance(roles.deployer);
   check(
-    dep >= 0.005,
+    dep >= 0.0003,
     `deployer holds ${dep.toFixed(4)} ETH`,
-    `deployer ${String(roles.deployer)} holds ${dep.toFixed(4)} ETH: send it at least 0.005 Base Sepolia ETH`,
+    `deployer ${String(roles.deployer)} holds ${dep.toFixed(4)} ETH: send it at least 0.0003 Base Sepolia ETH`,
   );
   for (const role of ['relayer', 'rootPoster'] as const) {
     const eth = await balance(roles[role]);
     optional(
-      eth >= 0.001,
+      eth >= 0.00005,
       `${role} holds ${eth.toFixed(4)} ETH`,
       `${role} has no ETH yet: run \`pnpm chain:fund\` once the deployer is funded`,
     );
