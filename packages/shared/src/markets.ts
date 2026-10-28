@@ -191,6 +191,8 @@ export const windowsFileSchema = z.object({
   maintenanceMarginBps: z.object({ stock: bps, basket: bps }),
   /** Liquidation penalty to the insurance fund (ADR-0016). */
   liquidationPenaltyBps: z.object({ stock: bps, basket: bps }),
+  /** Partial liquidation restores equity to MM × (1 + buffer) (M4). */
+  partialLiquidationBufferBps: bps,
   /** Funding interest component, longs pay shorts (ADR-0016). */
   fundingInterestBpsPerYear: bps,
   /** Mark step cap outside SNAP (ADR-0009). */

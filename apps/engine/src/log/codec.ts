@@ -54,6 +54,7 @@ export const inputSchema = z.discriminatedUnion('type', [
     maintenanceMarginBps: pos,
     liquidationPenaltyBps: nonNeg,
     fundingInterestBpsPerYear: nonNeg.default(0n),
+    partialLiquidationBufferBps: nonNeg.nullable().default(null),
     windows: z.object({ A: windowRisk, B: windowRisk, C: windowRisk, D: windowRisk }),
   }),
   z.object({

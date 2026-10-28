@@ -45,6 +45,8 @@ export type EngineInput =
       readonly minNotional: Usdc;
       readonly maintenanceMarginBps: bigint;
       readonly liquidationPenaltyBps: bigint;
+      /** Partial liquidation target buffer over MM, bps; null = full liquidation only (v1 logs). */
+      readonly partialLiquidationBufferBps: bigint | null;
       /** Funding interest component, longs pay shorts (ADR-0016). */
       readonly fundingInterestBpsPerYear: bigint;
       readonly windows: Readonly<Record<WindowId, WindowRisk>>;

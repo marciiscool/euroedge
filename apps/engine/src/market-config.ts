@@ -32,6 +32,7 @@ export function marketListedInput(
     minNotional: usdc(parseDecimal(m.minNotional, 6)),
     maintenanceMarginBps: BigInt(w.maintenanceMarginBps[m.kind]),
     fundingInterestBpsPerYear: BigInt(w.fundingInterestBpsPerYear),
+    partialLiquidationBufferBps: BigInt(w.partialLiquidationBufferBps),
     liquidationPenaltyBps: BigInt(w.liquidationPenaltyBps[m.kind]),
     windows: { A: risk('A'), B: risk('B'), C: risk('C'), D: risk('D') },
   };

@@ -24,6 +24,11 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - `PlaceOrder` v2 and a new `CancelOrder` input; open orders appear in the account snapshot.
   - API: `type`/`limitPrice` on `POST /api/orders`, and `DELETE /api/orders/:id`.
   - Terminal: a market/limit switch, a limit price field and an open-orders table with cancel.
+- Partial-first liquidation:
+  - The engine closes the fewest lots of the triggering position, at mark with the penalty to insurance, so that equity is back at MM × (1 + buffer).
+  - Formula: `k = ⌈(T·MM·10⁴ − E·10⁸) / (mark·tv·(T·mm − pen·10⁴))⌉` with `T = 10⁴ + buffer`.
+  - It falls back to full liquidation if that is impossible or would leave less than the minimum notional.
+  - New `partialLiquidationBufferBps: 2500` in `windows.yaml` (proposed); v1 logs keep full liquidation.
 
 ### M3 — Full fv-core (in progress, on `integration/m3`)
 
