@@ -21,7 +21,8 @@ export type PostingReason =
   | 'realized-pnl'
   | 'funding'
   | 'liquidation-penalty'
-  | 'insurance-cover';
+  | 'insurance-cover'
+  | 'dividend';
 
 /** One balanced transfer: `from` −amount, `to` +amount. */
 export interface Posting {

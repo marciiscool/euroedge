@@ -75,6 +75,15 @@ export type EngineOutput =
       readonly amount: bigint;
       readonly outcome: 'executed' | 'expired';
     }
+  | {
+      readonly type: 'DividendApplied';
+      readonly market: MarketId;
+      readonly exDate: string;
+      /** Σ net amounts credited to long accounts, µUSDC. */
+      readonly paidToLongs: bigint;
+      /** Σ gross amounts debited from short accounts, µUSDC. */
+      readonly paidByShorts: bigint;
+    }
   | { readonly type: 'InputIgnored'; readonly input: string; readonly reason: string }
   | { readonly type: 'AccountChanged'; readonly account: AccountId }
   | { readonly type: 'MarketChanged'; readonly market: MarketId }

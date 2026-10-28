@@ -26,6 +26,10 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Dividend cash flows (M4-16):
+  - New `DividendExDate` input: longs receive ⌊gross × (1 − withholding)⌋, shorts pay gross, the house takes the opposite.
+  - Applied once per market and ex-date; underwater accounts are liquidated afterwards.
+  - Withholding default 15 % (proposal).
 - Time in force and post-only for limit orders (M4-05/06):
   - `timeInForce: ioc | fok` fills at once or is rejected and never rests; with full fills only, FOK behaves like IOC.
   - `postOnly` rejects a limit that would take at placement (`would-take`), otherwise it rests as a maker.
