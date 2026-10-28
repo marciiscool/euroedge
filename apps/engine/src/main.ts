@@ -25,6 +25,7 @@ await runService(
       windows: await loadWindows(),
       log: service.log,
       snapshotEvery: config.ENGINE_SNAPSHOT_EVERY,
+      genesisSource: config.GENESIS_SOURCE,
     });
     healthy = true;
     service.onShutdown(() => engine.stop());

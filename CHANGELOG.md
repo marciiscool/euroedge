@@ -8,6 +8,13 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Base Sepolia go-live kit (M5-14):
+  - `pnpm chain:check` validates `.env` before and after the deploy (addresses, balances, Safe, Vault signer; never prints a key).
+  - `scripts/deploy-base-sepolia.sh` deploys and verifies from the keys in `.env`.
+  - Runbook `docs/runbooks/base-sepolia.md`.
+  - `GENESIS_SOURCE=chain` makes the engine wait for the Vault's genesis.
+  - With contracts configured, the API disables the sign-in play-money credit and the dev login, so every balance is backed by the Vault.
+  - `scripts/stack.sh` also starts relayer, indexer and signer (idle unless enabled).
 - Web funds panel (M5), shown after wallet sign-in:
   - Shows the wallet's Test USDC and how much can still be claimed.
   - Claim and deposit are one click each: the Privy wallet signs, the relayer pays gas.

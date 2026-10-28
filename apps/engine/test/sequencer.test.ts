@@ -89,6 +89,10 @@ describe('bootstrapInputs', () => {
     expect(bootstrapInputs(state, markets, limit, 'sim')).toEqual([
       { type: 'HouseRiskParams', dailyLossLimit: 1_000_000n * USDC },
     ]);
+    // With a deployed Vault, genesis only comes from the chain (M5-14).
+    expect(
+      bootstrapInputs(createState(), markets, windows, 'sim', 'chain').map((i) => i.type),
+    ).not.toContain('GenesisCapital');
     expect(bootstrapInputs(createState(), markets, windows, 'live-min').map((i) => i.type)).toEqual(
       ['HouseRiskParams', 'MarketListed'],
     );
