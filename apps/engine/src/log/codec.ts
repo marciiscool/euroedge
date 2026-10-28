@@ -7,7 +7,7 @@ import { canonicalBytes } from './canonical.ts';
 export const EVENT_VERSIONS: Readonly<Record<EngineInput['type'], number>> = {
   ClockTick: 1,
   GenesisCapital: 1,
-  MarketListed: 5,
+  MarketListed: 6,
   MarketData: 2,
   DevDeposit: 1,
   PlaceOrder: 4,
@@ -16,6 +16,7 @@ export const EVENT_VERSIONS: Readonly<Record<EngineInput['type'], number>> = {
   ClosePosition: 1,
   RequestWithdrawal: 1,
   DividendExDate: 1,
+  EarningsWindow: 1,
   CorporateActionFreeze: 1,
   CorporateActionAdjust: 1,
   CorporateActionUnfreeze: 1,
@@ -50,6 +51,7 @@ const windowRisk = z.object({
   impactAlphaHalves: z.enum(['3', '4']).transform(BigInt).default(3n),
   // v1–v4 logs predate the inventory hard cap.
   inventoryHardCap: pos.nullable().default(null),
+  oiCap: pos.nullable().default(null),
 });
 
 /** Decoders: canonical JSON (bigints as strings) → typed inputs. */
@@ -109,6 +111,14 @@ export const inputSchema = z.discriminatedUnion('type', [
   }),
   z.object({ type: z.literal('HouseRiskParams'), dailyLossLimit: pos.nullable() }),
   z.object({ type: z.literal('CancelOrder'), requestId: id, account: id, orderId: id }),
+  z.object({
+    type: z.literal('EarningsWindow'),
+    market: id,
+    id,
+    startTs: nonNeg,
+    endTs: nonNeg,
+    maxLeverage: pos,
+  }),
   z.object({ type: z.literal('CorporateActionFreeze'), market: id, actionId: id }),
   z.object({
     type: z.literal('CorporateActionAdjust'),

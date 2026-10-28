@@ -188,6 +188,8 @@ export const windowParamsSchema = z.object({
   impactRefUsdc: z.number().int().min(1),
   /** House inventory (whole USDC at FV) past which the market is reduce-only (M4-14); null = none. */
   inventoryHardCapUsdc: z.number().int().min(1).nullable(),
+  /** Gross user open interest (whole USDC at mark) past which new exposure is refused (M4-08); null = none. */
+  oiCapUsdc: z.number().int().min(1).nullable().default(null),
   /** α of the convex impact (ADR-0003: 1.5–2; integer maths supports these two). */
   impactAlpha: z.enum(['1.5', '2']),
   fundingOiCapUsdc: z.number().int().min(0),

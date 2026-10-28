@@ -13,6 +13,7 @@ export const M1_QUOTE = {
   impactRef: usdc(1n),
   impactAlphaHalves: 3n,
   inventoryHardCap: null,
+  oiCap: null,
 } as const;
 
 /** windows.yaml values as engine params. */

@@ -7,7 +7,12 @@ import {
   withinPriceLimit,
   type Position,
 } from '@euroedge/risk-core';
-import { accountEquity, initialRequirement } from './accounting.ts';
+import {
+  accountEquity,
+  effectiveLeverage,
+  grossOpenInterest,
+  initialRequirement,
+} from './accounting.ts';
 import { recordFlow } from './flow.ts';
 import { inventoryRejection } from './house-risk.ts';
 import { executablePrice } from './quote.ts';
@@ -113,7 +118,10 @@ export function decide(state: EngineState, o: OrderRequest): OrderOutcome {
   const realized = r.realized * m.units.tickValue;
 
   if (!reduces) {
-    if (risk.maxLeverage === 0n) return reject('reduce-only-window');
+    if (effectiveLeverage(m, state.ts) === 0n) return reject('reduce-only-window');
+    // Gross OI cap (M4-08): an order that adds exposure may not take user OI past it.
+    if (risk.oiCap !== null && grossOpenInterest(state, m, o.account, r.position.lots) > risk.oiCap)
+      return reject('oi-cap');
     const after = new Map<MarketId, Position>(acc.positions);
     after.set(o.market, r.position);
     const im = initialRequirement(state, after);

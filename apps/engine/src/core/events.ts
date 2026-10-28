@@ -38,6 +38,8 @@ export interface WindowRisk {
   readonly impactAlphaHalves: bigint;
   /** House inventory (µUSDC at FV) past which the market is reduce-only; null = none (M4-14). */
   readonly inventoryHardCap: Usdc | null;
+  /** Gross user OI cap at mark, µUSDC (M4-08); null = none. */
+  readonly oiCap: Usdc | null;
 }
 
 export interface FlowParams {
@@ -152,6 +154,18 @@ export type EngineInput =
       readonly grossPerShare: Ticks;
       /** Withholding on what longs receive, bps (config per market; proposal 1 500). */
       readonly withholdingBps: bigint;
+    }
+  | {
+      /**
+       * Earnings leverage step (M4-08): from `startTs` to `endTs` (event-time ms) new exposure
+       * and initial margin in the market use at most `maxLeverage`. Same id replaces.
+       */
+      readonly type: 'EarningsWindow';
+      readonly market: MarketId;
+      readonly id: string;
+      readonly startTs: bigint;
+      readonly endTs: bigint;
+      readonly maxLeverage: bigint;
     }
   | {
       /** Admin (M4-17): freeze a market for a corporate action; resting orders are cancelled. */
