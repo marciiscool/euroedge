@@ -76,6 +76,16 @@ describe('snapshot restore and log verifier (M4-19)', () => {
     await expect(restoreFromLog(records.slice(0, 3), good)).rejects.toThrow(/ahead of the log/);
   });
 
+  it('treats an older snapshot format or an unreadable body as a mismatch, not a crash', async () => {
+    const { events, records } = session();
+    const good = snapshotAt(events, records, 5);
+    const old = Buffer.from(good.body.toString('utf8').replace('"format":2', '"format":1'));
+    await expect(restoreFromLog(records, { ...good, body: old })).rejects.toThrow(SnapshotMismatch);
+    await expect(
+      restoreFromLog(records, { ...good, body: Buffer.from('not json') }),
+    ).rejects.toThrow(SnapshotMismatch);
+  });
+
   it('still verifies the whole chain when restoring from a snapshot', async () => {
     const { events, records } = session();
     const tampered = records.map((r, i) =>

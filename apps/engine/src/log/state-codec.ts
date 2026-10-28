@@ -9,7 +9,8 @@ import { canonicalBytes } from './canonical.ts';
  * the core: restore(snapshot at n) + replay(n+1…) must equal replay(1…) bit for bit.
  */
 
-export const STATE_FORMAT = 1;
+/** 2: withdrawals, dividends and corporate-action freezes joined the state (M4). */
+export const STATE_FORMAT = 2;
 
 type Plain = null | boolean | number | string | Plain[] | { [k: string]: Plain };
 

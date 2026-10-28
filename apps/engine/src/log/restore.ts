@@ -40,8 +40,17 @@ export async function restoreFromLog(
   let state = createState();
   let pending: EngineState | undefined;
   if (snapshot !== undefined) {
-    pending = decodeState(snapshot.body);
-    if (stateDigest(pending) !== snapshot.digest)
+    // An unreadable or older-shape snapshot is a mismatch too: the caller replays from genesis.
+    let digest: string;
+    try {
+      pending = decodeState(snapshot.body);
+      digest = stateDigest(pending);
+    } catch (err) {
+      throw new SnapshotMismatch(
+        `snapshot ${snapshot.seq}: unreadable (${err instanceof Error ? err.message : 'error'})`,
+      );
+    }
+    if (digest !== snapshot.digest)
       throw new SnapshotMismatch(`snapshot ${snapshot.seq}: digest does not match its body`);
   }
   let prev = GENESIS_HASH;
