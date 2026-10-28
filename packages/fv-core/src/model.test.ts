@@ -25,6 +25,7 @@ const params: FvParams = {
     basketCooldownSeconds: 900,
     markPinnedSeconds: 60,
   },
+  snap: { capSuspendSeconds: 60, outsideBandReduceOnlySeconds: 300 },
 };
 const T0 = 1_793_000_000_000;
 const model = () =>

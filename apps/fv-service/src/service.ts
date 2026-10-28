@@ -140,6 +140,9 @@ export async function startFvService(o: FvServiceOptions): Promise<RunningFvServ
           mark: u.mark,
           bandLo: u.bandLo,
           bandHi: u.bandHi,
+          ...(s.snap === undefined
+            ? {}
+            : { snap: { ts: s.snap.ts, outsideBand: s.snap.outsideBand } }),
         },
         global,
       );

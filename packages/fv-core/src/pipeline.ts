@@ -20,7 +20,10 @@ export class MarketFvPipeline {
   private readonly calendar: CalendarCache;
   private readonly tickSize: number;
   private readonly stepCap: number;
-  private prev: { mark: bigint; ts: number } | undefined;
+  private prev: { mark: bigint; ts: number; bandLo: number; bandHi: number } | undefined;
+  private readonly primaryKey: string;
+  private snap: { price: number; ts: number; outsideBand: boolean | undefined } | undefined;
+  private readonly params: FvParams;
 
   constructor(
     market: MarketConfig,
@@ -32,6 +35,8 @@ export class MarketFvPipeline {
     this.calendar = calendar;
     this.tickSize = Number(market.tickSize);
     this.stepCap = stepCapBpsPerSecond;
+    this.params = params;
+    this.primaryKey = `${market.primaryMic}:${market.primarySymbol ?? ''}`;
     if (market.kind !== 'stock' || market.primarySymbol === undefined)
       throw new Error(`${market.id}: baskets use BasketFvPipeline`);
     const ccy = market.primaryCcy;
@@ -80,6 +85,15 @@ export class MarketFvPipeline {
 
   onTick(t: Tick): void {
     this.model.onTick(t);
+    // Snap source (sim and real-time primary): the official opening-auction print, never indicatives.
+    if (
+      t.kind === 'auction' &&
+      `${t.instrument.venue}:${t.instrument.symbol}` === this.primaryKey
+    ) {
+      const p = this.model.lastPrimary();
+      if (p !== undefined && p.ts === t.ts)
+        this.snap = { price: p.value, ts: t.ts, outsideBand: undefined };
+    }
   }
 
   /** Evaluates at `ts`; undefined until the first anchor is known. */
@@ -90,15 +104,43 @@ export class MarketFvPipeline {
     );
     const adrLive =
       this.market.adr !== undefined && this.calendar.isVenueOpen(this.market.adr.venue, ts);
-    const snapshot = this.model.evaluate(ts, { window, adrLive });
-    if (snapshot === undefined) return undefined;
+    const raw = this.model.evaluate(ts, { window, adrLive });
+    if (raw === undefined) return undefined;
+    const snapshot = this.applySnap(raw, ts);
+    const snapping = snapshot.snap !== undefined;
     const update = toEngineUpdate(snapshot, {
       tickSize: this.tickSize,
       prevMark: this.prev?.mark,
       dtMs: this.prev === undefined ? 0 : ts - this.prev.ts,
-      stepCapBpsPerSecond: this.stepCap,
+      // The 50 bp/s step cap is suspended during SNAP; the band still clamps (ADR-0009).
+      stepCapBpsPerSecond: snapping ? 1_000_000 : this.stepCap,
     });
-    this.prev = { mark: update.mark, ts };
+    this.prev = { mark: update.mark, ts, bandLo: snapshot.bandLo, bandHi: snapshot.bandHi };
     return { snapshot, update };
+  }
+
+  /**
+   * SNAP (brief §6.4): for `capSuspendSeconds` after the opening print, FV, index and the band
+   * centre move to the snap price. An open outside the prior band is flagged (→ reduce-only).
+   */
+  private applySnap(s: FvSnapshot, ts: number): FvSnapshot {
+    const snap = this.snap;
+    if (snap === undefined || ts < snap.ts) return s;
+    if (ts - snap.ts >= this.params.snap.capSuspendSeconds * 1000) {
+      this.snap = undefined;
+      return s;
+    }
+    if (snap.outsideBand === undefined)
+      snap.outsideBand =
+        this.prev !== undefined && (snap.price < this.prev.bandLo || snap.price > this.prev.bandHi);
+    const k = snap.price / s.fv;
+    return {
+      ...s,
+      fv: snap.price,
+      index: snap.price,
+      bandLo: s.bandLo * k,
+      bandHi: s.bandHi * k,
+      snap: { price: snap.price, ts: snap.ts, outsideBand: snap.outsideBand },
+    };
   }
 }

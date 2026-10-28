@@ -65,6 +65,8 @@ export interface FvSnapshot {
   readonly fxAlert: boolean;
   /** Baskets only: constituents dropped for missing data. */
   readonly dropped?: readonly string[];
+  /** Reopen snap state (brief §6.4), set by the pipeline. */
+  readonly snap?: { readonly price: number; readonly ts: number; readonly outsideBand: boolean };
 }
 
 interface Obs {
@@ -106,6 +108,11 @@ export class FvModel {
       ...(cfg.adr === undefined ? {} : { adr: instrumentKey(cfg.adr.ref) }),
       ...(cfg.conversionFx === undefined ? {} : { conv: instrumentKey(cfg.conversionFx) }),
     };
+  }
+
+  /** Last primary print in EUR (trades and the opening auction). */
+  lastPrimary(): { readonly value: number; readonly ts: number } | undefined {
+    return this.primary;
   }
 
   /** Instruments this model consumes. */
