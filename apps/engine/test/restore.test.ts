@@ -5,9 +5,9 @@ import { chainHash, encodeEvent, EVENT_VERSIONS, GENESIS_HASH } from '../src/log
 import { stateDigest } from '../src/log/digest.ts';
 import { replay } from '../src/log/replay.ts';
 import { restoreFromLog, SnapshotMismatch, verifyLog, type Snapshot } from '../src/log/restore.ts';
-import { encodeState } from '../src/log/state-codec.ts';
+import { decodeState, encodeState } from '../src/log/state-codec.ts';
 import type { StoredRecord } from '../src/log/store.ts';
-import { data, Harness, order } from './fixtures.ts';
+import { data, Harness, listASML, order } from './fixtures.ts';
 
 /** A trading session as hash-chained records, plus the events. */
 function session() {
@@ -102,5 +102,14 @@ describe('snapshot restore and log verifier (M4-19)', () => {
       'snapshot 6: digest ≠ replay',
       `snapshot 99 is ahead of the log (${events.length})`,
     ]);
+  });
+});
+
+describe('state snapshot of a market without data yet', () => {
+  it('round-trips a listed but unpriced market', () => {
+    const h = new Harness();
+    h.run(listASML);
+    expect(h.state.markets.get('ASML-PERP')?.data).toBeUndefined();
+    expect(stateDigest(decodeState(encodeState(h.state)))).toBe(stateDigest(h.state));
   });
 });

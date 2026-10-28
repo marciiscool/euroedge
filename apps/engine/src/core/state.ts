@@ -72,7 +72,9 @@ export type RejectReason =
   | 'would-trigger'
   | 'house-one-sided'
   | 'house-inventory'
-  | 'house-loss-limit';
+  | 'house-loss-limit'
+  | 'would-take'
+  | 'invalid-order';
 
 export interface Fill {
   readonly market: MarketId;

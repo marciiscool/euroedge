@@ -114,6 +114,8 @@ export const rejectReasonSchema = z.enum([
   'house-one-sided',
   'house-inventory',
   'house-loss-limit',
+  'would-take',
+  'invalid-order',
 ]);
 
 /** Circuit-breaker effect on a market (brief §6.5); carried on each MarketData input. */

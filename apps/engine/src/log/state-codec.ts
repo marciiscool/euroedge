@@ -23,8 +23,9 @@ function toPlain(v: unknown): Plain {
   if (typeof v === 'object' && v !== null && Object.getPrototypeOf(v) === Object.prototype) {
     const out: Record<string, Plain> = {};
     for (const [k, x] of Object.entries(v)) {
-      if (x === undefined) throw new TypeError(`undefined at "${k}" in engine state`);
-      out[k] = toPlain(x);
+      // An absent optional field (e.g. `data` of a market listed but not yet priced) is
+      // omitted, and decodes back as absent.
+      if (x !== undefined) out[k] = toPlain(x);
     }
     return out;
   }

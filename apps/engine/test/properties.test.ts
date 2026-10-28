@@ -35,6 +35,8 @@ type Step =
       /** Offset of the limit / trigger from the current price, bp. */
       bp: number;
       oco: number | null;
+      tif: 'gtc' | 'ioc' | 'fok';
+      postOnly: boolean;
     }
   | { kind: 'cancel'; account: string; key: number }
   | { kind: 'withdraw'; account: string; amount: bigint; key: number }
@@ -78,7 +80,7 @@ const step: fc.Arbitrary<Step> = fc.oneof(
     }),
   },
   {
-    weight: 3,
+    weight: 4,
     arbitrary: fc.record({
       kind: fc.constant('resting' as const),
       account: fc.constantFrom(...ACCOUNTS),
@@ -94,6 +96,9 @@ const step: fc.Arbitrary<Step> = fc.oneof(
       ),
       bp: fc.integer({ min: -150, max: 150 }),
       oco: fc.option(fc.integer({ min: 0, max: 2 })),
+      // Mostly GTC and not post-only, so the generator still produces plenty of resting fills.
+      tif: fc.constantFrom<'gtc' | 'ioc' | 'fok'>('gtc', 'gtc', 'gtc', 'gtc', 'gtc', 'ioc', 'fok'),
+      postOnly: fc.constantFrom(false, false, false, false, true),
     }),
   },
   {
@@ -110,7 +115,7 @@ const step: fc.Arbitrary<Step> = fc.oneof(
     arbitrary: fc.record({
       kind: fc.constant('withdraw' as const),
       account: fc.constantFrom(...ACCOUNTS),
-      amount: fc.bigInt({ min: 1n, max: 15_000n * USDC }),
+      amount: fc.bigInt({ min: 1n, max: 3_000n * USDC }),
       key: fc.integer({ min: 0, max: 10 }),
     }),
   },
@@ -210,6 +215,8 @@ function toInputs(steps: Step[]): EngineInput[] {
             ? {}
             : { stop: { price: at, kind: s.type === 'take-profit' ? 'take-profit' : 'stop' } }),
           ...(s.oco === null ? {} : { ocoGroup: `g${s.oco}` }),
+          ...(s.tif === 'gtc' ? {} : { timeInForce: s.tif }),
+          ...(s.postOnly ? { postOnly: true } : {}),
         });
         break;
       }
@@ -295,10 +302,12 @@ describe('engine invariants under random inputs (fast-check, 15 000+ steps)', ()
       { numRuns: 50 },
     );
     // The generator must actually exercise trading, resting/stop orders, OCO, funding and liquidation.
+    // Floors sit well below typical runs (≈ 1 000 fills, ≈ 95 resting fills since withdrawals
+    // and IOC/FOK joined the mix) so they catch a dead generator, not seed noise.
     expect(totals.steps).toBeGreaterThan(15_000);
-    expect(totals.fills).toBeGreaterThan(1_000);
+    expect(totals.fills).toBeGreaterThan(600);
     expect(totals.liquidations).toBeGreaterThan(0);
-    expect(totals.resting).toBeGreaterThan(100);
+    expect(totals.resting).toBeGreaterThan(50);
     expect(totals.oco).toBeGreaterThan(0);
     expect(totals.fundings).toBeGreaterThan(100);
   }, 120_000);
