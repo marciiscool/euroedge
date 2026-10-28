@@ -388,7 +388,29 @@ importers:
         version: 8.22.0
 
   apps/backtest:
+    dependencies:
+      '@euroedge/calendar':
+        specifier: workspace:*
+        version: link:../../packages/calendar
+      '@euroedge/data-adapters':
+        specifier: workspace:*
+        version: link:../../packages/data-adapters
+      '@euroedge/fv-core':
+        specifier: workspace:*
+        version: link:../../packages/fv-core
+      '@euroedge/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      luxon:
+        specifier: 'catalog:'
+        version: 3.7.2
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.7
     devDependencies:
+      '@types/luxon':
+        specifier: 'catalog:'
+        version: 3.7.6
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.2

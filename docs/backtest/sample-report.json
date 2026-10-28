@@ -1,0 +1,311 @@
+{
+  "version": 1,
+  "data": ["../../data/sample/sim-2027-03-15_2027-03-31.csv.gz"],
+  "evaluateEverySeconds": 900,
+  "markets": {
+    "ASML-PERP": {
+      "opens": 10,
+      "all": {
+        "n": 1472,
+        "maeBp": 84.65,
+        "rmseBp": 105.77,
+        "p999AbsBp": 264.51,
+        "naiveMaeBp": 107.69,
+        "naiveRmseBp": 121.04,
+        "improvement": 0.214,
+        "bandCoverage": 0.733,
+        "pitHistogram": [346, 150, 218, 26, 237, 103, 17, 42, 71, 262]
+      },
+      "byWindow": {
+        "A": {
+          "n": 307,
+          "maeBp": 86.95,
+          "rmseBp": 109.52,
+          "p999AbsBp": 265.51,
+          "naiveMaeBp": 104.16,
+          "naiveRmseBp": 129.11,
+          "improvement": 0.1652,
+          "bandCoverage": 0.2606,
+          "pitHistogram": [174, 3, 7, 3, 6, 9, 8, 9, 5, 83]
+        },
+        "B": {
+          "n": 202,
+          "maeBp": 69.66,
+          "rmseBp": 85.93,
+          "p999AbsBp": 188.55,
+          "naiveMaeBp": 85.12,
+          "naiveRmseBp": 95.58,
+          "improvement": 0.1815,
+          "bandCoverage": 0.3465,
+          "pitHistogram": [75, 9, 8, 1, 8, 8, 5, 4, 8, 76]
+        },
+        "C": {
+          "n": 280,
+          "maeBp": 64.06,
+          "rmseBp": 73.14,
+          "p999AbsBp": 126.9,
+          "naiveMaeBp": 74.22,
+          "naiveRmseBp": 81.91,
+          "improvement": 0.1369,
+          "bandCoverage": 0.9179,
+          "pitHistogram": [35, 42, 3, 0, 0, 40, 1, 29, 44, 86]
+        },
+        "D": {
+          "n": 683,
+          "maeBp": 96.48,
+          "rmseBp": 119.77,
+          "p999AbsBp": 163.49,
+          "naiveMaeBp": 129.67,
+          "naiveRmseBp": 136.49,
+          "improvement": 0.2559,
+          "bandCoverage": 0.9839,
+          "pitHistogram": [62, 96, 200, 22, 223, 46, 3, 0, 14, 17]
+        }
+      }
+    },
+    "SAP-PERP": {
+      "opens": 10,
+      "all": {
+        "n": 1472,
+        "maeBp": 68.17,
+        "rmseBp": 82.32,
+        "p999AbsBp": 280.36,
+        "naiveMaeBp": 95.14,
+        "naiveRmseBp": 115.25,
+        "improvement": 0.2835,
+        "bandCoverage": 0.7588,
+        "pitHistogram": [321, 89, 163, 337, 179, 21, 83, 41, 47, 191]
+      },
+      "byWindow": {
+        "A": {
+          "n": 307,
+          "maeBp": 91.21,
+          "rmseBp": 115.83,
+          "p999AbsBp": 288.09,
+          "naiveMaeBp": 155.04,
+          "naiveRmseBp": 184.25,
+          "improvement": 0.4117,
+          "bandCoverage": 0.2182,
+          "pitHistogram": [168, 4, 5, 7, 8, 6, 3, 6, 4, 96]
+        },
+        "B": {
+          "n": 202,
+          "maeBp": 55.36,
+          "rmseBp": 73.88,
+          "p999AbsBp": 189.72,
+          "naiveMaeBp": 67.49,
+          "naiveRmseBp": 86.79,
+          "improvement": 0.1798,
+          "bandCoverage": 0.5,
+          "pitHistogram": [83, 10, 10, 10, 6, 5, 9, 12, 13, 44]
+        },
+        "C": {
+          "n": 280,
+          "maeBp": 55.71,
+          "rmseBp": 65.79,
+          "p999AbsBp": 119.51,
+          "naiveMaeBp": 54.34,
+          "naiveRmseBp": 73.82,
+          "improvement": -0.0252,
+          "bandCoverage": 0.95,
+          "pitHistogram": [52, 28, 8, 69, 3, 0, 28, 12, 29, 51]
+        },
+        "D": {
+          "n": 683,
+          "maeBp": 66.71,
+          "rmseBp": 72.01,
+          "p999AbsBp": 102.24,
+          "naiveMaeBp": 93.13,
+          "naiveRmseBp": 94.35,
+          "improvement": 0.2837,
+          "bandCoverage": 1,
+          "pitHistogram": [18, 47, 140, 251, 162, 10, 43, 11, 1, 0]
+        }
+      }
+    },
+    "NOVO-PERP": {
+      "opens": 9,
+      "all": {
+        "n": 1472,
+        "maeBp": 114.09,
+        "rmseBp": 142.46,
+        "p999AbsBp": 409.4,
+        "naiveMaeBp": 141.76,
+        "naiveRmseBp": 176.94,
+        "improvement": 0.1952,
+        "bandCoverage": 0.6997,
+        "pitHistogram": [156, 56, 48, 43, 52, 53, 142, 192, 207, 523]
+      },
+      "byWindow": {
+        "A": {
+          "n": 257,
+          "maeBp": 81.74,
+          "rmseBp": 122.27,
+          "p999AbsBp": 362.87,
+          "naiveMaeBp": 65.64,
+          "naiveRmseBp": 99.27,
+          "improvement": -0.2453,
+          "bandCoverage": 0.3152,
+          "pitHistogram": [68, 7, 7, 7, 6, 3, 7, 3, 7, 142]
+        },
+        "B": {
+          "n": 252,
+          "maeBp": 70.04,
+          "rmseBp": 98.66,
+          "p999AbsBp": 409.4,
+          "naiveMaeBp": 118.82,
+          "naiveRmseBp": 160.18,
+          "improvement": 0.4105,
+          "bandCoverage": 0.4722,
+          "pitHistogram": [40, 15, 11, 10, 7, 10, 7, 9, 7, 136]
+        },
+        "C": {
+          "n": 280,
+          "maeBp": 80.77,
+          "rmseBp": 111.7,
+          "p999AbsBp": 209.06,
+          "naiveMaeBp": 71.43,
+          "naiveRmseBp": 112.56,
+          "improvement": -0.1308,
+          "bandCoverage": 0.7,
+          "pitHistogram": [5, 19, 16, 1, 39, 40, 35, 5, 0, 120]
+        },
+        "D": {
+          "n": 683,
+          "maeBp": 156.18,
+          "rmseBp": 171.48,
+          "p999AbsBp": 409.4,
+          "naiveMaeBp": 207.7,
+          "naiveRmseBp": 221.59,
+          "improvement": 0.248,
+          "bandCoverage": 0.9283,
+          "pitHistogram": [43, 15, 14, 25, 0, 0, 93, 175, 193, 125]
+        }
+      }
+    },
+    "SHEL-PERP": {
+      "opens": 10,
+      "all": {
+        "n": 1472,
+        "maeBp": 72.14,
+        "rmseBp": 94.74,
+        "p999AbsBp": 205.87,
+        "naiveMaeBp": 83.11,
+        "naiveRmseBp": 101.61,
+        "improvement": 0.132,
+        "bandCoverage": 0.7595,
+        "pitHistogram": [268, 134, 229, 16, 291, 95, 51, 83, 42, 263]
+      },
+      "byWindow": {
+        "A": {
+          "n": 307,
+          "maeBp": 83.13,
+          "rmseBp": 100.03,
+          "p999AbsBp": 212.51,
+          "naiveMaeBp": 108.18,
+          "naiveRmseBp": 137.13,
+          "improvement": 0.2316,
+          "bandCoverage": 0.2215,
+          "pitHistogram": [105, 5, 6, 8, 5, 7, 5, 5, 5, 156]
+        },
+        "B": {
+          "n": 202,
+          "maeBp": 50.24,
+          "rmseBp": 65.04,
+          "p999AbsBp": 171.68,
+          "naiveMaeBp": 61.42,
+          "naiveRmseBp": 72.56,
+          "improvement": 0.182,
+          "bandCoverage": 0.4752,
+          "pitHistogram": [64, 8, 7, 3, 9, 8, 11, 6, 7, 79]
+        },
+        "C": {
+          "n": 280,
+          "maeBp": 46.33,
+          "rmseBp": 52.81,
+          "p999AbsBp": 77.58,
+          "naiveMaeBp": 55,
+          "naiveRmseBp": 59.17,
+          "improvement": 0.1577,
+          "bandCoverage": 0.9929,
+          "pitHistogram": [44, 36, 0, 0, 40, 0, 30, 72, 30, 28]
+        },
+        "D": {
+          "n": 683,
+          "maeBp": 84.26,
+          "rmseBp": 111.6,
+          "p999AbsBp": 154.77,
+          "naiveMaeBp": 89.79,
+          "naiveRmseBp": 103.96,
+          "improvement": 0.0616,
+          "bandCoverage": 0.9898,
+          "pitHistogram": [55, 85, 216, 5, 237, 80, 5, 0, 0, 0]
+        }
+      }
+    },
+    "TTE-PERP": {
+      "opens": 10,
+      "all": {
+        "n": 1472,
+        "maeBp": 108.37,
+        "rmseBp": 126.69,
+        "p999AbsBp": 258.19,
+        "naiveMaeBp": 111.14,
+        "naiveRmseBp": 138,
+        "improvement": 0.0249,
+        "bandCoverage": 0.7283,
+        "pitHistogram": [268, 126, 243, 112, 54, 83, 9, 53, 173, 351]
+      },
+      "byWindow": {
+        "A": {
+          "n": 307,
+          "maeBp": 84.81,
+          "rmseBp": 100.16,
+          "p999AbsBp": 265.36,
+          "naiveMaeBp": 100.86,
+          "naiveRmseBp": 148.17,
+          "improvement": 0.1592,
+          "bandCoverage": 0.1303,
+          "pitHistogram": [115, 5, 1, 0, 6, 5, 3, 3, 2, 167]
+        },
+        "B": {
+          "n": 202,
+          "maeBp": 60.96,
+          "rmseBp": 86.29,
+          "p999AbsBp": 220.64,
+          "naiveMaeBp": 74.89,
+          "naiveRmseBp": 104.31,
+          "improvement": 0.1861,
+          "bandCoverage": 0.5792,
+          "pitHistogram": [57, 10, 9, 8, 12, 7, 6, 11, 16, 66]
+        },
+        "C": {
+          "n": 280,
+          "maeBp": 50.92,
+          "rmseBp": 69.64,
+          "p999AbsBp": 163.15,
+          "naiveMaeBp": 47.3,
+          "naiveRmseBp": 67.11,
+          "improvement": -0.0766,
+          "bandCoverage": 0.9036,
+          "pitHistogram": [44, 28, 6, 46, 36, 40, 0, 14, 32, 34]
+        },
+        "D": {
+          "n": 683,
+          "maeBp": 156.53,
+          "rmseBp": 160.92,
+          "p999AbsBp": 185.9,
+          "naiveMaeBp": 152.65,
+          "naiveRmseBp": 161.59,
+          "improvement": -0.0254,
+          "bandCoverage": 0.9693,
+          "pitHistogram": [52, 83, 227, 58, 0, 31, 0, 25, 123, 84]
+        }
+      }
+    }
+  },
+  "notes": [
+    "Errors are 1e4·ln(FV/open) against the primary opening-auction print, sampled before the open (no look-ahead).",
+    "Baskets, the false-liquidation rate and the informed-arbitrageur PnL arrive with the M4 engine bots."
+  ]
+}

@@ -35,6 +35,11 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - The engine rejects new exposure under any breaker and doubles the house half-spread when degraded.
   - The terminal shows a breaker badge.
   - CB3 only applies while a live source is scheduled. Off-hours, FV_last widening is the design and does not count as stale.
+- Backtest CLI and metrics (M3-14/15):
+  - Replays through the production pipeline and scores against the next official open.
+  - Reports MAE/RMSE, p99.9, improvement vs the last close, band coverage and a PIT histogram, per window.
+  - Comparisons are dividend-aware.
+  - Sample report in `docs/backtest/`.
 
 ### M2 — Data layer (complete, on `integration/m2`)
 
