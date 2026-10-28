@@ -13,4 +13,18 @@ export {
   maintenanceMargin,
   notionalUsdc,
 } from './margin.ts';
-export { houseQuote, withinPriceLimit, type HouseQuote } from './quote.ts';
+export {
+  baseHalfSpreadPpm,
+  halfSpreadPpm,
+  houseQuote,
+  impactPpm,
+  inventorySkewPpm,
+  LADDER_NOTIONALS,
+  quoteLadder,
+  quotePrice,
+  withinPriceLimit,
+  type HouseQuote,
+  type LadderRung,
+  type QuoteInputs,
+  type QuoteParams,
+} from './quote.ts';

@@ -1,6 +1,18 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { abs, clamp, divRound, max, min, mulDiv, mulDivRem, pow10, sign } from './rounding.ts';
+import {
+  abs,
+  clamp,
+  divRound,
+  isqrt,
+  isqrtCeil,
+  max,
+  min,
+  mulDiv,
+  mulDivRem,
+  pow10,
+  sign,
+} from './rounding.ts';
 
 const big = fc.bigInt({ min: -(10n ** 30n), max: 10n ** 30n });
 const nonZero = big.filter((d) => d !== 0n);
@@ -96,5 +108,28 @@ describe('helpers', () => {
     expect(pow10(18)).toBe(1_000_000_000_000_000_000n);
     expect(() => pow10(-1)).toThrow(RangeError);
     expect(() => pow10(1.5)).toThrow(RangeError);
+  });
+
+  it('isqrt / isqrtCeil bracket the exact root', () => {
+    expect([0n, 1n, 2n, 3n, 4n, 15n, 16n, 17n].map(isqrt)).toEqual([
+      0n,
+      1n,
+      1n,
+      1n,
+      2n,
+      3n,
+      4n,
+      4n,
+    ]);
+    expect([0n, 1n, 2n, 4n, 15n, 16n, 17n].map(isqrtCeil)).toEqual([0n, 1n, 2n, 2n, 4n, 4n, 5n]);
+    expect(() => isqrt(-1n)).toThrow(RangeError);
+    fc.assert(
+      fc.property(fc.bigInt({ min: 0n, max: 10n ** 60n }), (n) => {
+        const r = isqrt(n);
+        expect(r * r <= n && (r + 1n) * (r + 1n) > n).toBe(true);
+        const c = isqrtCeil(n);
+        expect(c * c >= n && (c === 0n || (c - 1n) * (c - 1n) < n)).toBe(true);
+      }),
+    );
   });
 });

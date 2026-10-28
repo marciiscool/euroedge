@@ -7,7 +7,7 @@ import { canonicalBytes } from './canonical.ts';
 export const EVENT_VERSIONS: Readonly<Record<EngineInput['type'], number>> = {
   ClockTick: 1,
   GenesisCapital: 1,
-  MarketListed: 2,
+  MarketListed: 3,
   MarketData: 2,
   DevDeposit: 1,
   PlaceOrder: 3,
@@ -33,6 +33,13 @@ const windowRisk = z.object({
   // v1 logs predate funding: no cap → interest only, which v1 logs also carry as 0.
   fundingCapPpmPerHour: nonNeg.nullable().default(null),
   fundingOiCap: nonNeg.default(0n),
+  // v1/v2 logs predate the M4 quote model: every new term 0, i.e. the M1 quote.
+  sigmaSpreadBps: nonNeg.default(0n),
+  inventorySkewBps: nonNeg.default(0n),
+  inventoryCap: pos.nullable().default(null),
+  impactBps: nonNeg.default(0n),
+  impactRef: pos.default(1n),
+  impactAlphaHalves: z.enum(['3', '4']).transform(BigInt).default(3n),
 });
 
 /** Decoders: canonical JSON (bigints as strings) → typed inputs. */

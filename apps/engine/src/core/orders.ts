@@ -3,12 +3,12 @@ import { SYSTEM, userAccount, type Posting } from '@euroedge/ledger';
 import {
   applyFill,
   FLAT,
-  houseQuote,
   notionalUsdc,
   withinPriceLimit,
   type Position,
 } from '@euroedge/risk-core';
 import { accountEquity, initialRequirement } from './accounting.ts';
+import { executablePrice } from './quote.ts';
 import type { AccountId, MarketId, Side } from './events.ts';
 import type { EngineOutput } from './outputs.ts';
 import type { EngineState, OrderOutcome, RejectReason } from './state.ts';
@@ -91,12 +91,10 @@ export function decide(state: EngineState, o: OrderRequest): OrderOutcome {
   // Circuit breakers (brief §6.5): every non-none effect, and CB7 globally, blocks new exposure.
   if (!reduces && (data.breaker !== 'none' || state.capitalFloor)) return reject('circuit-breaker');
   const risk = m.windows[data.window];
-  // Degraded markets quote twice the usual half-spread.
-  const halfSpread =
-    data.breaker === 'degraded' ? risk.houseHalfSpreadBps * 2n : risk.houseHalfSpreadBps;
-  const quote = houseQuote(data.fv, halfSpread);
+  // House quote for the full size (ADR-0003): σ, inventory skew, convex impact, flow shift.
+  const price = executablePrice(m, qty);
+  if (price === undefined) return reject('no-market-data');
   const side: Side = qty > 0n ? 'buy' : 'sell';
-  const price = side === 'buy' ? quote.ask : quote.bid;
   if (o.limitPrice !== undefined && (side === 'buy' ? price > o.limitPrice : price < o.limitPrice))
     return reject('not-marketable');
   if (!withinPriceLimit(price, data.index, risk.priceLimitBps)) return reject('price-limit');

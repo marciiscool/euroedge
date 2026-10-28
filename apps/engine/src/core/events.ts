@@ -24,6 +24,18 @@ export interface WindowRisk {
   readonly fundingCapPpmPerHour: bigint | null;
   /** Net user OI skew (µUSDC) at which the skew term reaches the cap. */
   readonly fundingOiCap: Usdc;
+  /** Quote model (ADR-0003; values proposed in ADR-0019). a: σ_FV share added to h. */
+  readonly sigmaSpreadBps: bigint;
+  /** s: inventory skew at full inventoryCap. */
+  readonly inventorySkewBps: bigint;
+  /** House inventory (µUSDC at FV) of full skew; null = no skew. */
+  readonly inventoryCap: Usdc | null;
+  /** γ: marginal impact at impactRef. */
+  readonly impactBps: bigint;
+  /** x_ref, µUSDC. */
+  readonly impactRef: Usdc;
+  /** α in halves: 3 = 1.5, 4 = 2. */
+  readonly impactAlphaHalves: bigint;
 }
 
 export type EngineInput =

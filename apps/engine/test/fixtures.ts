@@ -4,9 +4,20 @@ import type { EngineInput, WindowId, WindowRisk } from '../src/core/events.ts';
 import type { EngineOutput } from '../src/core/outputs.ts';
 import { createState, type EngineState } from '../src/core/state.ts';
 
+/** Quote-model terms switched off: the M1 quote FV ± h (tests opt in per case). */
+export const M1_QUOTE = {
+  sigmaSpreadBps: 0n,
+  inventorySkewBps: 0n,
+  inventoryCap: null,
+  impactBps: 0n,
+  impactRef: usdc(1n),
+  impactAlphaHalves: 3n,
+} as const;
+
 /** windows.yaml values as engine params. */
 export const WINDOWS: Record<WindowId, WindowRisk> = {
   A: {
+    ...M1_QUOTE,
     maxLeverage: 5n,
     takerFeeBps: 5n,
     makerFeeBps: 1n,
@@ -16,6 +27,7 @@ export const WINDOWS: Record<WindowId, WindowRisk> = {
     fundingOiCap: usdc(2_000_000_000_000n),
   },
   B: {
+    ...M1_QUOTE,
     maxLeverage: 4n,
     takerFeeBps: 8n,
     makerFeeBps: 2n,
@@ -25,6 +37,7 @@ export const WINDOWS: Record<WindowId, WindowRisk> = {
     fundingOiCap: usdc(1_000_000_000_000n),
   },
   C: {
+    ...M1_QUOTE,
     maxLeverage: 3n,
     takerFeeBps: 12n,
     makerFeeBps: 3n,
@@ -34,6 +47,7 @@ export const WINDOWS: Record<WindowId, WindowRisk> = {
     fundingOiCap: usdc(500_000_000_000n),
   },
   D: {
+    ...M1_QUOTE,
     maxLeverage: 2n,
     takerFeeBps: 20n,
     makerFeeBps: 5n,
