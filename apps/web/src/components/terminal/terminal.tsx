@@ -3,17 +3,25 @@
 import { Button } from '@euroedge/ui/components/button';
 import type { AccountSnapshot, FvDisplaySnapshot, MarketSnapshot } from '@euroedge/shared';
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { api, type Session } from '@/lib/api';
 import { live, useChannel, useLiveStatus } from '@/lib/live';
+import { shortAccount } from '@/lib/format';
 import { useMarkets } from '@/lib/markets';
+import { walletSignInEnabled } from '@/wallet/config';
 import { MarketHeader } from './market-header';
 import { MarketSwitcher } from './market-switcher';
 import { OrderTicket } from './order-ticket';
 import { AccountSummary, Positions } from './positions';
 import { PriceChart } from './price-chart';
 import { Provenance } from './provenance';
+
+// Privy + wagmi load only in the browser and only here (shell budget, ADR-0020).
+const WalletSignIn = dynamic(() => import('@/wallet/sign-in').then((m) => m.WalletSignIn), {
+  ssr: false,
+});
 
 /** Bare trade terminal: enabled markets, sim data, market orders. The full terminal is M7. */
 export function Terminal() {
@@ -41,10 +49,25 @@ export function Terminal() {
   }, [session, refreshAccount]);
   const shown = liveAccount ?? account;
 
+  const refreshSession = useCallback(() => {
+    api.session().then(
+      (s) => {
+        setSession(s);
+        if (s.account === null) setAccount(undefined);
+        live().reconnect(); // re-bind the account channel to the new session cookie
+      },
+      () => undefined,
+    );
+  }, []);
+
   async function devLogin() {
     await api.devLogin('trader');
-    setSession(await api.session());
-    live().reconnect(); // re-bind the account channel to the new session cookie
+    refreshSession();
+  }
+
+  async function signOut() {
+    await api.logout();
+    refreshSession();
   }
 
   return (
@@ -69,14 +92,33 @@ export function Terminal() {
           aria-label={t('orderTicket')}
           className="border-t border-border lg:border-t-0 lg:border-l"
         >
-          {session !== null && session.account === null && session.devLogin && (
-            <div className="border-b border-border p-4">
-              <p className="mb-2 text-xs text-muted-foreground">{t('devLoginHint')}</p>
-              <Button onClick={() => void devLogin()} variant="secondary">
-                {t('devLogin')}
-              </Button>
-            </div>
-          )}
+          {session !== null &&
+            (walletSignInEnabled || session.account !== null || session.devLogin) && (
+              <div className="space-y-3 border-b border-border p-4">
+                {walletSignInEnabled ? (
+                  <WalletSignIn account={session.account} onChange={refreshSession} />
+                ) : (
+                  session.account !== null && (
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <span className="font-mono text-muted-foreground" title={session.account}>
+                        {t('signedInAs', { account: shortAccount(session.account) })}
+                      </span>
+                      <Button variant="ghost" size="sm" onClick={() => void signOut()}>
+                        {t('signOut')}
+                      </Button>
+                    </div>
+                  )
+                )}
+                {session.account === null && session.devLogin && (
+                  <div>
+                    <p className="mb-2 text-xs text-muted-foreground">{t('devLoginHint')}</p>
+                    <Button onClick={() => void devLogin()} variant="secondary">
+                      {t('devLogin')}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           <OrderTicket
             market={market}
             loggedIn={typeof session?.account === 'string'}

@@ -4,6 +4,24 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Login & wallet (ADR-0020)
+
+#### Added
+
+- SIWE sign-in (M6-01):
+  - `GET /api/auth/nonce` issues a single-use nonce (5-minute TTL in Valkey).
+  - `POST /api/auth/siwe` checks domain, URI, chain id and message age, burns the nonce, and verifies the signature: ECDSA, or EOA/ERC-1271/6492 when `BASE_SEPOLIA_RPC_URL` is set.
+  - It then sets the session cookie. The account id is the lower-case address.
+  - `POST /api/auth/logout`.
+  - In `DATA_TIER=sim`, a new wallet account gets the one-time play-money credit until on-chain deposits exist.
+- Privy sign-in in the terminal (M7-24, replaces RainbowKit):
+  - One window offers email code, Google and external wallets; users without a wallet get an embedded one.
+  - The wallet then signs our SIWE message. Embedded wallets sign without a dialog, so login is one step.
+  - Sign-out ends both sessions.
+  - Privy and wagmi load only in the browser and only on the trade page.
+  - If Privy fails, sign-in is hidden and the terminal keeps working.
+  - Without `NEXT_PUBLIC_PRIVY_APP_ID` only the dev login shows.
+
 ### M4 — Full engine (in progress, on `integration/m4`)
 
 #### Added

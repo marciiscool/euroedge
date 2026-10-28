@@ -15,6 +15,9 @@
   "dependencies": {
     "@euroedge/shared": "workspace:*",
     "@euroedge/ui": "workspace:*",
+    "@privy-io/react-auth": "catalog:",
+    "@privy-io/wagmi": "catalog:",
+    "@tanstack/react-query": "catalog:",
     "geist": "catalog:",
     "lightweight-charts": "catalog:",
     "lucide-react": "catalog:",
@@ -22,7 +25,9 @@
     "next-intl": "catalog:",
     "next-themes": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "viem": "catalog:",
+    "wagmi": "catalog:"
   },
   "devDependencies": {
     "@axe-core/playwright": "catalog:",
