@@ -156,7 +156,11 @@
     "signedInAs": "Angemeldet als {account}",
     "signOut": "Abmelden",
     "signInUnavailable": "Die Anmeldung ist gerade nicht verfügbar.",
-    "chartIntervals": "Zeitraum des Charts"
+    "chartIntervals": "Zeitraum des Charts",
+    "chartTheme": "Ansicht",
+    "chartLatest": "Zur aktuellen Kerze",
+    "chartReset": "Chart zurücksetzen",
+    "chartAutoScale": "Preisachse automatisch skalieren"
   },
   "Funds": {
     "title": "Wallet & Guthaben",

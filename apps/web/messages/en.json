@@ -156,7 +156,11 @@
     "signedInAs": "Signed in as {account}",
     "signOut": "Sign out",
     "signInUnavailable": "Sign-in is unavailable right now.",
-    "chartIntervals": "Chart timeframe"
+    "chartIntervals": "Chart timeframe",
+    "chartTheme": "Look",
+    "chartLatest": "Jump to the latest candle",
+    "chartReset": "Reset the chart",
+    "chartAutoScale": "Auto-scale the price axis"
   },
   "Funds": {
     "title": "Wallet & funds",
