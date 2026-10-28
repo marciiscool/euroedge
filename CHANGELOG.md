@@ -26,6 +26,11 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 #### Added
 
+- Stress scenarios (M4-27), each with Invariants 1–10 checked after every event:
+  - a −25 % Monday gap after a window-D weekend: longs liquidated, insurance absorbs the shortfall;
+  - a bad print: dropped at the band check, then held by a reduce-only breaker;
+  - a 6-hour feed outage: funding keeps settling hourly;
+  - an ex-dividend day: the price drop and the cash flow net to the withholding.
 - Dividend cash flows (M4-16):
   - New `DividendExDate` input: longs receive ⌊gross × (1 − withholding)⌋, shorts pay gross, the house takes the opposite.
   - Applied once per market and ex-date; underwater accounts are liquidated afterwards.
