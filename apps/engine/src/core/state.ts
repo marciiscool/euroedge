@@ -47,7 +47,11 @@ export type RejectReason =
   | 'min-notional'
   | 'insufficient-margin'
   | 'no-position'
-  | 'circuit-breaker';
+  | 'circuit-breaker'
+  | 'not-marketable'
+  | 'invalid-price'
+  | 'too-many-orders'
+  | 'unknown-order';
 
 export interface Fill {
   readonly market: MarketId;
@@ -61,7 +65,20 @@ export interface Fill {
 
 export type OrderOutcome =
   | { readonly status: 'filled'; readonly fill: Fill }
+  | { readonly status: 'accepted'; readonly orderId: string }
   | { readonly status: 'rejected'; readonly reason: RejectReason };
+
+/** A resting limit order (GTC, full fills only, against the house quote). */
+export interface RestingOrder {
+  readonly orderId: string;
+  readonly requestId: string;
+  readonly account: AccountId;
+  readonly market: MarketId;
+  /** Signed lots: + buy, − sell. */
+  readonly qty: bigint;
+  readonly limitPrice: bigint;
+  readonly reduceOnly: boolean;
+}
 
 export interface EngineState {
   seq: bigint;
@@ -74,6 +91,8 @@ export interface EngineState {
   readonly ledger: Ledger;
   /** `${account}:${idempotencyKey}` → first outcome (replayed for duplicates). */
   readonly idempotency: Map<string, OrderOutcome>;
+  /** `${account}:${orderId}` → resting limit order, matched in insertion (time) order. */
+  readonly orders: Map<string, RestingOrder>;
 }
 
 export function createState(): EngineState {
@@ -86,5 +105,6 @@ export function createState(): EngineState {
     accounts: new Map(),
     ledger: new Ledger(),
     idempotency: new Map(),
+    orders: new Map(),
   };
 }

@@ -43,6 +43,18 @@ export function Positions({
   const [closing, setClosing] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const positions = account?.positions ?? [];
+  const orders = account?.orders ?? [];
+
+  async function cancel(orderId: string) {
+    setClosing(orderId);
+    try {
+      const r = await api.cancelOrder(orderId);
+      setMessage(r.status === 'cancelled' ? t('orderCancelled') : t('cancelFailed'));
+      onClosed();
+    } finally {
+      setClosing(null);
+    }
+  }
 
   async function close(market: string) {
     setClosing(market);
@@ -51,7 +63,9 @@ export function Positions({
       setMessage(
         r.status === 'filled'
           ? t('closed', { pnl: formatSigned(r.fill.realized, locale) })
-          : t(`reject.${r.reason}`),
+          : r.status === 'rejected'
+            ? t(`reject.${r.reason}`)
+            : '',
       );
       onClosed();
     } finally {
@@ -119,6 +133,50 @@ export function Positions({
                   </tr>
                 );
               })}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {orders.length > 0 && (
+        <div className="overflow-x-auto">
+          <h3 className="px-4 pt-2 text-xs font-semibold">{t('openOrders')}</h3>
+          <table className="w-full text-xs">
+            <thead className="text-left text-muted-foreground">
+              <tr>
+                {['market', 'side', 'size', 'limitPrice'].map((k) => (
+                  <th key={k} scope="col" className="px-4 py-2 font-normal">
+                    {t(k)}
+                  </th>
+                ))}
+                <th scope="col" className="px-4 py-2">
+                  <span className="sr-only">{t('actions')}</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="font-mono tabular-nums">
+              {orders.map((o) => (
+                <tr key={o.orderId} className="border-t border-border">
+                  <td className="px-4 py-2" translate="no">
+                    {o.market}
+                  </td>
+                  <td className={`px-4 py-2 ${o.side === 'buy' ? 'text-up' : 'text-down'}`}>
+                    {o.side === 'buy' ? '▲ ' : '▼ '}
+                    {t(`${o.side}Noun`)}
+                  </td>
+                  <td className="px-4 py-2">{formatNumber(o.size, locale)}</td>
+                  <td className="px-4 py-2">{formatNumber(o.limitPrice, locale)}</td>
+                  <td className="px-4 py-2 text-right font-sans">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={closing === o.orderId}
+                      onClick={() => void cancel(o.orderId)}
+                    >
+                      {t('cancelOrder')}
+                    </Button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

@@ -55,13 +55,23 @@ export function sendError(reply: FastifyReply, code: ErrorCode, message: string)
   return reply.code(STATUS[code]).send({ error: { code, message }, requestId: reply.request.id });
 }
 
-const orderBody = z.object({
-  market: z.string().regex(MARKET_ID),
-  side: z.enum(['buy', 'sell']),
-  size: z.string().regex(/^\d+(\.\d+)?$/),
-  reduceOnly: z.boolean().default(false),
-  idempotencyKey: z.string().min(8).max(64),
-});
+const orderBody = z
+  .object({
+    market: z.string().regex(MARKET_ID),
+    side: z.enum(['buy', 'sell']),
+    size: z.string().regex(/^\d+(\.\d+)?$/),
+    type: z.enum(['market', 'limit']).default('market'),
+    limitPrice: z
+      .string()
+      .regex(/^\d+(\.\d+)?$/)
+      .optional(),
+    reduceOnly: z.boolean().default(false),
+    idempotencyKey: z.string().min(8).max(64),
+  })
+  .refine((o) => o.type === 'market' || o.limitPrice !== undefined, {
+    message: 'limit orders need limitPrice',
+    path: ['limitPrice'],
+  });
 const closeBody = z.object({ idempotencyKey: z.string().min(8).max(64) });
 const loginBody = z.object({
   name: z
@@ -230,7 +240,18 @@ export async function buildApi(app: FastifyInstance, deps: ApiDeps): Promise<voi
         'bad-request',
         body.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
       );
-    return execute(reply, () => adapter.placeOrder({ account, type: 'market', ...body.data }));
+    const { limitPrice, ...rest } = body.data;
+    return execute(reply, () =>
+      adapter.placeOrder({ account, ...rest, ...(limitPrice === undefined ? {} : { limitPrice }) }),
+    );
+  });
+
+  app.delete<{ Params: { id: string } }>('/api/orders/:id', async (req, reply) => {
+    const account = accountOf(req);
+    if (account === undefined) return sendError(reply, 'unauthenticated', 'log in first');
+    if (!/^[A-Za-z0-9_-]{8,64}$/.test(req.params.id))
+      return sendError(reply, 'bad-request', 'invalid order id');
+    return execute(reply, () => adapter.cancelOrder(account, req.params.id));
   });
 
   app.post<{ Params: { market: string } }>('/api/positions/:market/close', async (req, reply) => {

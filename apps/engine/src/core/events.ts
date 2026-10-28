@@ -16,6 +16,8 @@ export interface WindowRisk {
   /** Max leverage on new exposure; 0 = reduce-only. */
   readonly maxLeverage: bigint;
   readonly takerFeeBps: bigint;
+  /** Fee for resting limit orders filled later (M4). */
+  readonly makerFeeBps: bigint;
   readonly houseHalfSpreadBps: bigint;
   readonly priceLimitBps: bigint;
   /** Hourly cap on the total funding rate, ppm; null = interest only (Window D). */
@@ -78,6 +80,15 @@ export type EngineInput =
       readonly side: Side;
       readonly qty: Lots;
       readonly reduceOnly: boolean;
+      /** Limit price (ticks); absent = market order. Unfilled limits rest (GTC, full fills only). */
+      readonly limitPrice?: Ticks;
+    }
+  | {
+      readonly type: 'CancelOrder';
+      readonly requestId: string;
+      readonly account: AccountId;
+      /** The idempotency key the order was placed with. */
+      readonly orderId: string;
     }
   | {
       readonly type: 'ClosePosition';

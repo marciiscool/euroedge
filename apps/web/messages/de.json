@@ -94,7 +94,11 @@
       "min-notional": "Unter dem Mindestorderwert von 10 USDC.",
       "insufficient-margin": "Nicht genug Margin für diese Größe beim aktuellen Hebel-Limit.",
       "no-position": "Es gibt keine Position zum Schließen.",
-      "circuit-breaker": "Ein Schutzschalter ist aktiv: Gerade sind nur reduzierende Orders möglich."
+      "circuit-breaker": "Ein Schutzschalter ist aktiv: Gerade sind nur reduzierende Orders möglich.",
+      "not-marketable": "Der Preis hat dein Limit nicht erreicht.",
+      "invalid-price": "Gib einen gültigen Limitpreis ein.",
+      "too-many-orders": "Zu viele offene Orders. Storniere zuerst einige.",
+      "unknown-order": "Diese Order existiert nicht mehr."
     },
     "account": "Konto",
     "equity": "Eigenkapital",
@@ -122,6 +126,17 @@
       "no-opens": "Keine neuen Positionen",
       "degraded": "Eingeschränkt: keine neuen Positionen, breitere Spreads",
       "reduce-only": "Nur reduzieren"
-    }
+    },
+    "orderType": "Ordertyp",
+    "type": {
+      "market": "Markt",
+      "limit": "Limit"
+    },
+    "limitPrice": "Limitpreis",
+    "limitAccepted": "Limit-Order zu {price} platziert. Sie wird ausgeführt, sobald der Preis erreicht ist.",
+    "orderCancelled": "Order storniert.",
+    "cancelFailed": "Die Order konnte nicht storniert werden.",
+    "openOrders": "Offene Orders",
+    "cancelOrder": "Stornieren"
   }
 }

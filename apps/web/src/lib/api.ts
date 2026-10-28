@@ -59,11 +59,20 @@ export const api = {
   fvHistory: (id: string, minutes = 120) =>
     call<{ points: FvPoint[] }>(`/api/markets/${id}/fv?minutes=${minutes}`),
   account: () => call<AccountSnapshot>('/api/account'),
-  placeOrder: (o: { market: string; side: 'buy' | 'sell'; size: string; reduceOnly?: boolean }) =>
+  placeOrder: (o: {
+    market: string;
+    side: 'buy' | 'sell';
+    size: string;
+    reduceOnly?: boolean;
+    type?: 'market' | 'limit';
+    limitPrice?: string;
+  }) =>
     call<OrderResult>('/api/orders', {
       method: 'POST',
       body: JSON.stringify({ ...o, idempotencyKey: crypto.randomUUID() }),
     }),
+  cancelOrder: (orderId: string) =>
+    call<OrderResult>(`/api/orders/${orderId}`, { method: 'DELETE', body: '{}' }),
   close: (market: string) =>
     call<OrderResult>(`/api/positions/${market}/close`, {
       method: 'POST',

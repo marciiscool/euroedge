@@ -64,6 +64,18 @@ export const accountSnapshotSchema = z.object({
   equity: dec,
   maintenance: dec,
   positions: z.array(positionViewSchema),
+  /** Resting limit orders. */
+  orders: z
+    .array(
+      z.object({
+        orderId: z.string(),
+        market: z.string(),
+        side: z.enum(['buy', 'sell']),
+        size: dec,
+        limitPrice: dec,
+      }),
+    )
+    .default([]),
 });
 export type AccountSnapshot = z.infer<typeof accountSnapshotSchema>;
 
@@ -79,6 +91,10 @@ export const rejectReasonSchema = z.enum([
   'insufficient-margin',
   'no-position',
   'circuit-breaker',
+  'not-marketable',
+  'invalid-price',
+  'too-many-orders',
+  'unknown-order',
 ]);
 
 /** Circuit-breaker effect on a market (brief §6.5); carried on each MarketData input. */
@@ -100,6 +116,21 @@ export const orderResultSchema = z.discriminatedUnion('status', [
       fee: dec,
       realized: dec,
     }),
+  }),
+  z.object({
+    requestId: z.string(),
+    seq: int,
+    status: z.literal('accepted'),
+    duplicate: z.boolean(),
+    orderId: z.string(),
+  }),
+  z.object({
+    requestId: z.string(),
+    seq: int,
+    status: z.literal('cancelled'),
+    duplicate: z.boolean(),
+    orderId: z.string(),
+    reason: z.string(),
   }),
   z.object({
     requestId: z.string(),

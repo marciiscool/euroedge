@@ -21,11 +21,16 @@ export function OrderTicket({
   const locale = useLocale();
   const sizeId = useId();
   const [side, setSide] = useState<'buy' | 'sell'>('buy');
+  const [orderType, setOrderType] = useState<'market' | 'limit'>('market');
+  const [limitPrice, setLimitPrice] = useState('');
+  const limitId = useId();
   const [size, setSize] = useState('1.00');
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
 
-  const price = market === undefined ? undefined : Number(side === 'buy' ? market.ask : market.bid);
+  const validLimit = /^\d+(\.\d{1,2})?$/.test(limitPrice) && Number(limitPrice) > 0;
+  const quote = market === undefined ? undefined : Number(side === 'buy' ? market.ask : market.bid);
+  const price = orderType === 'limit' ? (validLimit ? Number(limitPrice) : undefined) : quote;
   const qty = Number(size);
   const validSize = /^\d+(\.\d{1,2})?$/.test(size) && qty > 0;
   const notional = price !== undefined && validSize ? qty * price : undefined;
@@ -40,11 +45,17 @@ export function OrderTicket({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (market === undefined || !validSize) return;
+    if (market === undefined || !validSize || (orderType === 'limit' && !validLimit)) return;
     setBusy(true);
     setStatus(null);
     try {
-      const r: OrderResult = await api.placeOrder({ market: market.market, side, size });
+      const r: OrderResult = await api.placeOrder({
+        market: market.market,
+        side,
+        size,
+        type: orderType,
+        ...(orderType === 'limit' ? { limitPrice } : {}),
+      });
       if (r.status === 'filled') {
         setStatus({
           kind: 'ok',
@@ -56,6 +67,14 @@ export function OrderTicket({
           }),
         });
         onFilled();
+      } else if (r.status === 'accepted') {
+        setStatus({
+          kind: 'ok',
+          text: t('limitAccepted', { price: formatNumber(limitPrice, locale) }),
+        });
+        onFilled();
+      } else if (r.status === 'cancelled') {
+        setStatus({ kind: 'error', text: t('orderCancelled') });
       } else {
         setStatus({ kind: 'error', text: t(`reject.${r.reason}`) });
       }
@@ -101,6 +120,43 @@ export function OrderTicket({
           </button>
         ))}
       </div>
+      <div role="radiogroup" aria-label={t('orderType')} className="grid grid-cols-2 gap-1 text-xs">
+        {(['market', 'limit'] as const).map((k) => (
+          <button
+            key={k}
+            type="button"
+            role="radio"
+            aria-checked={orderType === k}
+            onClick={() => setOrderType(k)}
+            className={cn(
+              'h-7 rounded-sm border transition-colors duration-(--duration-fast)',
+              orderType === k
+                ? 'border-foreground text-foreground'
+                : 'border-border text-muted-foreground hover:text-foreground',
+            )}
+          >
+            {t(`type.${k}`)}
+          </button>
+        ))}
+      </div>
+      {orderType === 'limit' && (
+        <div className="flex flex-col gap-1">
+          <label htmlFor={limitId} className="text-xs text-muted-foreground">
+            {t('limitPrice')}
+          </label>
+          <input
+            id={limitId}
+            name="limitPrice"
+            inputMode="decimal"
+            autoComplete="off"
+            value={limitPrice}
+            placeholder={quote === undefined ? '' : formatNumber(quote, locale)}
+            onChange={(e) => setLimitPrice(e.target.value.replace(',', '.'))}
+            aria-invalid={limitPrice !== '' && !validLimit}
+            className="h-9 rounded-md border border-input bg-transparent px-3 font-mono text-sm tabular-nums focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          />
+        </div>
+      )}
       <div className="flex flex-col gap-1">
         <label htmlFor={sizeId} className="text-xs text-muted-foreground">
           {t('size')}
@@ -138,7 +194,13 @@ export function OrderTicket({
         type="submit"
         variant={side === 'buy' ? 'up' : 'down'}
         size="lg"
-        disabled={!loggedIn || !validSize || busy || market === undefined}
+        disabled={
+          !loggedIn ||
+          !validSize ||
+          busy ||
+          market === undefined ||
+          (orderType === 'limit' && !validLimit)
+        }
       >
         {busy
           ? t('submitting')
