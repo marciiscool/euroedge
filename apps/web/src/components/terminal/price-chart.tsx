@@ -242,7 +242,7 @@ export function PriceChart({
       style={{ background: theme.bg }}
       aria-label={t('chartLabel')}
     >
-      <div className="flex items-center gap-1 border-b border-border px-2 py-1 font-mono text-xs">
+      <div className="flex items-center gap-1 border-b border-border bg-background px-2 py-1 font-mono text-xs">
         <div role="toolbar" aria-label={t('chartIntervals')} className="flex gap-1">
           {INTERVALS.map((i) => (
             <button
