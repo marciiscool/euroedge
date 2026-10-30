@@ -61,5 +61,5 @@ The plan had RainbowKit (wallets only, ADR-0006) plus our own SIWE session (M6-0
 - Embedded wallets are EOAs, so they take the relayed permit deposit path of ADR-0014 (no paymaster needed).
 - Users can export their key from Privy and move to a wallet extension, as on Hyperliquid.
 - e2e keeps the dev login and the wagmi `mock` connector (M7-29). Privy itself is not exercised in CI because that would need a live app id.
-- The wallet SDKs pull old transitive packages: `ws` is overridden to 8.22, and the zod-3 advisory GHSA-mrhx-c7xc-m3w5 inside WalletConnect/Reown is an accepted, documented exception (browser-only; `pnpm-workspace.yaml`).
+- The wallet SDKs pull old transitive packages: `ws` is overridden to 8.22, and the zod-3 advisory GHSA-mrhx-c7xc-m3w5 inside WalletConnect/Reown is an accepted, documented exception (browser-only; `pnpm-workspace.yaml`), as is GHSA-qr28-fpjm-wq7f in `decode-uri-component` 0.2.2 (its only fix is ESM-only and breaks `query-string` 7).
 - M7-24 now reads "Privy sign-in + SIWE + network switch".

@@ -78,3 +78,7 @@ auditConfig:
     # collection" DoS needs an attacker to feed data into the user's own wallet UI. Our own
     # zod is 4.6.7 (patched). Revisit when Privy ships WalletConnect on zod 4.
     - GHSA-mrhx-c7xc-m3w5
+    # decode-uri-component 0.2.2 via query-string 7 inside WalletConnect/Reown (Privy), browser-only.
+    # The only fix (0.5.1, 2026-10-23) is ESM-only and query-string 7 require()s it, so an override
+    # would break wallet connections. Revisit when WalletConnect moves to query-string 8+.
+    - GHSA-qr28-fpjm-wq7f
