@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Runs scripts/keepalive.sh at login and every 2 minutes (install: scripts/keepalive-install.sh). -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.euroedge.keepalive</string>
+  <key>ProgramArguments</key>
+  <array><string>/bin/bash</string><string>__REPO__/scripts/keepalive.sh</string></array>
+  <key>RunAtLoad</key><true/>
+  <key>StartInterval</key><integer>120</integer>
+  <key>StandardOutPath</key><string>/tmp/euroedge-keepalive.out</string>
+  <key>StandardErrorPath</key><string>/tmp/euroedge-keepalive.err</string>
+</dict>
+</plist>
