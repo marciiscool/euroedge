@@ -22,6 +22,8 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
   - With contracts configured, the API disables the sign-in play-money credit and the dev login, so every balance is backed by the Vault.
   - `scripts/stack.sh` also starts relayer, indexer and signer (idle unless enabled).
   - Works on free tiers: `INDEXER_MAX_RANGE` (10 for Alchemy's free `eth_getLogs` limit) with a catch-up loop; the relayer warns below 0.00002 ETH; Caddy in compose reaches the relayer on the host.
+  - `scripts/local-up.sh` brings the whole local stack up from any state: OrbStack engine, containers, migrations, web build, services. No global pnpm needed (falls back to corepack); `stack.sh` starts Next directly.
+  - `INDEXER_RPC_URL`: the indexer can read logs from Base's free public RPC (200 blocks per request) while everything else uses Alchemy.
   - Lean trial: Safe and Etherscan key optional, only the deployer needs faucet ETH; `pnpm chain:fund` passes some on to the relayer and the root poster.
 - Web funds panel (M5), shown after wallet sign-in:
   - Shows the wallet's Test USDC and how much can still be claimed.

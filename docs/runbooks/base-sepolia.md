@@ -109,6 +109,17 @@ Open http://localhost:8080/en/trade and go through the flow:
 
 Logs are in `.e2e-logs/`: `relayer.log`, `indexer.log`, `signer.log`, `engine.log`.
 
+## After a restart of the Mac (or OrbStack)
+
+Run `scripts/local-up.sh` from the repo. It is safe to re-run and does everything in order:
+
+1. starts OrbStack's Docker engine and the containers;
+2. migrates;
+3. rebuilds the web app;
+4. restarts every service.
+
+After downtime the indexer has to catch up on Base blocks. With `INDEXER_RPC_URL=https://sepolia.base.org` and `INDEXER_MAX_RANGE=200` this is free: Base's public RPC allows 200 blocks per `eth_getLogs`, Alchemy's free plan only 10. Deposits made during downtime are credited once it has caught up.
+
 ## If something is off
 
 | Symptom                                    | Check                                                                                      |
