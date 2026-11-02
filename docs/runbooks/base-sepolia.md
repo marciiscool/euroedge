@@ -120,6 +120,13 @@ Run `scripts/local-up.sh` from the repo. It is safe to re-run and does everythin
 
 After downtime the indexer has to catch up on Base blocks. With `INDEXER_RPC_URL=https://sepolia.base.org` and `INDEXER_MAX_RANGE=200` this is free: Base's public RPC allows 200 blocks per `eth_getLogs`, Alchemy's free plan only 10. Deposits made during downtime are credited once it has caught up.
 
+### Keep it running (optional)
+
+macOS sleep stops OrbStack's engine, and with it the whole stack.
+
+- `scripts/keepalive-install.sh` installs a per-user LaunchAgent. It runs `scripts/keepalive.sh` at login and every 2 minutes, and restarts the stack if the engine or the web app does not answer. After the Mac wakes, EuroEdge is back within about 2 minutes; the log is `.e2e-logs/keepalive.log`.
+- `scripts/keepalive-install.sh remove` uninstalls it.
+
 ## If something is off
 
 | Symptom                                    | Check                                                                                      |
