@@ -13,6 +13,11 @@ export const configShape = {
   INDEXER_ENABLED: z.stringbool().default(false),
   CHAIN_ID: z.coerce.number().int().positive().default(84532),
   BASE_SEPOLIA_RPC_URL: z.string().default(''),
+  /**
+   * Optional RPC for log reads only. Base's public endpoint allows 200 blocks per eth_getLogs
+   * with no account, vs 10 on Alchemy's free plan, so catching up after downtime stays free.
+   */
+  INDEXER_RPC_URL: z.string().default(''),
   VAULT_ADDRESS: address.optional(),
   INDEXER_START_BLOCK: z.coerce.bigint().min(0n).default(0n),
   INDEXER_POLL_MS: z.coerce.number().int().min(250).default(4_000),
@@ -22,7 +27,11 @@ export const configShape = {
 
 export const loadConfig = (source?: Record<string, string | undefined>) => {
   const env = loadEnv(configShape, source);
-  if (env.INDEXER_ENABLED && (env.BASE_SEPOLIA_RPC_URL === '' || env.VAULT_ADDRESS === undefined))
+  if (
+    env.INDEXER_ENABLED &&
+    ((env.INDEXER_RPC_URL === '' && env.BASE_SEPOLIA_RPC_URL === '') ||
+      env.VAULT_ADDRESS === undefined)
+  )
     throw new Error('INDEXER_ENABLED=true needs BASE_SEPOLIA_RPC_URL and VAULT_ADDRESS');
   return env;
 };

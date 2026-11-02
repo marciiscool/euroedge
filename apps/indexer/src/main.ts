@@ -25,7 +25,10 @@ await runService(
     }
     const db = new pg.Pool({ connectionString: config.DATABASE_URL, max: 2 });
     const valkey = createValkey(config.VALKEY_URL, 'indexer');
-    const reader = viemReader(config.BASE_SEPOLIA_RPC_URL, config.VAULT_ADDRESS as `0x${string}`);
+    const reader = viemReader(
+      config.INDEXER_RPC_URL || config.BASE_SEPOLIA_RPC_URL,
+      config.VAULT_ADDRESS as `0x${string}`,
+    );
     const sink = async (input: Record<string, unknown>) => {
       await valkey.xadd(
         STREAMS.engineInput,

@@ -16,7 +16,7 @@ case "${1:-start}" in
       (cd "apps/$svc" && exec node --env-file-if-exists=../../.env src/main.ts) > "$LOGS/$svc.log" 2>&1 < /dev/null &
       echo $! >> "$PIDS"
     done
-    (cd apps/web && exec pnpm exec next start --port 3000) > "$LOGS/web.log" 2>&1 < /dev/null &
+    (cd apps/web && exec ./node_modules/.bin/next start --port 3000) > "$LOGS/web.log" 2>&1 < /dev/null &
     echo $! >> "$PIDS"
     # Wait for readiness: engine, fv-service (publishing), api, web via Caddy.
     for url in http://localhost:4010/ready http://localhost:4020/ready http://localhost:4000/ready http://localhost:8080/en; do
