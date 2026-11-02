@@ -13,7 +13,13 @@ fi
 
 if ! docker info >/dev/null 2>&1; then
   echo "starting the Docker engine (OrbStack)…"
-  if command -v orb >/dev/null 2>&1; then orb start >/dev/null; else open -a OrbStack; fi
+  # Let the OrbStack app start its own engine (owned by launchd). An engine started with
+  # `orb start` from a terminal session was stopped again later, along with that session.
+  if pgrep -x OrbStack >/dev/null; then
+    osascript -e 'quit app "OrbStack"' >/dev/null 2>&1 || true
+    for _ in $(seq 1 15); do pgrep -x OrbStack >/dev/null || break; sleep 1; done
+  fi
+  open -a OrbStack
   for _ in $(seq 1 60); do docker info >/dev/null 2>&1 && break; sleep 2; done
   docker info >/dev/null 2>&1 || { echo "Docker engine did not start"; exit 1; }
 fi
