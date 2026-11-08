@@ -7,6 +7,8 @@
   <key>ProgramArguments</key>
   <array><string>/bin/bash</string><string>__REPO__/scripts/keepalive.sh</string></array>
   <key>RunAtLoad</key><true/>
+  <!-- The services keepalive starts must outlive it: launchd otherwise kills the job's children. -->
+  <key>AbandonProcessGroup</key><true/>
   <key>StartInterval</key><integer>120</integer>
   <key>StandardOutPath</key><string>/tmp/euroedge-keepalive.out</string>
   <key>StandardErrorPath</key><string>/tmp/euroedge-keepalive.err</string>
